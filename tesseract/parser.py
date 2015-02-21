@@ -18,11 +18,7 @@ def t_error(token):
     """
     :type token: LexToken
     """
-    token.parser.error = "Unexpected token %s" % token.type
-
-# Build the lexer
-import ply.lex as lex
-lex.lex()
+    raise RuntimeError("Unexpected token %s." % token.value)
 
 # Parsing rules
 
@@ -34,21 +30,22 @@ def p_insert_statement(p):
                      | INSERT
     """
     if len(p) == 3:
-        p.parser.error = "Expected table name after INTO."
+        raise RuntimeError("Expected table name after INTO.")
     else:
-        p.parser.error = "Expected table name after INSERT."
+        raise RuntimeError("Expected table name after INSERT.")
 
-def p_error(token):
-    if token:
-        token.parser.error = "Could not parse SQL."
+def p_error(p):
+    pass
 
 import ply.yacc as yacc
-
-bparser = yacc.yacc()
+import ply.lex as lex
 
 def parse(data):
-    bparser.error = None
-    p = bparser.parse(data)
-    if bparser.error:
-        raise RuntimeError(bparser.error)
-    return p
+    # Build the lexer
+    lex.lex()
+
+    # Build the parser
+    parser = yacc.yacc()
+
+    # Run the parser
+    return parser.parse(data)

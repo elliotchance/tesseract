@@ -14,3 +14,6 @@ class TestServer(TestCase):
 
     def test_insert_fail_2(self):
         self.assertFailure('INSERT INTO', 'Expected table name after INTO.')
+
+    def test_fail(self):
+        self.assertFailure('FOO', 'Unexpected token FOO.')
