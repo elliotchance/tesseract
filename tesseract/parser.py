@@ -26,10 +26,13 @@ precedence = ()
 
 def p_insert_statement(p):
     """
-    insert_statement : INSERT INTO
+    insert_statement : INSERT INTO IDENTIFIER
+                     | INSERT INTO
                      | INSERT
     """
-    if len(p) == 3:
+    if len(p) == 4:
+        raise RuntimeError("Expected record after table name or before INTO.")
+    elif len(p) == 3:
         raise RuntimeError("Expected table name after INTO.")
     else:
         raise RuntimeError("Expected table name after INSERT.")
