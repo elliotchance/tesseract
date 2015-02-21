@@ -1,3 +1,6 @@
 /.idea/
 
 *.pyc
+
+/parsetab.py
+/parser.out
