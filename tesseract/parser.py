@@ -28,11 +28,15 @@ lex.lex()
 
 precedence = ()
 
-def p_insert_statement(token):
+def p_insert_statement(p):
     """
-    insert_statement : INSERT
+    insert_statement : INSERT INTO
+                     | INSERT
     """
-    token.parser.error = "Expected table name after INSERT."
+    if len(p) == 3:
+        p.parser.error = "Expected table name after INTO."
+    else:
+        p.parser.error = "Expected table name after INSERT."
 
 def p_error(token):
     if token:
