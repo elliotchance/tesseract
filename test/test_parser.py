@@ -1,5 +1,6 @@
 from unittest import TestCase
 import tesseract.parser as parser
+from tesseract.parser import *
 
 class TestServer(TestCase):
     def assertFailure(self, sql, message):
@@ -21,3 +22,7 @@ class TestServer(TestCase):
     def test_insert_fail_3(self):
         self.assertFailure('INSERT INTO foo',
                            'Expected record after table name or before INTO.')
+
+    def test_insert1(self):
+        result = parser.parse('INSERT "foo" INTO foo')
+        self.assertEquals(result, InsertStatement())

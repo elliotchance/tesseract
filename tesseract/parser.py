@@ -1,3 +1,6 @@
+import ply.yacc as yacc
+import ply.lex as lex
+
 tokens = (
     'IDENTIFIER',
     'INSERT',
@@ -26,7 +29,8 @@ precedence = ()
 
 def p_insert_statement(p):
     """
-    insert_statement : INSERT INTO IDENTIFIER
+    insert_statement : INSERT STRING INTO IDENTIFIER
+                     | INSERT INTO IDENTIFIER
                      | INSERT INTO
                      | INSERT
     """
@@ -34,21 +38,33 @@ def p_insert_statement(p):
         raise RuntimeError("Expected record after table name or before INTO.")
     elif len(p) == 3:
         raise RuntimeError("Expected table name after INTO.")
-    else:
+    elif len(p) == 2:
         raise RuntimeError("Expected table name after INSERT.")
+
+    p.parser.ast = InsertStatement()
 
 def p_error(p):
     pass
 
-import ply.yacc as yacc
-import ply.lex as lex
-
 def parse(data):
-    # Build the lexer
+    # Build the lexer.
     lex.lex()
 
-    # Build the parser
+    # Build the parser.
     parser = yacc.yacc()
+    parser.ast = 'a'
 
-    # Run the parser
-    return parser.parse(data)
+    # Run the parser.
+    parser.parse(data)
+
+    # Return the base AST tree.
+    return parser.ast
+
+class InsertStatement:
+    def __eq__(self, other):
+        """
+        Compare objects based on their attributes.
+        :param other: object
+        :return: boolean
+        """
+        return self.__dict__ == other.__dict__
