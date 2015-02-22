@@ -6,6 +6,8 @@ tokens = (
     'INSERT',
     'INTO',
     'STRING',
+    'CURLY_CLOSE',
+    'CURLY_OPEN',
 )
 
 # Tokens
@@ -14,6 +16,8 @@ t_IDENTIFIER = r'[a-z]+'
 t_INSERT = r'INSERT'
 t_INTO = r'INTO'
 t_STRING = r'\".*?\"'
+t_CURLY_CLOSE = '}'
+t_CURLY_OPEN = '{'
 
 t_ignore = " "
 
@@ -29,7 +33,7 @@ precedence = ()
 
 def p_insert_statement(p):
     """
-    insert_statement : INSERT STRING INTO IDENTIFIER
+    insert_statement : INSERT INTO IDENTIFIER json_object
                      | INSERT INTO IDENTIFIER
                      | INSERT INTO
                      | INSERT
@@ -41,7 +45,12 @@ def p_insert_statement(p):
     elif len(p) == 2:
         raise RuntimeError("Expected table name after INSERT.")
 
-    p.parser.ast = InsertStatement()
+    p.parser.ast = InsertStatement({})
+
+def p_json_object(p):
+    """
+    json_object : CURLY_OPEN CURLY_CLOSE
+    """
 
 def p_error(p):
     pass
@@ -61,6 +70,12 @@ def parse(data):
     return parser.ast
 
 class InsertStatement:
+    def __init__(self, fields):
+        """
+        :param fields: dict
+        """
+        self.fields = fields
+
     def __eq__(self, other):
         """
         Compare objects based on their attributes.

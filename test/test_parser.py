@@ -23,6 +23,6 @@ class TestServer(TestCase):
         self.assertFailure('INSERT INTO foo',
                            'Expected record after table name or before INTO.')
 
-    def test_insert1(self):
-        result = parser.parse('INSERT "foo" INTO foo')
-        self.assertEquals(result, InsertStatement())
+    def test_insert_no_fields(self):
+        result = parser.parse('INSERT INTO foo {}')
+        self.assertEquals(result, InsertStatement({}))
