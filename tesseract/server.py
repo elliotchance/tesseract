@@ -1,3 +1,4 @@
+from tesseract.sql.expressions import *
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis
@@ -50,26 +51,29 @@ class Server:
         # This is a `SELECT`
         return self.execute_select(result.statement)
 
+    def compile_lua(self, expression):
+        # Compile the expression into a Lua expression.
+        lua = expression.compile_lua()
+
+        return """
+        local records = redis.call('LRANGE', ARGV[1], '0', '-1')
+        local matches = {}
+
+        for i, data in ipairs(records) do
+            local tuple = cjson.decode(data)
+            if %s then
+                table.insert(matches, data)
+            end
+        end
+
+        return matches
+        """ % lua
+
     def execute_select(self, select):
 
         if select.where:
-            lua = """
-            local records = redis.call('LRANGE', '%s', '0', '-1')
-            local matches = {}
-
-            for i, data in ipairs(records) do
-                local tuple = cjson.decode(data)
-                if %s then
-                    matches[i] = data
-                end
-            end
-
-            return matches
-            """ % (
-                select.table_name,
-                'tostring(tuple[ARGV[1]]) == tostring(ARGV[2])'
-            )
-            page = self.redis.eval(lua, 0, 'foo', 124)
+            lua = self.compile_lua(select.where)
+            page = self.redis.eval(lua, 0, select.table_name, 'foo', 124)
         else:
             page = self.redis.lrange(select.table_name, 0, -1)
 
