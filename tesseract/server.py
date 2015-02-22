@@ -1,5 +1,3 @@
-from tesseract import parser
-
 class Server:
     def execute(self, sql):
         """

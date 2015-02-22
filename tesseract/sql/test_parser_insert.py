@@ -1,23 +1,13 @@
-from unittest import TestCase
-import tesseract.parser as parser
-from tesseract.parser import *
+import tesseract.sql.parser as parser
+from tesseract.sql.parser import *
+from tesseract.sql.parser_test_case import ParserTestCase
 
-class TestServer(TestCase):
-    def assertFailure(self, sql, message):
-        try:
-            parser.parse(sql)
-            self.fail("Expected failure")
-        except Exception as e:
-            self.assertEqual(message, str(e))
-
+class TestParserInsert(ParserTestCase):
     def test_insert_fail_1(self):
         self.assertFailure('INSERT', 'Expected table name after INSERT.')
 
     def test_insert_fail_2(self):
         self.assertFailure('INSERT INTO', 'Expected table name after INTO.')
-
-    def test_fail(self):
-        self.assertFailure('FOO', 'Not valid SQL.')
 
     def test_insert_fail_3(self):
         self.assertFailure('INSERT INTO foo',
@@ -82,11 +72,6 @@ class TestServer(TestCase):
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": False}))
 
-    def test_sql_is_not_case_sensitive(self):
-        result = parser.parse('insert Into foo {"foo": false}')
-        self.assertEquals(result.statement,
-                          InsertStatement("foo", {"foo": False}))
-
     def test_insert_integer(self):
         result = parser.parse('INSERT INTO foo {"foo": 123}')
         self.assertEquals(result.statement,
@@ -101,32 +86,3 @@ class TestServer(TestCase):
         result = parser.parse('INSERT INTO foo {"foo": 1.23}')
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": 1.23}))
-
-    def test_select_fail_1(self):
-        self.assertFailure('SELECT', 'Expected expression after SELECT.')
-
-    def test_select_fail_2(self):
-        self.assertFailure('SELECT *', 'Missing FROM clause.')
-
-    def test_select_fail_3(self):
-        self.assertFailure('SELECT * FROM', 'Expected table name after FROM.')
-
-    def test_select(self):
-        result = parser.parse('SELECT * FROM foo')
-        self.assertEquals(result.statement, SelectStatement("foo"))
-
-    def test_select_str(self):
-        result = parser.parse('select * from foo')
-        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
-
-    def test_ignore_newline(self):
-        result = parser.parse('select *\nfrom foo')
-        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
-
-    def test_ignore_tab(self):
-        result = parser.parse('select *\tfrom foo')
-        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
-
-    def test_ignore_carriage_return(self):
-        result = parser.parse('select *\rfrom foo')
-        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
