@@ -15,8 +15,9 @@ sql_keywords = (
     'TRUE',
 )
 
-# JSON operators.
-json_operators = (
+# Operators.
+operators = (
+    'ASTERISK',
     'COLON',
     'COMMA',
     'CURLY_CLOSE',
@@ -34,9 +35,10 @@ expression_types = (
 # The actual tokens used will be the aggregation of all the groups above. It is
 # important that the `sql_keyword` are appended at the end since they are
 # pseudo-tokens and we do not want them to interfere with read tokens.
-tokens = json_operators + expression_types + sql_keywords
+tokens = operators + expression_types + sql_keywords
 
 # Regular expressions for each of the tokens go here.
+t_ASTERISK = r'\*'
 t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
@@ -89,11 +91,16 @@ def p_statement(p):
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT
+        select_statement : SELECT ASTERISK
+                         | SELECT
     """
 
     #     SELECT
-    raise RuntimeError("Expected expression after SELECT.")
+    if len(p) == 2:
+        raise RuntimeError("Expected expression after SELECT.")
+
+    #     SELECT ASTERISK
+    raise RuntimeError("Missing FROM clause.")
 
 # insert_statement
 # ----------------

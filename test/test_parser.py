@@ -104,3 +104,6 @@ class TestServer(TestCase):
 
     def test_select_fail_1(self):
         self.assertFailure('SELECT', 'Expected expression after SELECT.')
+
+    def test_select_fail_2(self):
+        self.assertFailure('SELECT *', 'Missing FROM clause.')
