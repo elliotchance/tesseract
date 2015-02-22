@@ -52,3 +52,7 @@ class TestServer(ParserTestCase):
     def test_select_where_greater_equal(self):
         result = parser.parse('SELECT * FROM foo WHERE a >= 6')
         self.assertEquals(str(result.statement.where), 'a >= 6')
+
+    def test_select_where_less_equal(self):
+        result = parser.parse('SELECT * FROM foo WHERE a <= 7')
+        self.assertEquals(str(result.statement.where), 'a <= 7')
