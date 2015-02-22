@@ -30,3 +30,7 @@ class TestServer(TestCase):
     def test_insert_one_field(self):
         result = parser.parse('INSERT INTO foo {"foo": "bar"}')
         self.assertEquals(result, InsertStatement({"foo": "bar"}))
+
+    def test_insert_two_fields(self):
+        result = parser.parse('INSERT INTO foo {"foo": "bar", "bar": "baz"}')
+        self.assertEquals(result, InsertStatement({"foo": "bar", "bar": "baz"}))

@@ -3,6 +3,7 @@ import ply.lex as lex
 
 tokens = (
     'COLON',
+    'COMMA',
     'CURLY_CLOSE',
     'CURLY_OPEN',
     'IDENTIFIER',
@@ -14,6 +15,7 @@ tokens = (
 # Tokens
 
 t_COLON = ':'
+t_COMMA = ','
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
 t_IDENTIFIER = r'[a-z]+'
@@ -52,12 +54,21 @@ def p_insert_statement(p):
 def p_json_object(p):
     """
     json_object : CURLY_OPEN CURLY_CLOSE
-                | CURLY_OPEN STRING COLON STRING CURLY_CLOSE
+                | CURLY_OPEN json_object_item CURLY_CLOSE
+                | CURLY_OPEN json_object_item COMMA json_object_item CURLY_CLOSE
     """
     if len(p) == 3:
         p[0] = {}
+    elif len(p) == 6:
+        p[0] = dict(p[2].items() + p[4].items())
     else:
-        p[0] = {p[2][1:-1]: p[4][1:-1]}
+        p[0] = p[2]
+
+def p_json_object_item(p):
+    """
+    json_object_item : STRING COLON STRING
+    """
+    p[0] = {p[1][1:-1]: p[3][1:-1]}
 
 def p_error(p):
     pass
