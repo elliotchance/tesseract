@@ -36,6 +36,11 @@ class Server:
         except RuntimeError as e:
             return ServerResult(False, None, str(e))
 
+        # If the statement is a `DELETE`
+        if isinstance(result.statement, DeleteStatement):
+            self.redis.delete(result.statement.table_name)
+            return ServerResult(True)
+
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
             self.redis.lpush(result.statement.table_name,
