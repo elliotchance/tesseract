@@ -26,5 +26,16 @@ class TestServer(TestCase):
         result = server.execute('SELECT * FROM foo')
         self.assertTrue(result.success)
         self.assertEqual(result.data, [
-            {"foo": "bar"}
+            {"foo": "bar"},
+        ])
+
+    def test_insert_multiple_and_select(self):
+        server = Server()
+        server.execute('INSERT INTO foo {"foo": "bar"}')
+        server.execute('INSERT INTO foo {"bar": "baz"}')
+        result = server.execute('SELECT * FROM foo')
+        self.assertTrue(result.success)
+        self.assertEqual(result.data, [
+            {"foo": "bar"},
+            {"bar": "baz"},
         ])
