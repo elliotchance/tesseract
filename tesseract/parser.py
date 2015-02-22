@@ -6,6 +6,7 @@ import ply.lex as lex
 
 # SQL keywords.
 sql_keywords = (
+    'FALSE',
     'INSERT',
     'INTO',
     'NULL',
@@ -143,6 +144,7 @@ def p_json_object_item(p):
     """
         json_object_item : STRING COLON NULL
                          | STRING COLON TRUE
+                         | STRING COLON FALSE
                          | STRING COLON STRING
     """
 
@@ -155,8 +157,14 @@ def p_json_object_item(p):
         p[0] = {key: None}
         return
 
+    #     STRING COLON TRUE
     elif p[3].upper() == 'TRUE':
         p[0] = {key: True}
+        return
+
+    #     STRING COLON FALSE
+    elif p[3].upper() == 'FALSE':
+        p[0] = {key: False}
         return
 
     #     STRING COLON STRING
