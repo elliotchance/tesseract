@@ -48,9 +48,32 @@ class Server:
             return ServerResult(True)
 
         # This is a `SELECT`
-        page = self.redis.lrange(result.statement.table_name, 0, -1)
-        all_records = [json.loads(object) for object in page]
-        return ServerResult(True, all_records)
+        return self.execute_select(result.statement)
+
+    def execute_select(self, select):
+
+        if select.where:
+            lua = """
+            local records = redis.call('LRANGE', '%s', '0', '-1')
+            local matches = {}
+
+            for i, data in ipairs(records) do
+                local tuple = cjson.decode(data)
+                if %s then
+                    matches[i] = data
+                end
+            end
+
+            return matches
+            """ % (
+                select.table_name,
+                'tostring(tuple[ARGV[1]]) == tostring(ARGV[2])'
+            )
+            page = self.redis.eval(lua, 0, 'foo', 124)
+        else:
+            page = self.redis.lrange(select.table_name, 0, -1)
+
+        return ServerResult(True, [json.loads(record) for record in page])
 
 
 class ServerResult:
