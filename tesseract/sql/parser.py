@@ -15,12 +15,25 @@ precedence = ()
 # ---------
 def p_statement(p):
     """
-        statement : insert_statement
+        statement : delete_statement
+                  | insert_statement
                   | select_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# delete_statement
+# ----------------
+def p_delete_statement(p):
+    """
+        delete_statement : DELETE
+    """
+
+    #     DELETE
+    if len(p) == 2:
+        raise RuntimeError("Expected FROM after DELETE.")
 
 
 # select_statement
