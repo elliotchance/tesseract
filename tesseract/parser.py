@@ -2,22 +2,24 @@ import ply.yacc as yacc
 import ply.lex as lex
 
 tokens = (
+    'COLON',
+    'CURLY_CLOSE',
+    'CURLY_OPEN',
     'IDENTIFIER',
     'INSERT',
     'INTO',
     'STRING',
-    'CURLY_CLOSE',
-    'CURLY_OPEN',
 )
 
 # Tokens
 
+t_COLON = ':'
+t_CURLY_CLOSE = '}'
+t_CURLY_OPEN = '{'
 t_IDENTIFIER = r'[a-z]+'
 t_INSERT = r'INSERT'
 t_INTO = r'INTO'
 t_STRING = r'\".*?\"'
-t_CURLY_CLOSE = '}'
-t_CURLY_OPEN = '{'
 
 t_ignore = " "
 
@@ -45,12 +47,17 @@ def p_insert_statement(p):
     elif len(p) == 2:
         raise RuntimeError("Expected table name after INSERT.")
 
-    p.parser.ast = InsertStatement({})
+    p.parser.ast = InsertStatement(p[4])
 
 def p_json_object(p):
     """
     json_object : CURLY_OPEN CURLY_CLOSE
+                | CURLY_OPEN STRING COLON STRING CURLY_CLOSE
     """
+    if len(p) == 3:
+        p[0] = {}
+    else:
+        p[0] = {p[2][1:-1]: p[4][1:-1]}
 
 def p_error(p):
     pass
@@ -74,6 +81,8 @@ class InsertStatement:
         """
         :param fields: dict
         """
+        assert isinstance(fields, dict), 'fields is not dict, got: %r' % fields
+
         self.fields = fields
 
     def __eq__(self, other):
@@ -82,4 +91,7 @@ class InsertStatement:
         :param other: object
         :return: boolean
         """
+        assert isinstance(other, object), \
+            'other is not an object, got: %r' % object
+
         return self.__dict__ == other.__dict__
