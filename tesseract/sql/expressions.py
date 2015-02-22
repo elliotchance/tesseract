@@ -28,3 +28,8 @@ class NotEqualExpression(BinaryExpression):
 class GreaterExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '>', right)
+
+
+class LessExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '<', right)

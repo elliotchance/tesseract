@@ -23,6 +23,7 @@ operators = (
     'EQUAL',
     'NOT_EQUAL',
     'GREATER',
+    'LESS',
 )
 
 # Values and identifiers.
@@ -50,6 +51,7 @@ t_STRING = r'\".*?\"'
 t_EQUAL = '='
 t_NOT_EQUAL = '(<>)|(!=)'
 t_GREATER = '>'
+t_LESS = '<'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.
