@@ -85,3 +85,13 @@ class TestServer(TestCase):
         )
         self.assertTrue(result.success)
         self.assertEqual(result.data, [{"foo": 123}])
+
+    def test_select_where_less(self):
+        server = Server()
+        server.execute('INSERT INTO %s {"foo": 123}' % self.table_name)
+        server.execute('INSERT INTO %s {"foo": 124}' % self.table_name)
+        result = server.execute(
+            'SELECT * FROM %s WHERE foo < 124' % self.table_name
+        )
+        self.assertTrue(result.success)
+        self.assertEqual(result.data, [{"foo": 123}])
