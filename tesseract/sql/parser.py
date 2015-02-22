@@ -1,11 +1,13 @@
 import ply.yacc as yacc
 from tesseract.sql.objects import *
+from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
-
-tokens = lexer.tokens
 
 # Parser
 # ======
+
+# Load in the tokens from lexer.
+tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = ()
@@ -50,7 +52,8 @@ def p_delete_statement(p):
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT ASTERISK FROM IDENTIFIER
+        select_statement : SELECT ASTERISK FROM IDENTIFIER WHERE expression
+                         | SELECT ASTERISK FROM IDENTIFIER
                          | SELECT ASTERISK FROM
                          | SELECT ASTERISK
                          | SELECT
@@ -68,8 +71,14 @@ def p_select_statement(p):
     if len(p) == 4:
         raise RuntimeError("Expected table name after FROM.")
 
+    # Only valid `SELECT`s beyond this point.
+
+    #     SELECT ASTERISK FROM IDENTIFIER WHERE expression
+    if len(p) == 7:
+        p[0] = SelectStatement(p[4], p[6])
+        return
+
     #     SELECT ASTERISK FROM IDENTIFIER
-    # This looks like a valid `SELECT`
     p[0] = SelectStatement(p[4])
 
 
@@ -154,7 +163,13 @@ def p_expression(p):
                    | FLOAT
                    | INTEGER
                    | STRING
+                   | IDENTIFIER EQUAL expression
     """
+
+    #     IDENTIFIER EQUAL expression
+    if len(p) == 4:
+        p[0] = EqualExpression(p[1], p[3])
+        return
 
     #     NULL
     if p[1].upper() == 'NULL':

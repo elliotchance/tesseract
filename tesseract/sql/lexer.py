@@ -13,6 +13,7 @@ sql_keywords = (
     'NULL',
     'SELECT',
     'TRUE',
+    'WHERE',
 )
 
 # Operators.
@@ -22,6 +23,7 @@ operators = (
     'COMMA',
     'CURLY_CLOSE',
     'CURLY_OPEN',
+    'EQUAL',
 )
 
 # Values and identifiers.
@@ -46,6 +48,7 @@ t_CURLY_OPEN = '{'
 t_FLOAT = '[0-9]+.[0-9]+'
 t_INTEGER = '[0-9]+'
 t_STRING = r'\".*?\"'
+t_EQUAL = '='
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

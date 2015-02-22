@@ -51,11 +51,12 @@ class SelectStatement(Statement):
     Represents an `SELECT` statement.
     """
 
-    def __init__(self, table_name):
+    def __init__(self, table_name, where=None):
         """
             :param table_name: str
         """
         self.table_name = table_name
+        self.where = where
 
         self.assert_type('table_name', str)
 
