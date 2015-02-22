@@ -61,7 +61,10 @@ class SelectStatement(Statement):
         self.assert_type('table_name', str)
 
     def __str__(self):
-        return "SELECT * FROM %s" % self.table_name
+        r = "SELECT * FROM %s" % self.table_name
+        if self.where:
+            r += ' WHERE %s' % self.where
+        return r
 
 
 class DeleteStatement(Statement):
