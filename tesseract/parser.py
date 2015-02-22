@@ -70,11 +70,10 @@ def p_json_object_items(p):
         p[0] = p[1]
     else:
         intersection = list(set(p[1].keys()) & set(p[3].keys()))
-        if len(intersection) > 0:
-            p.parser.warnings = [
-                'Duplicate key "%s", using last value.' % intersection[0]
-            ]
-        
+        for key in intersection:
+            message = 'Duplicate key "%s", using last value.' % key
+            p.parser.warnings.append(message)
+
         p[0] = dict(p[1].items() + p[3].items())
 
 def p_json_object_item(p):
@@ -93,7 +92,7 @@ def parse(data):
     # Build the parser.
     parser = yacc.yacc()
     parser.statement = None
-    parser.warnings = None
+    parser.warnings = []
 
     # Run the parser.
     parser.parse(data)

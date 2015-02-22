@@ -56,3 +56,11 @@ class TestServer(TestCase):
         self.assertEquals(result.warnings, [
             'Duplicate key "foo", using last value.'
         ])
+
+    def test_multiple_warnings_can_be_raised(self):
+        sql = 'INSERT INTO foo {"foo": "bar", "foo": "baz", "foo": "bax"}'
+        result = parser.parse(sql)
+        self.assertEquals(result.warnings, [
+            'Duplicate key "foo", using last value.',
+            'Duplicate key "foo", using last value.'
+        ])
