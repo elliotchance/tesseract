@@ -61,3 +61,17 @@ class SelectStatement(Statement):
 
     def __str__(self):
         return "SELECT * FROM %s" % self.table_name
+
+
+class DeleteStatement(Statement):
+    """
+    Represents an `DELETE` statement.
+    """
+
+    def __init__(self, table_name):
+        """
+            :param table_name: str
+        """
+        self.table_name = table_name
+
+        self.assert_type('table_name', str)

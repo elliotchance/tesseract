@@ -28,7 +28,8 @@ def p_statement(p):
 # ----------------
 def p_delete_statement(p):
     """
-        delete_statement : DELETE FROM
+        delete_statement : DELETE FROM IDENTIFIER
+                         | DELETE FROM
                          | DELETE
     """
 
@@ -37,7 +38,12 @@ def p_delete_statement(p):
         raise RuntimeError("Expected FROM after DELETE.")
 
     #     DELETE FROM
-    raise RuntimeError("Expected table name after FROM.")
+    elif len(p) == 3:
+        raise RuntimeError("Expected table name after FROM.")
+
+    #     DELETE FROM IDENTIFIER
+    # A valid `DELETE` statement
+    p[0] = DeleteStatement(p[3])
 
 
 # select_statement
