@@ -72,3 +72,9 @@ class TestServer(TestCase):
         print result.statement
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": None}))
+
+    def test_insert_true(self):
+        result = parser.parse('INSERT INTO foo {"foo": true}')
+        print result.statement
+        self.assertEquals(result.statement,
+                          InsertStatement("foo", {"foo": True}))

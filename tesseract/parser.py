@@ -9,6 +9,7 @@ sql_keywords = (
     'INSERT',
     'INTO',
     'NULL',
+    'TRUE',
 )
 
 # JSON operators.
@@ -141,6 +142,7 @@ def p_json_object_items(p):
 def p_json_object_item(p):
     """
         json_object_item : STRING COLON NULL
+                         | STRING COLON TRUE
                          | STRING COLON STRING
     """
 
@@ -151,6 +153,10 @@ def p_json_object_item(p):
     if p[3].upper() == 'NULL':
         # `NULL` is represented as `None`.
         p[0] = {key: None}
+        return
+
+    elif p[3].upper() == 'TRUE':
+        p[0] = {key: True}
         return
 
     #     STRING COLON STRING
