@@ -6,6 +6,9 @@ class Server:
     A server will execute SQL commands and return their result.
     """
 
+    def __init__(self):
+        self.records = []
+
     def execute(self, sql):
         """
         Execute a SQL statement.
@@ -25,10 +28,11 @@ class Server:
 
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
+            self.records.append(result.statement.fields)
             return ServerResult(True)
 
         # This is a `SELECT`
-        return ServerResult(True, [])
+        return ServerResult(True, self.records)
 
 
 class ServerResult:

@@ -19,3 +19,12 @@ class TestServer(TestCase):
         result = server.execute('INSERT INTO')
         self.assertFalse(result.success)
         self.assertEqual(result.error, 'Expected table name after INTO.')
+
+    def test_insert_and_select(self):
+        server = Server()
+        server.execute('INSERT INTO foo {"foo": "bar"}')
+        result = server.execute('SELECT * FROM foo')
+        self.assertTrue(result.success)
+        self.assertEqual(result.data, [
+            {"foo": "bar"}
+        ])
