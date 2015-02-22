@@ -21,6 +21,7 @@ operators = (
     'CURLY_CLOSE',
     'CURLY_OPEN',
     'EQUAL',
+    'NOT_EQUAL',
 )
 
 # Values and identifiers.
@@ -46,6 +47,7 @@ t_FLOAT = '[0-9]+.[0-9]+'
 t_INTEGER = '[0-9]+'
 t_STRING = r'\".*?\"'
 t_EQUAL = '='
+t_NOT_EQUAL = '<>'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

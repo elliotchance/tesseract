@@ -18,3 +18,8 @@ class BinaryExpression(Expression):
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '=', right)
+
+
+class NotEqualExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '<>', right)

@@ -11,7 +11,7 @@ tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = (
-    ('left', 'EQUAL'),
+    ('left', 'EQUAL', 'NOT_EQUAL'),
 )
 
 
@@ -160,16 +160,24 @@ def p_json_object_items(p):
 def p_expression(p):
     """
         expression : expression EQUAL expression
+                   | expression NOT_EQUAL expression
                    | FLOAT
                    | INTEGER
                    | STRING
                    | IDENTIFIER
     """
 
-    #     expression EQUAL expression
+    # A binary expression
     if len(p) == 4:
-        p[0] = EqualExpression(p[1], p[3])
-        return
+        #     expression EQUAL expression
+        if p[2] == '=':
+            p[0] = EqualExpression(p[1], p[3])
+            return
+
+        #     expression NOT_EQUAL expression
+        else:
+            p[0] = NotEqualExpression(p[1], p[3])
+            return
 
     #     NULL
     if p[1].upper() == 'NULL':
