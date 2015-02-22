@@ -49,7 +49,7 @@ def p_insert_statement(p):
     elif len(p) == 2:
         raise RuntimeError("Expected table name after INSERT.")
 
-    p.parser.ast = InsertStatement(p[3], p[4])
+    p.parser.statement = InsertStatement(p[3], p[4])
 
 def p_json_object(p):
     """
@@ -69,6 +69,12 @@ def p_json_object_items(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
+        intersection = list(set(p[1].keys()) & set(p[3].keys()))
+        if len(intersection) > 0:
+            p.parser.warnings = [
+                'Duplicate key "%s", using last value.' % intersection[0]
+            ]
+        
         p[0] = dict(p[1].items() + p[3].items())
 
 def p_json_object_item(p):
@@ -86,13 +92,14 @@ def parse(data):
 
     # Build the parser.
     parser = yacc.yacc()
-    parser.ast = 'a'
+    parser.statement = None
+    parser.warnings = None
 
     # Run the parser.
     parser.parse(data)
 
     # Return the base AST tree.
-    return parser.ast
+    return parser
 
 class InsertStatement:
     def __init__(self, table_name, fields):

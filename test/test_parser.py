@@ -25,15 +25,15 @@ class TestServer(TestCase):
 
     def test_insert_no_fields(self):
         result = parser.parse('INSERT INTO foo {}')
-        self.assertEquals(result, InsertStatement("foo", {}))
+        self.assertEquals(result.statement, InsertStatement("foo", {}))
 
     def test_insert_one_field(self):
         result = parser.parse('INSERT INTO foo {"foo": "bar"}')
-        self.assertEquals(result, InsertStatement("foo", {"foo": "bar"}))
+        self.assertEquals(result.statement, InsertStatement("foo", {"foo": "bar"}))
 
     def test_insert_two_fields(self):
         result = parser.parse('INSERT INTO foo {"foo": "bar", "bar": "baz"}')
-        self.assertEquals(result, InsertStatement("foo", {
+        self.assertEquals(result.statement, InsertStatement("foo", {
             "foo": "bar",
             "bar": "baz"
         }))
@@ -41,7 +41,7 @@ class TestServer(TestCase):
     def test_insert_three_fields(self):
         sql = 'INSERT INTO foo {"foo": "bar", "bar": "baz", "abc": "def"}'
         result = parser.parse(sql)
-        self.assertEquals(result, InsertStatement("foo", {
+        self.assertEquals(result.statement, InsertStatement("foo", {
             "foo": "bar",
             "bar": "baz",
             "abc": "def"
@@ -49,4 +49,10 @@ class TestServer(TestCase):
 
     def test_insert_duplicate_field_uses_second(self):
         result = parser.parse('INSERT INTO foo {"foo": "bar", "foo": "baz"}')
-        self.assertEquals(result, InsertStatement("foo", {"foo": "baz"}))
+        self.assertEquals(result.statement, InsertStatement("foo", {"foo": "baz"}))
+
+    def test_insert_duplicate_field_raises_warning(self):
+        result = parser.parse('INSERT INTO foo {"foo": "bar", "foo": "baz"}')
+        self.assertEquals(result.warnings, [
+            'Duplicate key "foo", using last value.'
+        ])
