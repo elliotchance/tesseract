@@ -110,3 +110,7 @@ class TestServer(TestCase):
 
     def test_select_fail_3(self):
         self.assertFailure('SELECT * FROM', 'Expected table name after FROM.')
+
+    def test_select(self):
+        result = parser.parse('SELECT * FROM foo')
+        self.assertEquals(str(result.statement), str(SelectStatement("foo")))

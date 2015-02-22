@@ -84,15 +84,16 @@ def p_statement(p):
                   | select_statement
     """
 
-    # Which ever one matches can be passed straight through.
-    p[0] = p[1]
+    # Which ever statement matches can be passed straight through.
+    p.parser.statement = p[1]
 
 
 # select_statement
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT ASTERISK FROM
+        select_statement : SELECT ASTERISK FROM IDENTIFIER
+                         | SELECT ASTERISK FROM
                          | SELECT ASTERISK
                          | SELECT
     """
@@ -106,7 +107,13 @@ def p_select_statement(p):
         raise RuntimeError("Missing FROM clause.")
 
     #     SELECT ASTERISK FROM
-    raise RuntimeError("Expected table name after FROM.")
+    if len(p) == 4:
+        raise RuntimeError("Expected table name after FROM.")
+
+    #     SELECT ASTERISK FROM IDENTIFIER
+    # This looks like a valid `SELECT`
+    p[0] = SelectStatement(p[4])
+
 
 # insert_statement
 # ----------------
@@ -132,7 +139,7 @@ def p_insert_statement(p):
 
     #     INSERT INTO IDENTIFIER json_object
     # We have a working `INSERT` statement.
-    p.parser.statement = InsertStatement(p[3], p[4])
+    p[0] = InsertStatement(p[3], p[4])
 
 
 # json_object
@@ -254,23 +261,14 @@ def parse(data):
     # Return the base AST tree.
     return parser
 
+
 # Objects
 # =======
 
-class InsertStatement:
+class Statement:
     """
-    Represents an `INSERT` statement.
+    Represents a SQL statement.
     """
-    def __init__(self, table_name, fields):
-        """
-            :param table_name: str
-            :param fields: dict
-        """
-        self.table_name = table_name
-        self.fields = fields
-
-        self.assert_type('table_name', str)
-        self.assert_type('fields', dict)
 
     def __eq__(self, other):
         """
@@ -289,5 +287,37 @@ class InsertStatement:
         assert isinstance(field, expected_type), \
             '%s is not %s, got: %r' % (field_name, expected_type, field)
 
+
+class InsertStatement(Statement):
+    """
+    Represents an `INSERT` statement.
+    """
+    def __init__(self, table_name, fields):
+        """
+            :param table_name: str
+            :param fields: dict
+        """
+        self.table_name = table_name
+        self.fields = fields
+
+        self.assert_type('table_name', str)
+        self.assert_type('fields', dict)
+
     def __str__(self):
         return "INSERT INTO %s %s" % (self.table_name, json.dumps(self.fields))
+
+
+class SelectStatement(Statement):
+    """
+    Represents an `SELECT` statement.
+    """
+    def __init__(self, table_name):
+        """
+            :param table_name: str
+        """
+        self.table_name = table_name
+
+        self.assert_type('table_name', str)
+
+    def __str__(self):
+        return "SELECT * FROM %s" % self.table_name
