@@ -5,6 +5,7 @@ import ply.lex as lex
 
 # SQL keywords.
 sql_keywords = (
+    'AND',
     'DELETE',
     'FROM',
     'INSERT',

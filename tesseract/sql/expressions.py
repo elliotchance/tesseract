@@ -52,3 +52,8 @@ class GreaterEqualExpression(BinaryExpression):
 class LessEqualExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '<=', right)
+
+
+class AndExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, 'AND', right)

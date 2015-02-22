@@ -11,6 +11,7 @@ tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = (
+    ('left', 'AND'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
 )
@@ -166,6 +167,7 @@ def p_expression(p):
                    | expression LESS expression
                    | expression GREATER_EQUAL expression
                    | expression LESS_EQUAL expression
+                   | expression AND expression
                    | FLOAT
                    | INTEGER
                    | STRING
@@ -193,6 +195,10 @@ def p_expression(p):
         #     expression EQUAL expression
         elif p[2] == '=':
             p[0] = EqualExpression(p[1], p[3])
+
+        #     expression AND expression
+        elif p[2].upper() == 'AND':
+            p[0] = AndExpression(p[1], p[3])
 
         #     expression NOT_EQUAL expression
         else:
