@@ -79,6 +79,9 @@ class AndExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, 'AND', right)
 
+    def compile_lua(self, offset):
+        return BinaryExpression.internal_compile_lua(self, 'and', offset)
+
 
 class OrExpression(BinaryExpression):
     def __init__(self, left, right):

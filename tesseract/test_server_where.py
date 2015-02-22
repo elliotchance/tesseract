@@ -38,3 +38,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_or(self):
         self.assertWhere('foo = 123 OR foo = 125', [{"foo": 123}, {"foo": 125}])
+
+    def test_select_where_and(self):
+        self.assertWhere('foo < 125 AND foo > 123', [{"foo": 124}])
