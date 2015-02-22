@@ -53,9 +53,10 @@ class Server:
 
     def compile_lua(self, expression):
         # Compile the expression into a Lua expression.
-        lua = expression.compile_lua()
+        matcher, offset, args = expression.compile_lua(2)
 
-        return """
+        # Generate the full Lua program.
+        lua = """
         local records = redis.call('LRANGE', ARGV[1], '0', '-1')
         local matches = {}
 
@@ -67,16 +68,18 @@ class Server:
         end
 
         return matches
-        """ % lua
+        """ % matcher
+
+        # Extract the values for the expression.
+        return (lua, args)
 
     def execute_select(self, select):
         """
         :type select: SelectExpression
         """
         if select.where:
-            lua = self.compile_lua(select.where)
-            page = self.redis.eval(lua, 0, select.table_name, 'foo',
-                                   select.where.right)
+            lua, args = self.compile_lua(select.where)
+            page = self.redis.eval(lua, 0, select.table_name, *args)
         else:
             page = self.redis.lrange(select.table_name, 0, -1)
 
