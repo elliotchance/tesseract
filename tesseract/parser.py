@@ -11,6 +11,7 @@ sql_keywords = (
     'INSERT',
     'INTO',
     'NULL',
+    'SELECT',
     'TRUE',
 )
 
@@ -71,6 +72,28 @@ def t_error(token):
 # Set precedence for operators. We do not need these yet.
 precedence = ()
 
+
+# statement
+# ---------
+def p_statement(p):
+    """
+        statement : insert_statement
+                  | select_statement
+    """
+
+    # Which ever one matches can be passed straight through.
+    p[0] = p[1]
+
+
+# select_statement
+# ----------------
+def p_select_statement(p):
+    """
+        select_statement : SELECT
+    """
+
+    #     SELECT
+    raise RuntimeError("Expected expression after SELECT.")
 
 # insert_statement
 # ----------------

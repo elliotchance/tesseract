@@ -101,3 +101,6 @@ class TestServer(TestCase):
         result = parser.parse('INSERT INTO foo {"foo": 1.23}')
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": 1.23}))
+
+    def test_select_fail_1(self):
+        self.assertFailure('SELECT', 'Expected expression after SELECT.')
