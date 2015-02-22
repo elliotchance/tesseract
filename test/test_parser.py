@@ -113,4 +113,8 @@ class TestServer(TestCase):
 
     def test_select(self):
         result = parser.parse('SELECT * FROM foo')
-        self.assertEquals(str(result.statement), str(SelectStatement("foo")))
+        self.assertEquals(result.statement, SelectStatement("foo"))
+
+    def test_select_str(self):
+        result = parser.parse('select * from foo')
+        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
