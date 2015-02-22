@@ -60,3 +60,7 @@ class TestServer(ParserTestCase):
     def test_select_where_and(self):
         result = parser.parse('SELECT * FROM foo WHERE a < 7 AND b > 15')
         self.assertEquals(str(result.statement.where), 'a < 7 AND b > 15')
+
+    def test_select_where_or(self):
+        result = parser.parse('SELECT * FROM foo WHERE a < 7 OR b > 15')
+        self.assertEquals(str(result.statement.where), 'a < 7 OR b > 15')

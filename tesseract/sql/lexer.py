@@ -10,6 +10,7 @@ sql_keywords = (
     'FROM',
     'INSERT',
     'INTO',
+    'OR',
     'SELECT',
     'WHERE',
 )

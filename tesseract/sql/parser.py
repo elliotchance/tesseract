@@ -11,7 +11,7 @@ tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = (
-    ('left', 'AND'),
+    ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
 )
@@ -157,85 +157,116 @@ def p_json_object_items(p):
     p[0] = dict(p[1].items() + p[3].items())
 
 
-# single_expression
-# -----------------
+# expression
+# ----------
 def p_expression(p):
     """
-        expression : expression EQUAL expression
-                   | expression NOT_EQUAL expression
-                   | expression GREATER expression
-                   | expression LESS expression
-                   | expression GREATER_EQUAL expression
-                   | expression LESS_EQUAL expression
-                   | expression AND expression
+        expression : comparison_expression
+                   | logic_expression
                    | FLOAT
                    | INTEGER
                    | STRING
                    | IDENTIFIER
     """
 
-    # A binary expression
-    if len(p) == 4:
-        #     expression GREATER expression
-        if p[2] == '>':
-            p[0] = GreaterExpression(p[1], p[3])
-
-        #     expression GREATER_EQUAL expression
-        elif p[2] == '>=':
-            p[0] = GreaterEqualExpression(p[1], p[3])
-
-        #     expression LESS_EQUAL expression
-        elif p[2] == '<=':
-            p[0] = LessEqualExpression(p[1], p[3])
-
-        #     expression LESS expression
-        elif p[2] == '<':
-            p[0] = LessExpression(p[1], p[3])
-
-        #     expression EQUAL expression
-        elif p[2] == '=':
-            p[0] = EqualExpression(p[1], p[3])
-
-        #     expression AND expression
-        elif p[2].upper() == 'AND':
-            p[0] = AndExpression(p[1], p[3])
-
-        #     expression NOT_EQUAL expression
-        else:
-            p[0] = NotEqualExpression(p[1], p[3])
-
-        # One of the above options would have matched, so we are done here.
+    #     comparison_expression
+    #     logic_expression
+    if isinstance(p[1], BinaryExpression):
+        p[0] = p[1]
         return
 
     #     NULL
     if p[1].upper() == 'NULL':
         # `NULL` is represented as `None`.
         p[0] = None
+        return
 
     #     TRUE
-    elif p[1].upper() == 'TRUE':
+    if p[1].upper() == 'TRUE':
         p[0] = True
+        return
 
     #     FALSE
-    elif p[1].upper() == 'FALSE':
+    if p[1].upper() == 'FALSE':
         p[0] = False
+        return
 
     #     STRING
-    elif p[1][0] == '"':
+    if p[1][0] == '"':
         # Prune the double-quotes off the STRING value.
         p[0] = p[1][1:-1]
+        return
+
+    #     INTEGER
+    try:
+        p[0] = int(p[1])
+        return
+    except ValueError:
+        pass
 
     #     FLOAT
-    elif '.' in p[1]:
+    try:
         p[0] = float(p[1])
+        return
+    except ValueError:
+        pass
+
+    #     IDENTIFIER
+    p[0] = p[1]
+
+
+# expression
+# ----------
+def p_comparison_expression(p):
+    """
+        comparison_expression : expression EQUAL expression
+                              | expression NOT_EQUAL expression
+                              | expression GREATER expression
+                              | expression GREATER_EQUAL expression
+                              | expression LESS expression
+                              | expression LESS_EQUAL expression
+    """
+
+    #     expression GREATER expression
+    if p[2] == '>':
+        p[0] = GreaterExpression(p[1], p[3])
+
+    #     expression GREATER_EQUAL expression
+    elif p[2] == '>=':
+        p[0] = GreaterEqualExpression(p[1], p[3])
+
+    #     expression LESS_EQUAL expression
+    elif p[2] == '<=':
+        p[0] = LessEqualExpression(p[1], p[3])
+
+    #     expression LESS expression
+    elif p[2] == '<':
+        p[0] = LessExpression(p[1], p[3])
+
+    #     expression EQUAL expression
+    elif p[2] == '=':
+        p[0] = EqualExpression(p[1], p[3])
 
     else:
-        try:
-            #     INTEGER
-            p[0] = int(p[1])
-        except ValueError:
-            #     IDENTIFIER
-            p[0] = p[1]
+        #     expression NOT_EQUAL expression
+        p[0] = NotEqualExpression(p[1], p[3])
+
+
+# logic_expression
+# ----------------
+def p_logic_expression(p):
+    """
+        logic_expression : expression AND expression
+                         | expression OR expression
+    """
+
+    #     expression AND expression
+    if p[2].upper() == 'AND':
+        p[0] = AndExpression(p[1], p[3])
+
+    #     expression OR expression
+    else:
+        p[0] = OrExpression(p[1], p[3])
 
 
 # json_object_item
