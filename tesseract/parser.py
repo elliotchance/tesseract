@@ -8,6 +8,7 @@ import json
 # SQL keywords.
 sql_keywords = (
     'FALSE',
+    'FROM',
     'INSERT',
     'INTO',
     'NULL',
@@ -91,7 +92,8 @@ def p_statement(p):
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT ASTERISK
+        select_statement : SELECT ASTERISK FROM
+                         | SELECT ASTERISK
                          | SELECT
     """
 
@@ -100,7 +102,11 @@ def p_select_statement(p):
         raise RuntimeError("Expected expression after SELECT.")
 
     #     SELECT ASTERISK
-    raise RuntimeError("Missing FROM clause.")
+    if len(p) == 3:
+        raise RuntimeError("Missing FROM clause.")
+
+    #     SELECT ASTERISK FROM
+    raise RuntimeError("Expected table name after FROM.")
 
 # insert_statement
 # ----------------
