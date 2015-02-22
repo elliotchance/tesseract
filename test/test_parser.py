@@ -69,18 +69,20 @@ class TestServer(TestCase):
 
     def test_insert_null(self):
         result = parser.parse('INSERT INTO foo {"foo": null}')
-        print result.statement
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": None}))
 
     def test_insert_true(self):
         result = parser.parse('INSERT INTO foo {"foo": true}')
-        print result.statement
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": True}))
 
     def test_insert_false(self):
         result = parser.parse('INSERT INTO foo {"foo": false}')
-        print result.statement
+        self.assertEquals(result.statement,
+                          InsertStatement("foo", {"foo": False}))
+
+    def test_sql_is_not_case_sensitive(self):
+        result = parser.parse('insert Into foo {"foo": false}')
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": False}))
