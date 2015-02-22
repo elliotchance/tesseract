@@ -14,6 +14,9 @@ class BinaryExpression(Expression):
     def __str__(self):
         return '%s %s %s' % (self.left, self.operator, self.right)
 
+    def compile_lua(self):
+        return 'tostring(tuple[ARGV[2]]) %s tostring(ARGV[3])' % self.operator
+
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
@@ -35,16 +38,10 @@ class GreaterExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '>', right)
 
-    def compile_lua(self):
-        return 'tostring(tuple[ARGV[2]]) > tostring(ARGV[3])'
-
 
 class LessExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '<', right)
-
-    def compile_lua(self):
-        return 'tostring(tuple[ARGV[2]]) < tostring(ARGV[3])'
 
 
 class GreaterEqualExpression(BinaryExpression):
@@ -55,6 +52,3 @@ class GreaterEqualExpression(BinaryExpression):
 class LessEqualExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '<=', right)
-
-    def compile_lua(self):
-        return 'tostring(tuple[ARGV[2]]) <= tostring(ARGV[3])'

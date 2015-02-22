@@ -32,3 +32,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_less_equal(self):
         self.assertWhere('foo <= 124', [{"foo": 123}, {"foo": 124}])
+
+    def test_select_where_greater_equal(self):
+        self.assertWhere('foo >= 124', [{"foo": 124}, {"foo": 125}])
