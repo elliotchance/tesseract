@@ -96,3 +96,8 @@ class TestServer(TestCase):
         result = parser.parse('INSERT INTO foo {"foo": 123}')
         self.assertEquals(str(result.statement),
                           'INSERT INTO foo {"foo": 123}')
+
+    def test_insert_floating(self):
+        result = parser.parse('INSERT INTO foo {"foo": 1.23}')
+        self.assertEquals(result.statement,
+                          InsertStatement("foo", {"foo": 1.23}))

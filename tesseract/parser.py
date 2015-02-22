@@ -24,6 +24,7 @@ json_operators = (
 
 # Values and identifiers.
 expression_types = (
+    'FLOAT',
     'IDENTIFIER',
     'INTEGER',
     'STRING',
@@ -39,6 +40,7 @@ t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
+t_FLOAT = '[0-9]+.[0-9]+'
 t_INTEGER = '[0-9]+'
 t_STRING = r'\".*?\"'
 
@@ -148,6 +150,7 @@ def p_expression(p):
         expression : NULL
                    | TRUE
                    | FALSE
+                   | FLOAT
                    | INTEGER
                    | STRING
     """
@@ -169,6 +172,10 @@ def p_expression(p):
     elif p[1][0] == '"':
         # Prune the double-quotes off the STRING value.
         p[0] = p[1][1:-1]
+
+    #     FLOAT
+    elif '.' in p[1]:
+        p[0] = float(p[1])
 
     #     INTEGER
     else:
