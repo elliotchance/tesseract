@@ -24,6 +24,7 @@ json_operators = (
 # Values and identifiers.
 expression_types = (
     'IDENTIFIER',
+    'INTEGER',
     'STRING',
 )
 
@@ -37,6 +38,7 @@ t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
+t_INTEGER = '[0-9]+'
 t_STRING = r'\".*?\"'
 
 def t_IDENTIFIER(t):
@@ -138,38 +140,52 @@ def p_json_object_items(p):
     p[0] = dict(p[1].items() + p[3].items())
 
 
+# expression
+# ----------
+def p_expression(p):
+    """
+        expression : NULL
+                   | TRUE
+                   | FALSE
+                   | INTEGER
+                   | STRING
+    """
+
+    #     NULL
+    if p[1].upper() == 'NULL':
+        # `NULL` is represented as `None`.
+        p[0] = None
+
+    #     TRUE
+    elif p[1].upper() == 'TRUE':
+        p[0] = True
+
+    #     FALSE
+    elif p[1].upper() == 'FALSE':
+        p[0] = False
+
+    #     STRING
+    elif p[1][0] == '"':
+        # Prune the double-quotes off the STRING value.
+        p[0] = p[1][1:-1]
+
+    #     INTEGER
+    else:
+        p[0] = int(p[1])
+
+
 # json_object_item
 # ----------------
 def p_json_object_item(p):
     """
-        json_object_item : STRING COLON NULL
-                         | STRING COLON TRUE
-                         | STRING COLON FALSE
-                         | STRING COLON STRING
+        json_object_item : STRING COLON expression
     """
 
     # Remove the trailing and proceeding double-quotes around the STRING key.
     key = p[1][1:-1]
 
-    #     STRING COLON NULL
-    if p[3].upper() == 'NULL':
-        # `NULL` is represented as `None`.
-        p[0] = {key: None}
-        return
-
-    #     STRING COLON TRUE
-    elif p[3].upper() == 'TRUE':
-        p[0] = {key: True}
-        return
-
-    #     STRING COLON FALSE
-    elif p[3].upper() == 'FALSE':
-        p[0] = {key: False}
-        return
-
-    #     STRING COLON STRING
-    # Also prune the double-quotes off the STRING value.
-    p[0] = {key: p[3][1:-1]}
+    # Create the key-value item.
+    p[0] = {key: p[3]}
 
 
 # error
