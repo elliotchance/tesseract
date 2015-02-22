@@ -36,3 +36,7 @@ class TestServer(ParserTestCase):
     def test_select_where_not_equal(self):
         result = parser.parse('SELECT * FROM foo WHERE a <> 2')
         self.assertEquals(str(result.statement.where), 'a <> 2')
+
+    def test_select_where_not_equal2(self):
+        result = parser.parse('SELECT * FROM foo WHERE a != 3')
+        self.assertEquals(str(result.statement.where), 'a <> 3')
