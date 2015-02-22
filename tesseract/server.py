@@ -1,3 +1,6 @@
+import tesseract.sql.parser as parser
+from tesseract.sql.objects import *
+
 class Server:
     def execute(self, sql):
         """
@@ -5,4 +8,14 @@ class Server:
         :param sql: str
         :return: boolean
         """
-        return True
+        result = parser.parse(sql)
+        if isinstance(result.statement, InsertStatement):
+            return ServerResult(True, None)
+
+        return ServerResult(True, [])
+
+
+class ServerResult:
+    def __init__(self, success, data):
+        self.success = success
+        self.data = data
