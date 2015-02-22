@@ -12,3 +12,7 @@ class TestParserDelete(ParserTestCase):
     def test_delete(self):
         result = parser.parse('DELETE FROM foo')
         self.assertEquals(result.statement, DeleteStatement("foo"))
+
+    def test_delete_str(self):
+        result = parser.parse('DELETE FROM foo')
+        self.assertEquals(str(result.statement), 'DELETE FROM foo')

@@ -75,3 +75,6 @@ class DeleteStatement(Statement):
         self.table_name = table_name
 
         self.assert_type('table_name', str)
+
+    def __str__(self):
+        return "DELETE FROM %s" % self.table_name
