@@ -34,3 +34,12 @@ class TestServer(TestCase):
     def test_insert_two_fields(self):
         result = parser.parse('INSERT INTO foo {"foo": "bar", "bar": "baz"}')
         self.assertEquals(result, InsertStatement({"foo": "bar", "bar": "baz"}))
+
+    def test_insert_three_fields(self):
+        sql = 'INSERT INTO foo {"foo": "bar", "bar": "baz", "abc": "def"}'
+        result = parser.parse(sql)
+        self.assertEquals(result, InsertStatement({
+            "foo": "bar",
+            "bar": "baz",
+            "abc": "def"
+        }))

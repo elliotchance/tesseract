@@ -54,15 +54,22 @@ def p_insert_statement(p):
 def p_json_object(p):
     """
     json_object : CURLY_OPEN CURLY_CLOSE
-                | CURLY_OPEN json_object_item CURLY_CLOSE
-                | CURLY_OPEN json_object_item COMMA json_object_item CURLY_CLOSE
+                | CURLY_OPEN json_object_items CURLY_CLOSE
     """
     if len(p) == 3:
         p[0] = {}
-    elif len(p) == 6:
-        p[0] = dict(p[2].items() + p[4].items())
     else:
         p[0] = p[2]
+
+def p_json_object_items(p):
+    """
+    json_object_items : json_object_item
+                      | json_object_items COMMA json_object_item
+    """
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = dict(p[1].items() + p[3].items())
 
 def p_json_object_item(p):
     """
