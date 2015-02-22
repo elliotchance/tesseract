@@ -28,12 +28,16 @@ def p_statement(p):
 # ----------------
 def p_delete_statement(p):
     """
-        delete_statement : DELETE
+        delete_statement : DELETE FROM
+                         | DELETE
     """
 
     #     DELETE
     if len(p) == 2:
         raise RuntimeError("Expected FROM after DELETE.")
+
+    #     DELETE FROM
+    raise RuntimeError("Expected table name after FROM.")
 
 
 # select_statement
