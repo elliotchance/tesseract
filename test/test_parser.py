@@ -126,3 +126,7 @@ class TestServer(TestCase):
     def test_ignore_tab(self):
         result = parser.parse('select *\tfrom foo')
         self.assertEquals(str(result.statement), 'SELECT * FROM foo')
+
+    def test_ignore_carriage_return(self):
+        result = parser.parse('select *\rfrom foo')
+        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
