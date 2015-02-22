@@ -4,3 +4,7 @@
 
 /parsetab.py
 /parser.out
+
+/docs/
+
+.DS_Store
