@@ -49,7 +49,7 @@ def p_insert_statement(p):
     elif len(p) == 2:
         raise RuntimeError("Expected table name after INSERT.")
 
-    p.parser.ast = InsertStatement(p[4])
+    p.parser.ast = InsertStatement(p[3], p[4])
 
 def p_json_object(p):
     """
@@ -95,13 +95,16 @@ def parse(data):
     return parser.ast
 
 class InsertStatement:
-    def __init__(self, fields):
+    def __init__(self, table_name, fields):
         """
+        :param table_name: str
         :param fields: dict
         """
-        assert isinstance(fields, dict), 'fields is not dict, got: %r' % fields
-
+        self.table_name = table_name
         self.fields = fields
+
+        self.assert_type('table_name', str)
+        self.assert_type('fields', dict)
 
     def __eq__(self, other):
         """
@@ -113,3 +116,8 @@ class InsertStatement:
             'other is not an object, got: %r' % object
 
         return self.__dict__ == other.__dict__
+
+    def assert_type(self, field_name, expected_type):
+        field = getattr(self, field_name)
+        assert isinstance(field, expected_type), \
+            '%s is not %s, got: %r' % (field_name, expected_type, field)
