@@ -60,7 +60,7 @@ def t_IDENTIFIER(t):
     return t
 
 # Characters that can be ignored, at the moment it is only a space.
-t_ignore = " "
+t_ignore = " \n"
 
 def t_error(token):
     """

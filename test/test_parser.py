@@ -118,3 +118,7 @@ class TestServer(TestCase):
     def test_select_str(self):
         result = parser.parse('select * from foo')
         self.assertEquals(str(result.statement), 'SELECT * FROM foo')
+
+    def test_ignore_newline(self):
+        result = parser.parse('select *\nfrom foo')
+        self.assertEquals(str(result.statement), 'SELECT * FROM foo')
