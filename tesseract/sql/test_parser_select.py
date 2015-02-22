@@ -28,3 +28,7 @@ class TestServer(ParserTestCase):
         result = parser.parse('SELECT * FROM foo WHERE a=1')
         self.assertEquals(str(result.statement),
                           'SELECT * FROM foo WHERE a = 1')
+
+    def test_select_where_identifier(self):
+        result = parser.parse('SELECT * FROM foo WHERE truthy')
+        self.assertEquals(str(result.statement.where), 'truthy')

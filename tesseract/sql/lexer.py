@@ -6,13 +6,10 @@ import ply.lex as lex
 # SQL keywords.
 sql_keywords = (
     'DELETE',
-    'FALSE',
     'FROM',
     'INSERT',
     'INTO',
-    'NULL',
     'SELECT',
-    'TRUE',
     'WHERE',
 )
 

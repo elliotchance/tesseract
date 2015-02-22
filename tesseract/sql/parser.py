@@ -10,7 +10,9 @@ import tesseract.sql.lexer as lexer
 tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
-precedence = ()
+precedence = (
+    ('left', 'EQUAL'),
+)
 
 
 # statement
@@ -153,20 +155,18 @@ def p_json_object_items(p):
     p[0] = dict(p[1].items() + p[3].items())
 
 
-# expression
-# ----------
+# single_expression
+# -----------------
 def p_expression(p):
     """
-        expression : NULL
-                   | TRUE
-                   | FALSE
+        expression : expression EQUAL expression
                    | FLOAT
                    | INTEGER
                    | STRING
-                   | IDENTIFIER EQUAL expression
+                   | IDENTIFIER
     """
 
-    #     IDENTIFIER EQUAL expression
+    #     expression EQUAL expression
     if len(p) == 4:
         p[0] = EqualExpression(p[1], p[3])
         return
@@ -193,9 +193,13 @@ def p_expression(p):
     elif '.' in p[1]:
         p[0] = float(p[1])
 
-    #     INTEGER
     else:
-        p[0] = int(p[1])
+        try:
+            #     INTEGER
+            p[0] = int(p[1])
+        except ValueError:
+            #     IDENTIFIER
+            p[0] = p[1]
 
 
 # json_object_item
