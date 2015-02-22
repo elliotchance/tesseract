@@ -1,5 +1,6 @@
 import ply.yacc as yacc
 import ply.lex as lex
+import json
 
 # Lexer
 # =====
@@ -244,3 +245,6 @@ class InsertStatement:
         field = getattr(self, field_name)
         assert isinstance(field, expected_type), \
             '%s is not %s, got: %r' % (field_name, expected_type, field)
+
+    def __str__(self):
+        return "INSERT INTO %s %s" % (self.table_name, json.dumps(self.fields))

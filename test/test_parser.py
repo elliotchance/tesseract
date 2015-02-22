@@ -88,6 +88,11 @@ class TestServer(TestCase):
                           InsertStatement("foo", {"foo": False}))
 
     def test_insert_integer(self):
-        result = parser.parse('insert Into foo {"foo": 123}')
+        result = parser.parse('INSERT INTO foo {"foo": 123}')
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": 123}))
+
+    def test_insert_str(self):
+        result = parser.parse('INSERT INTO foo {"foo": 123}')
+        self.assertEquals(str(result.statement),
+                          'INSERT INTO foo {"foo": 123}')
