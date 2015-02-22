@@ -35,6 +35,9 @@ class GreaterExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '>', right)
 
+    def compile_lua(self):
+        return 'tostring(tuple[ARGV[2]]) > tostring(ARGV[3])'
+
 
 class LessExpression(BinaryExpression):
     def __init__(self, left, right):

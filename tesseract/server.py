@@ -70,10 +70,13 @@ class Server:
         """ % lua
 
     def execute_select(self, select):
-
+        """
+        :type select: SelectExpression
+        """
         if select.where:
             lua = self.compile_lua(select.where)
-            page = self.redis.eval(lua, 0, select.table_name, 'foo', 124)
+            page = self.redis.eval(lua, 0, select.table_name, 'foo',
+                                   select.where.right)
         else:
             page = self.redis.lrange(select.table_name, 0, -1)
 
