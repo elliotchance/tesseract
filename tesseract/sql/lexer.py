@@ -23,6 +23,7 @@ operators = (
     'EQUAL',
     'NOT_EQUAL',
     'GREATER',
+    'GREATER_EQUAL',
     'LESS',
 )
 
@@ -51,6 +52,7 @@ t_STRING = r'\".*?\"'
 t_EQUAL = '='
 t_NOT_EQUAL = '(<>)|(!=)'
 t_GREATER = '>'
+t_GREATER_EQUAL = '>='
 t_LESS = '<'
 
 def t_IDENTIFIER(t):

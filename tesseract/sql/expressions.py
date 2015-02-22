@@ -33,3 +33,8 @@ class GreaterExpression(BinaryExpression):
 class LessExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '<', right)
+
+
+class GreaterEqualExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '>=', right)
