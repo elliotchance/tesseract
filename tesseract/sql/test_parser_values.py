@@ -1,10 +1,13 @@
 from tesseract.sql.parser_test_case import ParserTestCase
 
 class TestParserValues(ParserTestCase):
-    def test_integer(self):
+    def test_integer_1(self):
         self.assertSQL('123', '123')
 
-    def test_float(self):
+    def test_integer_2(self):
+        self.assertSQL('-123', '-123')
+
+    def test_float_1(self):
         self.assertSQL('1.23', '1.23')
 
     def test_null(self):
