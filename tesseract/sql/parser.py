@@ -180,7 +180,6 @@ def p_expression(p):
 
     #     NULL
     if p[1].upper() == 'NULL':
-        # `NULL` is represented as `None`.
         p[0] = None
         return
 

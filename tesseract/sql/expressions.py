@@ -1,5 +1,3 @@
-from json import JSONEncoder
-
 # Expressions
 # ===========
 
@@ -8,6 +6,13 @@ class Expression:
     A base class for all expressions.
     """
     pass
+
+    @staticmethod
+    def to_sql(object):
+        if object == None:
+            return "NULL"
+
+        return str(object)
 
 
 class Identifier(str):
