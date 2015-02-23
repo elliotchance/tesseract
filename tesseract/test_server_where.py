@@ -50,3 +50,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_minus(self):
         self.assertWhere('foo = 224 - 100', [{"foo": 124}])
+
+    def test_select_where_times(self):
+        self.assertWhere('foo = 62 * 2', [{"foo": 124}])
