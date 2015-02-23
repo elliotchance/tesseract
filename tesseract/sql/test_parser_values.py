@@ -10,6 +10,9 @@ class TestParserValues(ParserTestCase):
     def test_float_1(self):
         self.assertSQL('1.23', '1.23')
 
+    def test_float_2(self):
+        self.assertSQL('-1.23', '-1.23')
+
     def test_null(self):
         self.assertSQL('NULL', 'null')
 
