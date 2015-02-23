@@ -30,6 +30,7 @@ operators = (
     'PLUS',
     'MINUS',
     'TIMES',
+    'DIVIDE',
 )
 
 # Values and identifiers.
@@ -62,6 +63,7 @@ t_LESS_EQUAL = '<='
 t_PLUS = r'\+'
 t_MINUS = r'\-'
 t_TIMES = r'\*'
+t_DIVIDE = r'\/'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

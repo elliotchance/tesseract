@@ -76,3 +76,7 @@ class TestServer(ParserTestCase):
     def test_select_where_times(self):
         result = parser.parse('SELECT * FROM foo WHERE a * b')
         self.assertEquals(str(result.statement.where), 'a * b')
+
+    def test_select_where_divide(self):
+        result = parser.parse('SELECT * FROM foo WHERE a / b')
+        self.assertEquals(str(result.statement.where), 'a / b')
