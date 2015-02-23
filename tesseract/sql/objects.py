@@ -1,4 +1,4 @@
-import json
+from tesseract.sql.expressions import Expression
 
 # Objects
 # =======
@@ -43,7 +43,10 @@ class InsertStatement(Statement):
         self.assert_type('fields', dict)
 
     def __str__(self):
-        return "INSERT INTO %s %s" % (self.table_name, json.dumps(self.fields))
+        return "INSERT INTO %s %s" % (
+            self.table_name,
+            Expression.to_sql(self.fields)
+        )
 
 
 class SelectStatement(Statement):

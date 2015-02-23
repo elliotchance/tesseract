@@ -1,3 +1,4 @@
+import json
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis
@@ -44,7 +45,7 @@ class Server:
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
             self.redis.lpush(result.statement.table_name,
-                             json.dumps(result.statement.fields))
+                             Expression.to_sql(result.statement.fields))
             return ServerResult(True)
 
         # This is a `SELECT`

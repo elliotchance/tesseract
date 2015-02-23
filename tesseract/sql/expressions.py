@@ -5,24 +5,46 @@ class Expression:
     """
     A base class for all expressions.
     """
-    pass
 
     @staticmethod
     def to_sql(object):
-        if object == None:
-            return "NULL"
-
-        if isinstance(object, bool):
-            return str(object).upper()
+        if isinstance(object, dict):
+            items = ['"%s": %s' % (key, Expression.to_sql(value))
+                     for key, value in object.iteritems()]
+            return '{%s}' % ', '.join(items)
 
         return str(object)
 
 
-class Identifier(str):
-    """
-    Column name.
-    """
-    pass
+class Value(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        if isinstance(other, Value):
+            return self.value == other.value
+
+        return self.value == other
+
+    def __str__(self):
+        if self.value is None:
+            return "null"
+
+        if isinstance(self.value, bool):
+            return str(self.value).lower()
+
+        if isinstance(self.value, (int, float)):
+            return str(self.value)
+
+        return '"%s"' % self.value
+
+
+class Identifier(Expression):
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    def __str__(self):
+        return self.identifier
 
 
 class BinaryExpression(Expression):

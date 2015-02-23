@@ -1,3 +1,4 @@
+from tesseract.sql.expressions import Value
 from tesseract.sql.parser_test_case import ParserTestCase
 from tesseract.sql.objects import InsertStatement
 import tesseract.sql.parser as parser

@@ -166,11 +166,17 @@ def p_expression(p):
         expression : arithmetic_expression
                    | comparison_expression
                    | logic_expression
+                   | json_object
                    | FLOAT
                    | INTEGER
                    | STRING
                    | IDENTIFIER
     """
+
+    #     json_object
+    if isinstance(p[1], dict):
+        p[0] = p[1]
+        return
 
     #     comparison_expression
     #     logic_expression
@@ -180,35 +186,35 @@ def p_expression(p):
 
     #     NULL
     if p[1].upper() == 'NULL':
-        p[0] = None
+        p[0] = Value(None)
         return
 
     #     TRUE
     if p[1].upper() == 'TRUE':
-        p[0] = True
+        p[0] = Value(True)
         return
 
     #     FALSE
     if p[1].upper() == 'FALSE':
-        p[0] = False
+        p[0] = Value(False)
         return
 
     #     STRING
     if p[1][0] == '"':
         # Prune the double-quotes off the STRING value.
-        p[0] = p[1][1:-1]
+        p[0] = Value(p[1][1:-1])
         return
 
     #     INTEGER
     try:
-        p[0] = int(p[1])
+        p[0] = Value(int(p[1]))
         return
     except ValueError:
         pass
 
     #     FLOAT
     try:
-        p[0] = float(p[1])
+        p[0] = Value(float(p[1]))
         return
     except ValueError:
         pass
