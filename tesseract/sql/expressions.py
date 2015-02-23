@@ -12,8 +12,8 @@ class Expression:
         if object == None:
             return "NULL"
 
-        if object == True:
-            return "TRUE"
+        if isinstance(object, bool):
+            return str(object).upper()
 
         return str(object)
 
