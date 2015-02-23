@@ -212,7 +212,7 @@ def p_expression(p):
         pass
 
     #     IDENTIFIER
-    p[0] = p[1]
+    p[0] = Identifier(p[1])
 
 
 # expression

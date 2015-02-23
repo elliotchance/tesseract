@@ -1,7 +1,19 @@
+from json import JSONEncoder
+
 # Expressions
 # ===========
 
 class Expression:
+    """
+    A base class for all expressions.
+    """
+    pass
+
+
+class Identifier(str):
+    """
+    Column name.
+    """
     pass
 
 
@@ -22,7 +34,10 @@ class BinaryExpression(Expression):
             args.extend(new_args)
         else:
             args.append(self.left)
-            left = "tonumber(tuple[ARGV[%d]])" % offset
+            if isinstance(self.left, Identifier):
+                left = "tonumber(tuple[ARGV[%d]])" % offset
+            else:
+                left = "tonumber(ARGV[%d])" % offset
             offset += 1
 
         if isinstance(self.right, BinaryExpression):
@@ -30,7 +45,10 @@ class BinaryExpression(Expression):
             args.extend(new_args)
         else:
             args.append(self.right)
-            right = "tonumber(ARGV[%d])" % offset
+            if isinstance(self.right, Identifier):
+                right = "tonumber(tuple[ARGV[%d]])" % offset
+            else:
+                right = "tonumber(ARGV[%d])" % offset
             offset += 1
 
         return ('%s %s %s' % (left, operator, right), offset, args)

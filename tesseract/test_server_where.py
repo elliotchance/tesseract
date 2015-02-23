@@ -41,3 +41,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_and(self):
         self.assertWhere('foo < 125 AND foo > 123', [{"foo": 124}])
+
+    def test_select_where_equal_reverse(self):
+        self.assertWhere('124 = foo', [{"foo": 124}])
