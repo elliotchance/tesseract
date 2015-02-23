@@ -44,3 +44,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_equal_reverse(self):
         self.assertWhere('124 = foo', [{"foo": 124}])
+
+    def test_select_where_plus(self):
+        self.assertWhere('foo = 100 + 24', [{"foo": 124}])

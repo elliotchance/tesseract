@@ -11,6 +11,7 @@ tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = (
+    ('left', 'PLUS'),
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
@@ -161,7 +162,8 @@ def p_json_object_items(p):
 # ----------
 def p_expression(p):
     """
-        expression : comparison_expression
+        expression : arithmetic_expression
+                   | comparison_expression
                    | logic_expression
                    | FLOAT
                    | INTEGER
@@ -267,6 +269,16 @@ def p_logic_expression(p):
     #     expression OR expression
     else:
         p[0] = OrExpression(p[1], p[3])
+
+
+# arithmetic_expression
+# ---------------------
+def p_arithmetic_expression(p):
+    """
+        arithmetic_expression : expression PLUS expression
+    """
+
+    p[0] = AddExpression(p[1], p[3])
 
 
 # json_object_item

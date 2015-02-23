@@ -28,6 +28,7 @@ operators = (
     'GREATER_EQUAL',
     'LESS',
     'LESS_EQUAL',
+    'PLUS',
 )
 
 # Values and identifiers.
@@ -58,6 +59,7 @@ t_GREATER = '>'
 t_GREATER_EQUAL = '>='
 t_LESS = '<'
 t_LESS_EQUAL = '<='
+t_PLUS = r'\+'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

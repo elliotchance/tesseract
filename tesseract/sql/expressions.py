@@ -107,3 +107,8 @@ class OrExpression(BinaryExpression):
 
     def compile_lua(self, offset):
         return BinaryExpression.internal_compile_lua(self, 'or', offset)
+
+
+class AddExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '+', right)
