@@ -7,6 +7,9 @@ class TestParserValues(ParserTestCase):
     def test_integer_2(self):
         self.assertSQL('-123', '-123')
 
+    def test_integer_3(self):
+        self.assertSQL('+123', '123')
+
     def test_float_1(self):
         self.assertSQL('1.23', '1.23')
 
