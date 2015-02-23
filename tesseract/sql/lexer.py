@@ -17,7 +17,6 @@ sql_keywords = (
 
 # Operators.
 operators = (
-    'ASTERISK',
     'COLON',
     'COMMA',
     'CURLY_CLOSE',
@@ -30,6 +29,7 @@ operators = (
     'LESS_EQUAL',
     'PLUS',
     'MINUS',
+    'TIMES',
 )
 
 # Values and identifiers.
@@ -46,7 +46,6 @@ expression_types = (
 tokens = operators + expression_types + sql_keywords
 
 # Regular expressions for each of the tokens go here.
-t_ASTERISK = r'\*'
 t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
@@ -62,6 +61,7 @@ t_LESS = '<'
 t_LESS_EQUAL = '<='
 t_PLUS = r'\+'
 t_MINUS = r'\-'
+t_TIMES = r'\*'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

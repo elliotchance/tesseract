@@ -1,4 +1,3 @@
-from tesseract.sql.expressions import *
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis

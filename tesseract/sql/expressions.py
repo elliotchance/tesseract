@@ -117,3 +117,8 @@ class AddExpression(BinaryExpression):
 class SubtractExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '-', right)
+
+
+class MultiplyExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '*', right)

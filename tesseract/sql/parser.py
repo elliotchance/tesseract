@@ -12,6 +12,7 @@ tokens = lexer.tokens
 # Set precedence for operators. We do not need these yet.
 precedence = (
     ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES'),
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
@@ -57,10 +58,10 @@ def p_delete_statement(p):
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT ASTERISK FROM IDENTIFIER WHERE expression
-                         | SELECT ASTERISK FROM IDENTIFIER
-                         | SELECT ASTERISK FROM
-                         | SELECT ASTERISK
+        select_statement : SELECT TIMES FROM IDENTIFIER WHERE expression
+                         | SELECT TIMES FROM IDENTIFIER
+                         | SELECT TIMES FROM
+                         | SELECT TIMES
                          | SELECT
     """
 
@@ -68,22 +69,22 @@ def p_select_statement(p):
     if len(p) == 2:
         raise RuntimeError("Expected expression after SELECT.")
 
-    #     SELECT ASTERISK
+    #     SELECT TIMES
     if len(p) == 3:
         raise RuntimeError("Missing FROM clause.")
 
-    #     SELECT ASTERISK FROM
+    #     SELECT TIMES FROM
     if len(p) == 4:
         raise RuntimeError("Expected table name after FROM.")
 
     # Only valid `SELECT`s beyond this point.
 
-    #     SELECT ASTERISK FROM IDENTIFIER WHERE expression
+    #     SELECT TIMES FROM IDENTIFIER WHERE expression
     if len(p) == 7:
         p[0] = SelectStatement(p[4], p[6])
         return
 
-    #     SELECT ASTERISK FROM IDENTIFIER
+    #     SELECT TIMES FROM IDENTIFIER
     p[0] = SelectStatement(p[4])
 
 
@@ -277,11 +278,16 @@ def p_arithmetic_expression(p):
     """
         arithmetic_expression : expression PLUS expression
                               | expression MINUS expression
+                              | expression TIMES expression
     """
 
     #     expression PLUS expression
     if p[2].upper() == '+':
         p[0] = AddExpression(p[1], p[3])
+
+    #     expression TIMES expression
+    elif p[2].upper() == '*':
+        p[0] = MultiplyExpression(p[1], p[3])
 
     #     expression MINUS expression
     else:
