@@ -22,6 +22,9 @@ class TestParserValues(ParserTestCase):
     def test_float_5(self):
         self.assertSQL('1.23e-3', '0.00123')
 
+    def test_float_6(self):
+        self.assertSQL('1.23e10', '12300000000.0')
+
     def test_null(self):
         self.assertSQL('NULL', 'null')
 
