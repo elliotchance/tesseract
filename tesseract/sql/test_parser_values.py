@@ -14,3 +14,7 @@ class TestServer(ParserTestCase):
     def test_null(self):
         result = parser.parse('SELECT * FROM foo WHERE NULL')
         self.assertEquals(Expression.to_sql(result.statement.where), 'NULL')
+
+    def test_true(self):
+        result = parser.parse('SELECT * FROM foo WHERE TRUE')
+        self.assertEquals(Expression.to_sql(result.statement.where), 'TRUE')

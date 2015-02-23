@@ -12,6 +12,9 @@ class Expression:
         if object == None:
             return "NULL"
 
+        if object == True:
+            return "TRUE"
+
         return str(object)
 
 
