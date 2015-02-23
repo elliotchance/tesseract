@@ -13,3 +13,4 @@ class ParserTestCase(TestCase):
     def assertSQL(self, sql, expected):
         result = parser.parse('SELECT * FROM foo WHERE %s' % sql)
         self.assertEquals(Expression.to_sql(result.statement.where), expected)
+        return result

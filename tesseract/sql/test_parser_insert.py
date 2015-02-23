@@ -17,3 +17,8 @@ class TestParserInsert(ParserTestCase):
         result = parser.parse('INSERT INTO foo {"foo": "bar"}')
         self.assertEquals(result.statement,
                           InsertStatement("foo", {"foo": "bar"}))
+
+    def test_insert_str(self):
+        result = parser.parse('INSERT INTO foo {"foo": 123}')
+        self.assertEquals(str(result.statement),
+                          'INSERT INTO foo {"foo": 123}')
