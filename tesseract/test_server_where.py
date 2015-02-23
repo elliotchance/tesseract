@@ -47,3 +47,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_plus(self):
         self.assertWhere('foo = 100 + 24', [{"foo": 124}])
+
+    def test_select_where_minus(self):
+        self.assertWhere('foo = 224 - 100', [{"foo": 124}])
