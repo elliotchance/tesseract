@@ -53,3 +53,6 @@ class TestServerWhere(TestCase):
 
     def test_select_where_times(self):
         self.assertWhere('foo = 62 * 2', [{"foo": 124}])
+
+    def test_select_where_divide(self):
+        self.assertWhere('foo = 248 / 2', [{"foo": 124}])
