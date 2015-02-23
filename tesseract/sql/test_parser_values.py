@@ -21,3 +21,6 @@ class TestParserValues(ParserTestCase):
 
     def test_identifier_case(self):
         self.assertSQL('Truthy', 'Truthy')
+
+    def test_string(self):
+        self.assertSQL('"false"', '"false"')
