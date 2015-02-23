@@ -112,3 +112,8 @@ class OrExpression(BinaryExpression):
 class AddExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '+', right)
+
+
+class SubtractExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '-', right)
