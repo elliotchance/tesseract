@@ -6,3 +6,7 @@ class TestServer(ParserTestCase):
     def test_integer(self):
         result = parser.parse('SELECT * FROM foo WHERE 123')
         self.assertEquals(str(result.statement.where), '123')
+
+    def test_float(self):
+        result = parser.parse('SELECT * FROM foo WHERE 1.23')
+        self.assertEquals(str(result.statement.where), '1.23')
