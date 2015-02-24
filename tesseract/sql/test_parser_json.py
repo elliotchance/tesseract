@@ -46,3 +46,6 @@ class TestParserJson(ParserTestCase):
             'Duplicate key "foo", using last value.',
             'Duplicate key "foo", using last value.'
         ])
+
+    def test_array_empty(self):
+        self.assertSQL('[]', '[]')

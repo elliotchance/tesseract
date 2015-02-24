@@ -115,6 +115,16 @@ def p_insert_statement(p):
     p[0] = InsertStatement(p[3], p[4])
 
 
+# json_array
+# ----------
+def p_json_array(p):
+    """
+        json_array : SQUARE_OPEN SQUARE_CLOSE
+    """
+
+    p[0] = []
+
+
 # json_object
 # -----------
 def p_json_object(p):
@@ -167,6 +177,7 @@ def p_expression(p):
                    | comparison_expression
                    | logic_expression
                    | json_object
+                   | json_array
                    | FLOAT
                    | INTEGER
                    | STRING
@@ -175,6 +186,11 @@ def p_expression(p):
 
     #     json_object
     if isinstance(p[1], dict):
+        p[0] = p[1]
+        return
+
+    #     json_array
+    if isinstance(p[1], list):
         p[0] = p[1]
         return
 
