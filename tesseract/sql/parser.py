@@ -120,12 +120,18 @@ def p_insert_statement(p):
 def p_json_array(p):
     """
         json_array : SQUARE_OPEN SQUARE_CLOSE
+                   | SQUARE_OPEN expression COMMA expression SQUARE_CLOSE
                    | SQUARE_OPEN expression SQUARE_CLOSE
     """
 
     #     SQUARE_OPEN SQUARE_CLOSE
     if len(p) == 3:
         p[0] = []
+        return
+
+    #     SQUARE_OPEN expression COMMA expression SQUARE_CLOSE
+    if len(p) > 4:
+        p[0] = [ p[2], p[4] ]
         return
 
     #     SQUARE_OPEN expression SQUARE_CLOSE

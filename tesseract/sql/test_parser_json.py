@@ -52,3 +52,6 @@ class TestParserJson(ParserTestCase):
 
     def test_array_one_item(self):
         self.assertSQL('[123]', '[123]')
+
+    def test_array_two_items(self):
+        self.assertSQL('[1, 2]', '[1, 2]')
