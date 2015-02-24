@@ -8,6 +8,10 @@ class Expression:
 
     @staticmethod
     def to_sql(object):
+        if isinstance(object, list):
+            items = [Expression.to_sql(value) for value in object]
+            return '[%s]' % ', '.join(items)
+
         if isinstance(object, dict):
             items = ['"%s": %s' % (key, Expression.to_sql(value))
                      for key, value in object.iteritems()]
