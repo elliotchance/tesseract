@@ -1,15 +1,8 @@
-from unittest import TestCase
 from tesseract.server import Server
-import string
-import random
+from tesseract.server_test_case import ServerTestCase
 
-class TestServer(TestCase):
-    def setUp(self):
-        TestCase.setUp(self)
-        self.table_name = ''.join(
-            random.choice(string.lowercase) for i in range(8)
-        )
 
+class TestServer(ServerTestCase):
     def test_insert_into_table_that_doesnt_exist(self):
         server = Server()
         result = server.execute(
