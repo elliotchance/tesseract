@@ -166,4 +166,6 @@ class DivideExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, '/', right)
 
     def eval(self):
+        if self.left is None:
+            return None
         return self.left / self.right
