@@ -120,8 +120,7 @@ def p_insert_statement(p):
 def p_json_array(p):
     """
         json_array : SQUARE_OPEN SQUARE_CLOSE
-                   | SQUARE_OPEN expression COMMA expression SQUARE_CLOSE
-                   | SQUARE_OPEN expression SQUARE_CLOSE
+                   | SQUARE_OPEN expression_list SQUARE_CLOSE
     """
 
     #     SQUARE_OPEN SQUARE_CLOSE
@@ -129,13 +128,27 @@ def p_json_array(p):
         p[0] = []
         return
 
-    #     SQUARE_OPEN expression COMMA expression SQUARE_CLOSE
-    if len(p) > 4:
-        p[0] = [ p[2], p[4] ]
+    #     SQUARE_OPEN expression_list SQUARE_CLOSE
+    p[0] = p[2]
+
+
+# expression_list
+# ---------------
+def p_expression_list(p):
+    """
+        expression_list : expression
+                        | expression_list COMMA expression
+    """
+
+    #     expression
+    if len(p) == 2:
+        p[0] = [ p[1] ]
         return
 
-    #     SQUARE_OPEN expression SQUARE_CLOSE
-    p[0] = [ p[2] ]
+    #     expression_list COMMA expression
+
+    # Append the expression to the list.
+    p[0] = p[1] + [ p[3] ]
 
 
 # json_object
