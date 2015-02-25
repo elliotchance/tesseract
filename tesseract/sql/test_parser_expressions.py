@@ -1,4 +1,3 @@
-import tesseract.sql.parser as parser
 from tesseract.sql.parser_test_case import ParserTestCase
 
 class TestParserExpressions(ParserTestCase):

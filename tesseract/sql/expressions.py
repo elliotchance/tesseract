@@ -164,3 +164,6 @@ class MultiplyExpression(BinaryExpression):
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '/', right)
+
+    def eval(self):
+        return self.left / self.right
