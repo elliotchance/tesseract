@@ -2,6 +2,64 @@ from tesseract.sql.expression_test_case import ExpressionTestCase
 from tesseract.sql.expressions import *
 
 
+class TestOrExpression(ExpressionTestCase):
+    def matrix(self):
+        return {
+            "null null": Exception('null OR null is not supported.'),
+            "null boolean": Exception('null OR boolean is not supported.'),
+            "null integer": Exception('null OR integer is not supported.'),
+            "null float": Exception('null OR float is not supported.'),
+            "null string": Exception('null OR string is not supported.'),
+            "null array": Exception('null OR array is not supported.'),
+            "null object": Exception('null OR object is not supported.'),
+            "boolean null": Exception('boolean OR null is not supported.'),
+            "boolean boolean": True,
+            "boolean integer": Exception('boolean OR integer is not supported.'),
+            "boolean float": Exception('boolean OR float is not supported.'),
+            "boolean string": Exception('boolean OR string is not supported.'),
+            "boolean array": Exception('boolean OR array is not supported.'),
+            "boolean object": Exception('boolean OR object is not supported.'),
+            "integer null": Exception('integer OR null is not supported.'),
+            "integer boolean": Exception('integer OR boolean is not supported.'),
+            "integer integer": Exception('integer OR integer is not supported.'),
+            "integer float": Exception('integer OR float is not supported.'),
+            "integer string": Exception('integer OR string is not supported.'),
+            "integer array": Exception('integer OR array is not supported.'),
+            "integer object": Exception('integer OR object is not supported.'),
+            "float null": Exception('float OR null is not supported.'),
+            "float boolean": Exception('float OR boolean is not supported.'),
+            "float integer": Exception('float OR integer is not supported.'),
+            "float float": Exception('float OR float is not supported.'),
+            "float string": Exception('float OR string is not supported.'),
+            "float array": Exception('float OR array is not supported.'),
+            "float object": Exception('float OR object is not supported.'),
+            "string null": Exception('string OR null is not supported.'),
+            "string boolean": Exception('string OR boolean is not supported.'),
+            "string integer": Exception('string OR integer is not supported.'),
+            "string float": Exception('string OR float is not supported.'),
+            "string string": Exception('string OR string is not supported.'),
+            "string array": Exception('string OR array is not supported.'),
+            "string object": Exception('string OR object is not supported.'),
+            "array null": Exception('array OR null is not supported.'),
+            "array boolean": Exception('array OR boolean is not supported.'),
+            "array integer": Exception('array OR integer is not supported.'),
+            "array float": Exception('array OR float is not supported.'),
+            "array string": Exception('array OR string is not supported.'),
+            "array array": Exception('array OR array is not supported.'),
+            "array object": Exception('array OR object is not supported.'),
+            "object null": Exception('object OR null is not supported.'),
+            "object boolean": Exception('object OR boolean is not supported.'),
+            "object integer": Exception('object OR integer is not supported.'),
+            "object float": Exception('object OR float is not supported.'),
+            "object string": Exception('object OR string is not supported.'),
+            "object array": Exception('object OR array is not supported.'),
+            "object object": Exception('object OR object is not supported.'),
+        }
+
+    def expression_class(self):
+        return OrExpression
+
+
 class TestAddExpression(ExpressionTestCase):
     def matrix(self):
         return {

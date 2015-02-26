@@ -177,6 +177,15 @@ class OrExpression(BinaryExpression):
     def compile_lua(self, offset):
         return BinaryExpression.internal_compile_lua(self, 'or', offset)
 
+    def eval(self):
+        if self.left.type() == Value.BOOLEAN and self.right.type() == Value.BOOLEAN:
+            return self.left.value or self.right.value
+
+        raise RuntimeError('%s OR %s is not supported.' % (
+            self.left.type(),
+            self.right.type()
+        ))
+
 
 class AddExpression(BinaryExpression):
     def __init__(self, left, right):
