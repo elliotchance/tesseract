@@ -24,6 +24,14 @@ class Expression:
 
 
 class Value(Expression):
+    NULL = 'null'
+    BOOLEAN = 'boolean'
+    INTEGER = 'integer'
+    FLOAT = 'float'
+    STRING = 'string'
+    ARRAY = 'array'
+    OBJECT = 'object'
+
     def __init__(self, value):
         self.value = value
 
@@ -44,6 +52,30 @@ class Value(Expression):
             return str(self.value)
 
         return '"%s"' % self.value
+
+    def eval(self):
+        return self
+
+    def type(self):
+        if isinstance(self.value, bool):
+            return self.BOOLEAN
+
+        if isinstance(self.value, int):
+            return self.INTEGER
+
+        if isinstance(self.value, float):
+            return self.FLOAT
+
+        if isinstance(self.value, str):
+            return self.STRING
+
+        if isinstance(self.value, list):
+            return self.ARRAY
+
+        if isinstance(self.value, dict):
+            return self.OBJECT
+
+        return self.NULL
 
 
 class Identifier(Expression):
@@ -166,6 +198,12 @@ class DivideExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, '/', right)
 
     def eval(self):
-        if self.left is None:
-            return None
-        return self.left / self.right
+        numeric = (Value.INTEGER, Value.FLOAT)
+
+        if self.left.type() in numeric and self.right.type() in numeric:
+            return self.left.value / self.right.value
+
+        raise RuntimeError('%s / %s is not supported.' % (
+            self.left.type(),
+            self.right.type()
+        ))
