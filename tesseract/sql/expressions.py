@@ -192,6 +192,17 @@ class MultiplyExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '*', right)
 
+    def eval(self):
+        numeric = (Value.INTEGER, Value.FLOAT)
+
+        if self.left.type() in numeric and self.right.type() in numeric:
+            return self.left.value * self.right.value
+
+        raise RuntimeError('%s * %s is not supported.' % (
+            self.left.type(),
+            self.right.type()
+        ))
+
 
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):

@@ -1,5 +1,64 @@
 from tesseract.sql.expression_test_case import ExpressionTestCase
-from tesseract.sql.expressions import DivideExpression
+from tesseract.sql.expressions import *
+
+
+class TestMultiplyExpression(ExpressionTestCase):
+    def matrix(self):
+        return {
+            "null null": Exception('null * null is not supported.'),
+            "null boolean": Exception('null * boolean is not supported.'),
+            "null integer": Exception('null * integer is not supported.'),
+            "null float": Exception('null * float is not supported.'),
+            "null string": Exception('null * string is not supported.'),
+            "null array": Exception('null * array is not supported.'),
+            "null object": Exception('null * object is not supported.'),
+            "boolean null": Exception('boolean * null is not supported.'),
+            "boolean boolean": Exception('boolean * boolean is not supported.'),
+            "boolean integer": Exception('boolean * integer is not supported.'),
+            "boolean float": Exception('boolean * float is not supported.'),
+            "boolean string": Exception('boolean * string is not supported.'),
+            "boolean array": Exception('boolean * array is not supported.'),
+            "boolean object": Exception('boolean * object is not supported.'),
+            "integer null": Exception('integer * null is not supported.'),
+            "integer boolean": Exception('integer * boolean is not supported.'),
+            "integer integer": 2000,
+            "integer float": 750,
+            "integer string": Exception('integer * string is not supported.'),
+            "integer array": Exception('integer * array is not supported.'),
+            "integer object": Exception('integer * object is not supported.'),
+            "float null": Exception('float * null is not supported.'),
+            "float boolean": Exception('float * boolean is not supported.'),
+            "float integer": 50,
+            "float float": 18.75,
+            "float string": Exception('float * string is not supported.'),
+            "float array": Exception('float * array is not supported.'),
+            "float object": Exception('float * object is not supported.'),
+            "string null": Exception('string * null is not supported.'),
+            "string boolean": Exception('string * boolean is not supported.'),
+            "string integer": Exception('string * integer is not supported.'),
+            "string float": Exception('string * float is not supported.'),
+            "string string": Exception('string * string is not supported.'),
+            "string array": Exception('string * array is not supported.'),
+            "string object": Exception('string * object is not supported.'),
+            "array null": Exception('array * null is not supported.'),
+            "array boolean": Exception('array * boolean is not supported.'),
+            "array integer": Exception('array * integer is not supported.'),
+            "array float": Exception('array * float is not supported.'),
+            "array string": Exception('array * string is not supported.'),
+            "array array": Exception('array * array is not supported.'),
+            "array object": Exception('array * object is not supported.'),
+            "object null": Exception('object * null is not supported.'),
+            "object boolean": Exception('object * boolean is not supported.'),
+            "object integer": Exception('object * integer is not supported.'),
+            "object float": Exception('object * float is not supported.'),
+            "object string": Exception('object * string is not supported.'),
+            "object array": Exception('object * array is not supported.'),
+            "object object": Exception('object * object is not supported.'),
+        }
+
+    def expression_class(self):
+        return MultiplyExpression
+
 
 class TestDivideExpression(ExpressionTestCase):
     def matrix(self):
