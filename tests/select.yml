@@ -1,0 +1,108 @@
+data:
+  table1:
+  - {"foo": 123}
+  - {"foo": 124}
+  - {"foo": 125}
+
+tests:
+  fail_1:
+    sql: SELECT
+    error: Expected expression after SELECT.
+
+  simple:
+    data: table1
+    sql: SELECT * FROM table1
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
+
+  where_equal:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 124
+    result:
+    - {"foo": 124}
+
+  where_not_equal_1:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo <> 124
+    result:
+    - {"foo": 123}
+    - {"foo": 125}
+
+  where_not_equal_2:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo != 124
+    as: SELECT * FROM table1 WHERE foo <> 124
+    result:
+    - {"foo": 123}
+    - {"foo": 125}
+
+  where_less_than:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo < 124
+    result:
+    - {"foo": 123}
+
+  where_greater_than:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo > 124
+    result:
+    - {"foo": 125}
+
+  where_less_than_equal:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo <= 124
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+
+  where_greater_than_equal:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo >= 124
+    result:
+    - {"foo": 124}
+    - {"foo": 125}
+
+  where_or:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 123 OR foo = 125
+    result:
+    - {"foo": 123}
+    - {"foo": 125}
+
+  where_or:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo > 123 AND foo < 125
+    result:
+    - {"foo": 124}
+
+  where_equal_reverse:
+    data: table1
+    sql: SELECT * FROM table1 WHERE 124 = foo
+    result:
+    - {"foo": 124}
+
+  where_add:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 100 + 24
+    result:
+    - {"foo": 124}
+
+  where_subtract:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 150 - 26
+    result:
+    - {"foo": 124}
+
+  where_multiply:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 62 * 2
+    result:
+    - {"foo": 124}
+
+  where_divide:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 248 / 2
+    result:
+    - {"foo": 124}
