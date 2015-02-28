@@ -9,6 +9,14 @@ tests:
     sql: SELECT
     error: Expected expression after SELECT.
 
+  fail_2:
+    sql: SELECT *
+    error: Missing FROM clause.
+
+  fail_3:
+    sql: SELECT * FROM
+    error: Expected table name after FROM.
+
   simple:
     data: table1
     sql: SELECT * FROM table1
