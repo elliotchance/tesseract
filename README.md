@@ -22,8 +22,21 @@ tesseract> insert into people {
          
 tesseract> select * from people;
 [
-  {"first_name": "Bob", "last_name": "Smith", "children": ["Sally", "Bob Jnr."]}
-  {"first_name": "John", "last_name": "Williams", "children": ["Bill"]}
+   {
+      "first_name":"Bob",
+      "last_name":"Smith",
+      "children":[
+         "Sally",
+         "Bob Jnr."
+      ]
+   },
+   {
+      "first_name":"John",
+      "last_name":"Williams",
+      "children":[
+         "Bill"
+      ]
+   }
 ]
 ```
 
@@ -32,7 +45,14 @@ Friendly `WHERE` clause:
 ```sql
 tesseract> select * from people where first_name like "B%";
 [
-  {"first_name": "Bob", "last_name": "Smith", "children": ["Sally", "Bob Jnr."]}
+   {
+      "first_name":"Bob",
+      "last_name":"Smith",
+      "children":[
+         "Sally",
+         "Bob Jnr."
+      ]
+   }
 ]
 ```
 
@@ -42,8 +62,16 @@ Some basic manipulation...
 tesseract> select first_name, len(children) as children, children[0] as first
          > from people;
 [
-  {"first_name": "Bob", "children": 2, "first": "Sally"}
-  {"first_name": "John", "children": 1, "first": "Bill"}
+   {
+      "first_name":"Bob",
+      "children":2,
+      "first":"Sally"
+   },
+   {
+      "first_name":"John",
+      "children":1,
+      "first":"Bill"
+   }
 ]
 ```
 
@@ -52,7 +80,13 @@ Aggregation:
 ```sql
 tesseract> select sort(sum(children)) from people;
 [
-  {"col1": ["Bill", "Bob Jnr.", "Sally"]}
+   {
+      "col1":[
+         "Bill",
+         "Bob Jnr.",
+         "Sally"
+      ]
+   }
 ]
 ```
 
@@ -65,8 +99,12 @@ tesseract> select first_name + " " + last_name as _key,
          >     {"has": count(children)} as _value
          > from people;
 {
-  "Bob Smith": {"has": 2},
-  "John Williams": {"has": 1},
+   "Bob Smith":{
+      "has":2
+   },
+   "John Williams":{
+      "has":1
+   }
 }
 ```
 
@@ -78,14 +116,33 @@ tesseract> insert into order {"id": 456, "customer_id": 123, "items": ["Hammer",
 tesseract> select *
          > from customer
          > join order on customer.id = customer_id;
-{
-    {"id": 456, "name": "Bob the Builder", "customer_id": 123, "items": ["Hammer", "Nails"]}
-}
+[
+   {
+      "id":456,
+      "name":"Bob the Builder",
+      "customer_id":123,
+      "items":[
+         "Hammer",
+         "Nails"
+      ]
+   }
+]
 
 tesseract> select order.*, customer
          > from customer
          > join order on customer.id = customer_id;
-{
-    {"id": 456, "customer_id": 123, "items": ["Hammer", "Nails"], "customer": {"id": 123, "name": "Bob the Builder"}}
-}
+[
+   {
+      "id":456,
+      "customer_id":123,
+      "items":[
+         "Hammer",
+         "Nails"
+      ],
+      "customer":{
+         "id":123,
+         "name":"Bob the Builder"
+      }
+   }
+]
 ```
