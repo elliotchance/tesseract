@@ -56,11 +56,21 @@ class Server:
         # This is a `SELECT`
         return self.execute_select(result.statement)
 
-    def compile_lua(self, expression):
-        # Compile the expression into a Lua expression.
-        if expression is None:
-            expression = Value(True)
-        matcher, offset, args = expression.compile_lua(3)
+    def compile_select(self, expression):
+        assert isinstance(expression, SelectStatement)
+
+        offset = 3
+
+        # Compile the `SELECT` expression
+        if expression.columns == '*':
+            select_expression = "local tuple = cjson.decode(data)"
+        else:
+            select_expression = 'local tuple = {}\ntuple["col1"] = %s' % \
+                                expression.columns.compile_lua(offset)[0]
+
+        # Compile the WHERE into a Lua expression.
+        where_expression = expression.where if expression.where else Value(True)
+        where_clause, offset, args = where_expression.compile_lua(offset)
 
         # Generate the full Lua program.
         lua = """
@@ -68,20 +78,14 @@ class Server:
         local matches = {}
 
         for i, data in ipairs(records) do
-            local tuple = cjson.decode(data)
+            %s
             if %s then
-                if ARGV[2] == '*' then
-                    table.insert(matches, data)
-                else
-                    tuple = {}
-                    tuple["123"] = 123
-                    table.insert(matches, tuple)
-                end
+                table.insert(matches, tuple)
             end
         end
 
         return cjson.encode({result = matches})
-        """ % matcher
+        """ % (select_expression, where_clause)
 
         # Extract the values for the expression.
         return (lua, args)
@@ -90,8 +94,11 @@ class Server:
         """
         :type select: SelectExpression
         """
-        lua, args = self.compile_lua(select.where)
+        lua, args = self.compile_select(select)
         result = json.loads(self.redis.eval(lua, 0, select.table_name, select.columns, *args))
+
+        if len(result['result']) == 0:
+            result['result'] = []
 
         return ServerResult(True, result['result'])
 

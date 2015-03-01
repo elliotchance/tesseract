@@ -2,4 +2,9 @@ tests:
   int:
     sql: SELECT 123
     result:
-    - {"123": 123}
+    - {"col1": 123}
+
+  true:
+    sql: SELECT true
+    result:
+    - {"col1": true}

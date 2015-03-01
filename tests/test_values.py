@@ -13,5 +13,17 @@ class TestValues(ParserTestCase):
         sql = 'SELECT 123'
         result = server.execute(sql)
         self.assertTrue(result.success)
-        self.assertEqual(sorted(result.data), sorted([{'123': 123}]))
+        self.assertEqual(sorted(result.data), sorted([{'col1': 123}]))
+
+    def test_True_parse(self):
+        sql = 'SELECT true'
+        result = parser.parse(sql)
+        self.assertEquals(str(result.statement), sql)
+
+    def test_True_execute(self):
+        server = Server()
+        sql = 'SELECT true'
+        result = server.execute(sql)
+        self.assertTrue(result.success)
+        self.assertEqual(sorted(result.data), sorted([{'col1': True}]))
 
