@@ -1,0 +1,8 @@
+tests:
+  fail_1:
+    sql: DELETE
+    error: Expected FROM after DELETE.
+
+  fail_2:
+    sql: DELETE FROM
+    error: Expected table name after FROM.

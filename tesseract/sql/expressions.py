@@ -97,6 +97,9 @@ class Identifier(Expression):
     def __str__(self):
         return self.identifier
 
+    def compile_lua(self, offset):
+        return ('row["%s"]' % self.identifier, offset, [])
+
 
 class BinaryExpression(Expression):
     def __init__(self, left, operator, right):

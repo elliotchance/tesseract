@@ -62,6 +62,7 @@ def p_select_statement(p):
                          | SELECT TIMES FROM IDENTIFIER
                          | SELECT TIMES FROM
                          | SELECT expression
+                         | SELECT expression FROM IDENTIFIER
                          | SELECT TIMES
                          | SELECT
     """
@@ -84,6 +85,11 @@ def p_select_statement(p):
         raise RuntimeError("Expected table name after FROM.")
 
     # Only valid `SELECT`s beyond this point.
+
+    #     SELECT expression FROM IDENTIFIER
+    if len(p) == 5:
+        p[0] = SelectStatement(p[4], p[2])
+        return
 
     #     SELECT TIMES FROM IDENTIFIER WHERE expression
     if len(p) == 7:

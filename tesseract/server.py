@@ -1,5 +1,5 @@
 import json
-from tesseract.sql.expressions import Value
+from tesseract.sql.expressions import Value, Identifier
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis
@@ -63,10 +63,13 @@ class Server:
 
         # Compile the `SELECT` expression
         if expression.columns == '*':
-            select_expression = "local tuple = cjson.decode(data)"
+            select_expression = "local tuple = row"
         else:
-            select_expression = 'local tuple = {}\ntuple["col1"] = %s' % \
-                                expression.columns.compile_lua(offset)[0]
+            name = "col1"
+            if isinstance(expression.columns, Identifier):
+                name = str(expression.columns)
+            select_expression = 'local tuple = {}\ntuple["%s"] = %s' % \
+                                (name, expression.columns.compile_lua(offset)[0])
 
         # Compile the WHERE into a Lua expression.
         where_expression = expression.where if expression.where else Value(True)
@@ -78,6 +81,7 @@ class Server:
         local matches = {}
 
         for i, data in ipairs(records) do
+            local row = cjson.decode(data)
             %s
             if %s then
                 table.insert(matches, tuple)

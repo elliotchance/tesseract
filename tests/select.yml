@@ -4,6 +4,9 @@ data:
   - {"foo": 124}
   - {"foo": 125}
 
+  table2:
+  - {"first": "Elliot", "last": "Chance"}
+
 tests:
   fail_1:
     sql: SELECT
@@ -114,3 +117,9 @@ tests:
     sql: SELECT * FROM table1 WHERE foo = 248 / 2
     result:
     - {"foo": 124}
+
+  one_column:
+    data: table2
+    sql: SELECT first FROM table2
+    result:
+    - {"first": "Elliot"}
