@@ -1,10 +1,88 @@
 tests:
-  int:
-    sql: SELECT 123
+  null:
+    sql: SELECT null
     result:
-    - {"col1": 123}
+    - {"col1": null}
 
   true:
     sql: SELECT true
     result:
     - {"col1": true}
+
+  false:
+    sql: SELECT false
+    result:
+    - {"col1": false}
+
+  integer:
+    sql: SELECT 123
+    result:
+    - {"col1": 123}
+
+  integer_with_exponent:
+    sql: SELECT 1e3
+    as: SELECT 1000.0
+    result:
+    - {"col1": 1000.0}
+
+  negative_integer:
+    sql: SELECT -123
+    result:
+    - {"col1": -123}
+
+  explicit_positive_integer:
+    sql: SELECT +123
+    as: SELECT 123
+    result:
+    - {"col1": 123}
+
+  float:
+    sql: SELECT 12.3
+    result:
+    - {"col1": 12.3}
+
+  negative_float:
+    sql: SELECT -12.3
+    result:
+    - {"col1": -12.3}
+
+  float_without_preceeding_integer:
+    sql: SELECT -.23
+    as: SELECT -0.23
+    result:
+    - {"col1": -0.23}
+
+  float_in_scientific_notation:
+    sql: SELECT 1.23e3
+    as: SELECT 1230.0
+    result:
+    - {"col1": 1230.0}
+
+  negative_float_in_scientific_notation:
+    sql: SELECT 1.23e-3
+    as: SELECT 0.00123
+    result:
+    - {"col1": 0.00123}
+
+  float_in_scientific_notation_with_big_exponent:
+    sql: SELECT 1.23e10
+    as: SELECT 12300000000.0
+    result:
+    - {"col1": 12300000000.0}
+
+  negative_float_in_scientific_notation_with_explicit_positive_exponent:
+    sql: SELECT 1.23e+3
+    as: SELECT 1230.0
+    result:
+    - {"col1": 1230.0}
+
+  explicit_positive_float:
+    sql: SELECT +12.3
+    as: SELECT 12.3
+    result:
+    - {"col1": 12.3}
+
+  string:
+    sql: SELECT "foo"
+    result:
+    - {"col1": "foo"}

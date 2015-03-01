@@ -20,7 +20,7 @@ def process_file(file):
                 out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
             out.write("\n")
 
-    for name, test in tests_file['tests'].iteritems():
+    for name, test in iter(sorted(tests_file['tests'].iteritems())):
         if 'error' in test:
             out.write("    def test_%s(self):\n" % name)
             out.write("        self.assertFailure('%s', '%s')\n\n" % (test['sql'], test['error']))

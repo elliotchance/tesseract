@@ -78,7 +78,16 @@ class Value(Expression):
         return self.NULL
 
     def compile_lua(self, offset):
-        return (str(self), offset, [])
+        # In most cases we can render the literal value as a string and use
+        # that. However `nil` is a special case because a table in Lua that has
+        # a `nil` value will not be encoded at all. So the `cjson` library
+        # provides a special value for when you explicitly want a `null` in the
+        # JSON output.
+        value = str(self)
+        if self.value is None:
+            value = 'cjson.null'
+
+        return (value, offset, [])
 
 
 class Identifier(Expression):
