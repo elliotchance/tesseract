@@ -77,6 +77,9 @@ class Value(Expression):
 
         return self.NULL
 
+    def compile_lua(self, offset):
+        return ('true', offset, [])
+
 
 class Identifier(Expression):
     def __init__(self, identifier):

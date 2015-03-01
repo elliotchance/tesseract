@@ -12,12 +12,13 @@ def process_file(file):
 
     out.write("class Test%s(ParserTestCase):\n" % file[:-4].capitalize())
 
-    for name, table in tests_file['data'].iteritems():
-        out.write("    def load_%s(self, server):\n" % name)
-        out.write("        server.execute('DELETE FROM %s')\n" % name)
-        for row in table:
-            out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
-        out.write("\n")
+    if 'data' in tests_file:
+        for name, table in tests_file['data'].iteritems():
+            out.write("    def load_%s(self, server):\n" % name)
+            out.write("        server.execute('DELETE FROM %s')\n" % name)
+            for row in table:
+                out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
+            out.write("\n")
 
     for name, test in tests_file['tests'].iteritems():
         if 'error' in test:

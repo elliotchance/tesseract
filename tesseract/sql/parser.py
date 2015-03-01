@@ -61,6 +61,7 @@ def p_select_statement(p):
         select_statement : SELECT TIMES FROM IDENTIFIER WHERE expression
                          | SELECT TIMES FROM IDENTIFIER
                          | SELECT TIMES FROM
+                         | SELECT expression
                          | SELECT TIMES
                          | SELECT
     """
@@ -70,8 +71,13 @@ def p_select_statement(p):
         raise RuntimeError("Expected expression after SELECT.")
 
     #     SELECT TIMES
-    if len(p) == 3:
+    if len(p) == 3 and p[2] == '*':
         raise RuntimeError("Missing FROM clause.")
+
+    #     SELECT expression
+    if len(p) == 3:
+        p[0] = SelectStatement(SelectStatement.NO_TABLE, p[2])
+        return
 
     #     SELECT TIMES FROM
     if len(p) == 4:
@@ -81,11 +87,11 @@ def p_select_statement(p):
 
     #     SELECT TIMES FROM IDENTIFIER WHERE expression
     if len(p) == 7:
-        p[0] = SelectStatement(p[4], p[6])
+        p[0] = SelectStatement(p[4], '*', p[6])
         return
 
     #     SELECT TIMES FROM IDENTIFIER
-    p[0] = SelectStatement(p[4])
+    p[0] = SelectStatement(p[4], '*')
 
 
 # insert_statement

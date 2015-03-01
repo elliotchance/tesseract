@@ -1,4 +1,4 @@
-from tesseract.sql.expressions import Expression
+from tesseract.sql.expressions import Expression, Value
 
 # Objects
 # =======
@@ -54,17 +54,22 @@ class SelectStatement(Statement):
     Represents an `SELECT` statement.
     """
 
-    def __init__(self, table_name, where=None):
+    NO_TABLE = '__no_table'
+
+    def __init__(self, table_name, columns, where=None):
         """
             :param table_name: str
         """
         self.table_name = table_name
         self.where = where
+        self.columns = columns
 
         self.assert_type('table_name', str)
 
     def __str__(self):
-        r = "SELECT * FROM %s" % self.table_name
+        r = "SELECT %s" % self.columns
+        if self.table_name != SelectStatement.NO_TABLE:
+            r += " FROM %s" % self.table_name
         if self.where:
             r += ' WHERE %s' % self.where
         return r

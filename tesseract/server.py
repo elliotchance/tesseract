@@ -1,4 +1,5 @@
 import json
+from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis
@@ -19,6 +20,10 @@ class Server:
         # Attempt to connect.
         self.redis = redis.StrictRedis(host=redis_host, port=6379, db=0)
         self.redis.set('tesseract_server', 1)
+
+        # Setup NO_TABLE
+        self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
+        self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
 
     def execute(self, sql):
         """
@@ -53,7 +58,9 @@ class Server:
 
     def compile_lua(self, expression):
         # Compile the expression into a Lua expression.
-        matcher, offset, args = expression.compile_lua(2)
+        if expression is None:
+            expression = Value(True)
+        matcher, offset, args = expression.compile_lua(3)
 
         # Generate the full Lua program.
         lua = """
@@ -63,11 +70,17 @@ class Server:
         for i, data in ipairs(records) do
             local tuple = cjson.decode(data)
             if %s then
-                table.insert(matches, data)
+                if ARGV[2] == '*' then
+                    table.insert(matches, data)
+                else
+                    tuple = {}
+                    tuple["123"] = 123
+                    table.insert(matches, tuple)
+                end
             end
         end
 
-        return matches
+        return cjson.encode({result = matches})
         """ % matcher
 
         # Extract the values for the expression.
@@ -77,13 +90,10 @@ class Server:
         """
         :type select: SelectExpression
         """
-        if select.where:
-            lua, args = self.compile_lua(select.where)
-            page = self.redis.eval(lua, 0, select.table_name, *args)
-        else:
-            page = self.redis.lrange(select.table_name, 0, -1)
+        lua, args = self.compile_lua(select.where)
+        result = json.loads(self.redis.eval(lua, 0, select.table_name, select.columns, *args))
 
-        return ServerResult(True, [json.loads(record) for record in page])
+        return ServerResult(True, result['result'])
 
 
 class ServerResult:
