@@ -25,21 +25,33 @@ def process_file(file):
             out.write("    def test_%s(self):\n" % name)
             out.write("        self.assertFailure('%s', '%s')\n\n" % (test['sql'], test['error']))
         else:
-            out.write("    def test_%s_parse(self):\n" % name)
-            out.write("        sql = '%s'\n" % test['sql'])
-            out.write("        result = parser.parse(sql)\n")
-            if 'as' in test:
-                out.write("        sql = '%s'\n" % test['as'])
-            out.write("        self.assertEquals(str(result.statement), sql)\n\n")
+            # We only generate a `parse` test if there is only one SQL statement
+            # provided.
+            if not isinstance(test['sql'], list):
+                out.write("    def test_%s_parse(self):\n" % name)
+                out.write("        sql = '%s'\n" % test['sql'])
+                out.write("        result = parser.parse(sql)\n")
+                if 'as' in test:
+                    out.write("        sql = '%s'\n" % test['as'])
+                out.write("        self.assertEquals(str(result.statement), sql)\n\n")
 
+            # Create the test that runs all of the SQL statements and asserts
+            # the `result`.
             out.write("    def test_%s_execute(self):\n" % name)
             out.write("        server = Server()\n")
             if 'data' in test:
                 out.write("        self.load_%s(server)\n\n" % test['data'])
 
-            out.write("        sql = '%s'\n" % test['sql'])
-            out.write("        result = server.execute(sql)\n")
-            out.write("        self.assertTrue(result.success)\n")
+            # Convert a single SQL into a list if we have to.
+            if not isinstance(test['sql'], list):
+                test['sql'] = [ test['sql'] ]
+
+            for sql in test['sql']:
+                out.write("        sql = '%s'\n" % sql)
+                out.write("        result = server.execute(sql)\n")
+                out.write("        self.assertTrue(result.success)\n")
+
+            # Finally assert the result of the last statement.
             out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n\n" % test['result'])
 
 

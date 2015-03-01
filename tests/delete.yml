@@ -6,3 +6,10 @@ tests:
   fail_2:
     sql: DELETE FROM
     error: Expected table name after FROM.
+
+  delete_without_where:
+    sql:
+    - 'INSERT INTO mytable {"foo": "bar"}'
+    - DELETE FROM mytable
+    - SELECT * FROM mytable
+    result: []
