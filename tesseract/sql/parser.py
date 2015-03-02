@@ -112,7 +112,7 @@ def p_insert_statement(p):
 
     #     INSERT INTO IDENTIFIER
     if len(p) == 4:
-        raise RuntimeError("Expected record after table name or before INTO.")
+        raise RuntimeError("Expected JSON object after table name.")
 
     #     INSERT INTO
     elif len(p) == 3:

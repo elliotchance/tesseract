@@ -52,7 +52,8 @@ def process_file(file):
                 out.write("        self.assertTrue(result.success)\n")
 
             # Finally assert the result of the last statement.
-            out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n\n" % test['result'])
+            if 'result' in test:
+                out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n\n" % test['result'])
 
 
 for file in listdir('tests'):

@@ -1,0 +1,15 @@
+tests:
+  fail_1:
+    sql: INSERT
+    error: Expected table name after INSERT.
+
+  fail_2:
+    sql: INSERT INTO
+    error: Expected table name after INTO.
+
+  fail_2:
+    sql: INSERT INTO foo
+    error: Expected JSON object after table name.
+
+  simple_insert:
+    sql: 'INSERT INTO foo {"foo": "bar"}'
