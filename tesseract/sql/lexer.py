@@ -1,4 +1,5 @@
 import ply.lex as lex
+from tesseract.sql.expressions import Value, Identifier
 
 # Lexer
 # =====
@@ -37,10 +38,9 @@ operators = (
 
 # Values and identifiers.
 expression_types = (
-    'FLOAT',
+    'NUMBER',
     'IDENTIFIER',
-    'INTEGER',
-    'STRING',
+    'STRING'
 )
 
 # The actual tokens used will be the aggregation of all the groups above. It is
@@ -53,9 +53,6 @@ t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
-t_FLOAT = r'[\-\+]?([0-9]*\.)?[0-9]+(e[\-\+]?\d+)?'
-t_INTEGER = r'[\-\+]?[0-9]+'
-t_STRING = r'\".*?\"'
 t_EQUAL = '='
 t_NOT_EQUAL = '(<>)|(!=)'
 t_GREATER = '>'
@@ -73,14 +70,43 @@ def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.
     r'[a-zA-Z_][a-zA-Z_0-9]*'
 
+    # Check for value keywords.
+    if t.value.upper() == 'NULL':
+        t.value = Value(None)
+    elif t.value.upper() == 'TRUE':
+        t.value = Value(True)
+    elif t.value.upper() == 'FALSE':
+        t.value = Value(False)
+
     # Check for reserved words. Be sure to convert all identifiers to upper
     # case.
-    if t.value.upper() in sql_keywords:
+    elif t.value.upper() in sql_keywords:
         t.type = t.value.upper()
+        t.value = t.type
+
+    # If all the above fail then it really is an identifier.
+    else:
+        t.value = Identifier(t.value)
 
     return t
 
-# Characters that can be ignored, at the moment it is only a space.
+def t_NUMBER(t):
+    r'([0-9]*\.)?[0-9]+(e[\-\+]?\d+)?'
+
+    if '.' in t.value or 'e' in t.value:
+        t.value = Value(float(t.value))
+    else:
+        t.value = Value(int(t.value))
+
+    return t
+
+def t_STRING(t):
+    r'\".*?\"'
+
+    t.value = Value(t.value[1:-1])
+    return t
+
+# Characters that can be ignored.
 t_ignore = " \n\t\r"
 
 def t_error(token):

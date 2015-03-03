@@ -50,11 +50,3 @@ class TestServer(ServerTestCase):
         except Exception as e:
             self.assertEqual('Error 8 connecting to nowhere:6379. nodename nor '
                 'servname provided, or not known.', str(e))
-
-    def test_delete(self):
-        server = Server()
-        server.execute('INSERT INTO %s {"foo": "bar"}' % self.table_name)
-        server.execute('DELETE FROM %s' % self.table_name)
-        result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success)
-        self.assertEqual(result.data, [])

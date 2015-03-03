@@ -36,10 +36,11 @@ class Value(Expression):
         self.value = value
 
     def __eq__(self, other):
+        right = other
         if isinstance(other, Value):
-            return self.value == other.value
+            right = other.value
 
-        return self.value == other
+        return self.value == right
 
     def __str__(self):
         if self.value is None:
@@ -50,6 +51,14 @@ class Value(Expression):
 
         if isinstance(self.value, (int, float)):
             return str(self.value)
+
+        if isinstance(self.value, list):
+            items = [str(value) for value in self.value]
+            return '[%s]' % ', '.join(items)
+
+        if isinstance(self.value, dict):
+            items = ['"%s": %s' % (key, str(value)) for key, value in self.value.iteritems()]
+            return '{%s}' % ', '.join(items)
 
         return '"%s"' % self.value
 
@@ -79,13 +88,27 @@ class Value(Expression):
 
     def compile_lua(self, offset):
         # In most cases we can render the literal value as a string and use
-        # that. However `nil` is a special case because a table in Lua that has
-        # a `nil` value will not be encoded at all. So the `cjson` library
-        # provides a special value for when you explicitly want a `null` in the
-        # JSON output.
+        # that.
         value = str(self)
+
+        # `nil` is a special case because a table in Lua that has a `nil` value
+        # will not be encoded at all. So the `cjson` library provides a special
+        # value for when you explicitly want a `null` in the JSON output.
         if self.value is None:
             value = 'cjson.null'
+
+        # Arrays are also represented differently in Lua - surrounded by curly
+        #  braces instead of square ones.
+        if isinstance(self.value, list):
+            items = [value.compile_lua(offset)[0] for value in self.value]
+            value = '{%s}' % ', '.join(items)
+
+        # Last, but not least, is objects. There's a weird syntax...
+        if isinstance(self.value, dict):
+            items = ['["%s"] = %s' % (key, value.compile_lua(offset)[0])
+                     for key, value
+                     in self.value.iteritems()]
+            value = '{%s}' % ', '.join(items)
 
         return (value, offset, [])
 

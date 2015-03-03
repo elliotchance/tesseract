@@ -1,0 +1,22 @@
+tests:
+  sql_is_not_case_sensitive:
+    sql: 'insert Into foo {"foo": "bar"}'
+    as: 'INSERT INTO foo {"foo": "bar"}'
+
+  not_even_close_to_sql:
+    sql: FOO
+    error: Not valid SQL.
+
+  ignore_newline:
+    sql: |
+      SELECT *
+      FROM foo
+    as: SELECT * FROM foo
+
+  ignore_tab:
+    sql: "SELECT *\tFROM foo"
+    as: SELECT * FROM foo
+
+  ignore_carriage_return:
+    sql: "SELECT *\rFROM foo"
+    as: SELECT * FROM foo

@@ -29,11 +29,12 @@ def process_file(file):
             # provided.
             if not isinstance(test['sql'], list):
                 out.write("    def test_%s_parse(self):\n" % name)
-                out.write("        sql = '%s'\n" % test['sql'])
+                out.write("        sql = '''%s'''\n" % test['sql'])
                 out.write("        result = parser.parse(sql)\n")
                 if 'as' in test:
-                    out.write("        sql = '%s'\n" % test['as'])
-                out.write("        self.assertEquals(str(result.statement), sql)\n\n")
+                    out.write("        sql = '''%s'''\n" % test['as'])
+                out.write("        self.assertEquals(sql, str(result.statement))\n")
+            out.write("\n")
 
             # Create the test that runs all of the SQL statements and asserts
             # the `result`.
@@ -47,13 +48,14 @@ def process_file(file):
                 test['sql'] = [ test['sql'] ]
 
             for sql in test['sql']:
-                out.write("        sql = '%s'\n" % sql)
+                out.write("        sql = '''%s'''\n" % sql)
                 out.write("        result = server.execute(sql)\n")
-                out.write("        self.assertTrue(result.success)\n")
+                out.write("        self.assertTrue(result.success, msg=result.error)\n")
 
             # Finally assert the result of the last statement.
             if 'result' in test:
-                out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n\n" % test['result'])
+                out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n" % test['result'])
+            out.write("\n")
 
 
 for file in listdir('tests'):

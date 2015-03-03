@@ -1,4 +1,4 @@
-from tesseract.sql.expressions import Expression, Value
+from tesseract.sql.expressions import Expression, Value, Identifier
 
 # Objects
 # =======
@@ -15,15 +15,9 @@ class Statement:
             :param other: object
             :return: boolean
         """
-        assert isinstance(other, object), \
-            'other is not an object, got: %r' % object
+        assert isinstance(other, object)
 
-        return self.__dict__ == other.__dict__
-
-    def assert_type(self, field_name, expected_type):
-        field = getattr(self, field_name)
-        assert isinstance(field, expected_type), \
-            '%s is not %s, got: %r' % (field_name, expected_type, field)
+        return cmp(self.__dict__, other.__dict__)
 
 
 class InsertStatement(Statement):
@@ -33,14 +27,14 @@ class InsertStatement(Statement):
 
     def __init__(self, table_name, fields):
         """
-            :param table_name: str
+            :param table_name: Identifier
             :param fields: dict
         """
+        assert isinstance(table_name, Identifier)
+        assert isinstance(fields, dict)
+
         self.table_name = table_name
         self.fields = fields
-
-        self.assert_type('table_name', str)
-        self.assert_type('fields', dict)
 
     def __str__(self):
         return "INSERT INTO %s %s" % (
@@ -54,17 +48,17 @@ class SelectStatement(Statement):
     Represents an `SELECT` statement.
     """
 
-    NO_TABLE = '__no_table'
+    NO_TABLE = Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None):
         """
-            :param table_name: str
+            :param table_name: Identifier
         """
+        assert isinstance(table_name, Identifier)
+
         self.table_name = table_name
         self.where = where
         self.columns = columns
-
-        self.assert_type('table_name', str)
 
     def __str__(self):
         r = "SELECT %s" % self.columns
@@ -82,11 +76,11 @@ class DeleteStatement(Statement):
 
     def __init__(self, table_name):
         """
-            :param table_name: str
+            :param table_name: Identifier
         """
-        self.table_name = table_name
+        assert isinstance(table_name, Identifier)
 
-        self.assert_type('table_name', str)
+        self.table_name = table_name
 
     def __str__(self):
         return "DELETE FROM %s" % self.table_name

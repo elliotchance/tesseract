@@ -42,9 +42,9 @@ tests:
     - {"col1": 12.3}
 
   negative_float:
-    sql: SELECT -12.3
+    sql: SELECT -12.5
     result:
-    - {"col1": -12.3}
+    - {"col1": -12.5}
 
   float_without_preceeding_integer:
     sql: SELECT -.23
@@ -86,3 +86,56 @@ tests:
     sql: SELECT "foo"
     result:
     - {"col1": "foo"}
+
+  json_object_with_zero_elements:
+    sql: 'SELECT {}'
+    result:
+    - {"col1": {}}
+
+  json_object_with_one_element:
+    sql: 'SELECT {"foo": null}'
+    result:
+    - {"col1": {"foo": null}}
+
+  json_object_with_two_elements:
+    sql: 'SELECT {"foo": "bar", "baz": 123}'
+    result:
+    - {"col1": {"foo": "bar", "baz": 123}}
+
+  json_object_with_three_elements:
+    sql: 'SELECT {"foo": "bar", "bar": "baz", "abc": "def"}'
+    result:
+    - {"col1": {"foo": "bar", "bar": "baz", "abc": "def"}}
+
+  json_object_duplicate_item_uses_second:
+    comment: |
+      This is another case of where the rendering of the statement does not come
+      out exactly the same... This may or not be a bad thing depending on which
+      way you look at it.
+    sql: 'SELECT {"foo": "bar", "foo": "baz"}'
+    as: 'SELECT {"foo": "baz"}'
+    result:
+    - {"col1": {"foo": "baz"}}
+
+  json_array_with_zero_items:
+    comment: |
+      Lua does not differentiate between normal arrays and associative arrays,
+      this leads to it encoding empty arrays as empty objects.
+    sql: 'SELECT []'
+    result:
+    - {"col1": {}}
+
+  json_array_with_one_item:
+    sql: 'SELECT [123]'
+    result:
+    - {"col1": [123]}
+
+  json_array_with_two_items:
+    sql: 'SELECT ["foo", "bar"]'
+    result:
+    - {"col1": ["foo", "bar"]}
+
+  json_array_with_three_items:
+    sql: 'SELECT ["foo", "bar", "baz"]'
+    result:
+    - {"col1": ["foo", "bar", "baz"]}

@@ -2,8 +2,8 @@
 
 *.pyc
 
-/parsetab.py
-/parser.out
+parsetab.py
+parser.out
 
 /docs/
 

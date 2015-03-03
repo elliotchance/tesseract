@@ -11,11 +11,11 @@ tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
 precedence = (
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE'),
+    ('left', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE'),
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
+    #('right', 'UMINUS'),
 )
 
 
@@ -124,7 +124,7 @@ def p_insert_statement(p):
 
     #     INSERT INTO IDENTIFIER json_object
     # We have a working `INSERT` statement.
-    p[0] = InsertStatement(p[3], p[4])
+    p[0] = InsertStatement(p[3], p[4].value)
 
 
 # json_array
@@ -137,11 +137,11 @@ def p_json_array(p):
 
     #     SQUARE_OPEN SQUARE_CLOSE
     if len(p) == 3:
-        p[0] = []
+        p[0] = Value([])
         return
 
     #     SQUARE_OPEN expression_list SQUARE_CLOSE
-    p[0] = p[2]
+    p[0] = Value(p[2])
 
 
 # expression_list
@@ -173,11 +173,11 @@ def p_json_object(p):
 
     #     CURLY_OPEN CURLY_CLOSE
     if len(p) == 3:
-        p[0] = {}
+        p[0] = Value({})
         return
 
     #     CURLY_OPEN json_object_items CURLY_CLOSE
-    p[0] = p[2]
+    p[0] = Value(p[2])
 
 
 # json_object_items
@@ -207,6 +207,33 @@ def p_json_object_items(p):
     p[0] = dict(p[1].items() + p[3].items())
 
 
+# value
+# -----
+def p_value(p):
+    """
+        value : json_object
+              | json_array
+              | NUMBER
+              | MINUS NUMBER
+              | PLUS NUMBER
+              | STRING
+              | IDENTIFIER
+    """
+
+    #     MINUS NUMBER
+    if p[1] == '-':
+        p[0] = Value(-p[2].value)
+
+    #     PLUS NUMBER
+    elif p[1] == '+':
+        p[0] = p[2]
+
+    # All other conditions are single entity and can be passed through directly.
+    else:
+        p[0] = p[1]
+
+
+
 # expression
 # ----------
 def p_expression(p):
@@ -214,67 +241,10 @@ def p_expression(p):
         expression : arithmetic_expression
                    | comparison_expression
                    | logic_expression
-                   | json_object
-                   | json_array
-                   | FLOAT
-                   | INTEGER
-                   | STRING
-                   | IDENTIFIER
+                   | value
     """
 
-    #     json_object
-    if isinstance(p[1], dict):
-        p[0] = p[1]
-        return
-
-    #     json_array
-    if isinstance(p[1], list):
-        p[0] = p[1]
-        return
-
-    #     comparison_expression
-    #     logic_expression
-    if isinstance(p[1], BinaryExpression):
-        p[0] = p[1]
-        return
-
-    #     NULL
-    if p[1].upper() == 'NULL':
-        p[0] = Value(None)
-        return
-
-    #     TRUE
-    if p[1].upper() == 'TRUE':
-        p[0] = Value(True)
-        return
-
-    #     FALSE
-    if p[1].upper() == 'FALSE':
-        p[0] = Value(False)
-        return
-
-    #     STRING
-    if p[1][0] == '"':
-        # Prune the double-quotes off the STRING value.
-        p[0] = Value(p[1][1:-1])
-        return
-
-    #     INTEGER
-    try:
-        p[0] = Value(int(p[1]))
-        return
-    except ValueError:
-        pass
-
-    #     FLOAT
-    try:
-        p[0] = Value(float(p[1]))
-        return
-    except ValueError:
-        pass
-
-    #     IDENTIFIER
-    p[0] = Identifier(p[1])
+    p[0] = p[1]
 
 
 # expression
@@ -323,7 +293,7 @@ def p_logic_expression(p):
     """
 
     #     expression AND expression
-    if p[2].upper() == 'AND':
+    if p[2] == 'AND':
         p[0] = AndExpression(p[1], p[3])
 
     #     expression OR expression
@@ -366,7 +336,7 @@ def p_json_object_item(p):
     """
 
     # Remove the trailing and proceeding double-quotes around the STRING key.
-    key = p[1][1:-1]
+    key = p[1].value
 
     # Create the key-value item.
     p[0] = {key: p[3]}
