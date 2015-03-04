@@ -129,3 +129,9 @@ tests:
     sql: SELECT does_not_exist FROM table2
     result:
     - {}
+
+  colums_are_case_sensitive:
+    data: table2
+    sql: SELECT First FROM table2
+    result:
+    - {}
