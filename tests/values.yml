@@ -139,3 +139,15 @@ tests:
     sql: 'SELECT ["foo", "bar", "baz"]'
     result:
     - {"col1": ["foo", "bar", "baz"]}
+
+  json_object_duplicate_item_raises_warning:
+    sql: 'SELECT {"foo": "bar", "foo": "baz"}'
+    as: 'SELECT {"foo": "baz"}'
+    warning: Duplicate key "foo", using last value.
+
+  multiple_warnings_can_be_raised:
+    sql: 'SELECT {"foo": "bar", "foo": "baz", "foo": "bax"}'
+    as: 'SELECT {"foo": "bax"}'
+    warning:
+    - Duplicate key "foo", using last value.
+    - Duplicate key "foo", using last value.

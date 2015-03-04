@@ -52,6 +52,15 @@ def process_file(file):
                 out.write("        result = server.execute(sql)\n")
                 out.write("        self.assertTrue(result.success, msg=result.error)\n")
 
+            # If there are warnings we need to assert those.
+            if 'warning' in test:
+                # We must always assert against an array, so convert a single
+                # (str) warnings into an array.
+                if not isinstance(test['warning'], list):
+                    test['warning'] = [ test['warning'] ]
+
+                out.write("        self.assertEqual(result.warnings, %s)\n" % json.dumps(test['warning']))
+
             # Finally assert the result of the last statement.
             if 'result' in test:
                 out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n" % test['result'])

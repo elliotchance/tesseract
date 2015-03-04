@@ -1,5 +1,4 @@
 import json
-from tesseract.sql.expressions import Value, Identifier
 import tesseract.sql.parser as parser
 from tesseract.sql.objects import *
 import redis
@@ -33,9 +32,11 @@ class Server:
             :return: boolean
         """
 
+
         # Try to parse the SQL.
         try:
             result = parser.parse(sql)
+            self.warnings = result.warnings
 
         # We could not parse the SQL, so return the error message in the
         # response.
@@ -104,11 +105,12 @@ class Server:
         if len(result['result']) == 0:
             result['result'] = []
 
-        return ServerResult(True, result['result'])
+        return ServerResult(True, result['result'], warnings=self.warnings)
 
 
 class ServerResult:
-    def __init__(self, success, data=None, error=None):
+    def __init__(self, success, data=None, error=None, warnings=None):
         self.success = success
         self.data = data
         self.error = error
+        self.warnings = warnings
