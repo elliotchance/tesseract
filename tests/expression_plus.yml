@@ -1,0 +1,4 @@
+tests:
+  null_null:
+    sql: SELECT null + null
+    error: attempt to perform arithmetic on a nil value

@@ -21,50 +21,54 @@ def process_file(file):
             out.write("\n")
 
     for name, test in iter(sorted(tests_file['tests'].iteritems())):
-        if 'error' in test:
-            out.write("    def test_%s(self):\n" % name)
-            out.write("        self.assertFailure('%s', '%s')\n\n" % (test['sql'], test['error']))
-        else:
-            # We only generate a `parse` test if there is only one SQL statement
-            # provided.
-            if not isinstance(test['sql'], list):
-                out.write("    def test_%s_parse(self):\n" % name)
-                out.write("        sql = '''%s'''\n" % test['sql'])
-                out.write("        result = parser.parse(sql)\n")
-                if 'as' in test:
-                    out.write("        sql = '''%s'''\n" % test['as'])
-                out.write("        self.assertEquals(sql, str(result.statement))\n")
-            out.write("\n")
+        out.write("    def test_%s(self):\n" % name)
+        out.write("        warnings = []\n")
+        out.write("        server = Server()\n")
 
-            # Create the test that runs all of the SQL statements and asserts
-            # the `result`.
-            out.write("    def test_%s_execute(self):\n" % name)
-            out.write("        server = Server()\n")
-            if 'data' in test:
-                out.write("        self.load_%s(server)\n\n" % test['data'])
+        # Load any data sets if needed.
+        if 'data' in test:
+            out.write("        self.load_%s(server)\n\n" % test['data'])
 
-            # Convert a single SQL into a list if we have to.
-            if not isinstance(test['sql'], list):
-                test['sql'] = [ test['sql'] ]
+        # Convert a single SQL into a list if we have to.
+        if not isinstance(test['sql'], list):
+            test['sql'] = [ test['sql'] ]
 
-            for sql in test['sql']:
-                out.write("        sql = '''%s'''\n" % sql)
-                out.write("        result = server.execute(sql)\n")
+        # Execute each SQL statement and make sure that it passed.
+        for i in xrange(0, len(test['sql'])):
+            sql = test['sql'][i]
+            out.write("        sql = '''%s'''\n" % sql)
+            out.write("        result = server.execute(sql)\n")
+
+            # Every statement must pass except for the last one if this is an
+            # error test
+            if not ('error' in test and i == len(test['sql']) - 1):
                 out.write("        self.assertTrue(result.success, msg=result.error)\n")
 
-            # If there are warnings we need to assert those.
-            if 'warning' in test:
-                # We must always assert against an array, so convert a single
-                # (str) warnings into an array.
-                if not isinstance(test['warning'], list):
-                    test['warning'] = [ test['warning'] ]
+            # Catch all the warnings along the way
+            out.write("        if isinstance(result.warnings, list):\n")
+            out.write("            warnings.extend(result.warnings)\n")
 
-                out.write("        self.assertEqual(result.warnings, %s)\n" % json.dumps(test['warning']))
+        # An error must be asserted after the last SQL statement
+        if 'error' in test:
+            out.write("        self.assertFalse(result.success)\n")
+            out.write("        self.assertEquals(result.error, '%s')\n\n" % test['error'])
 
-            # Finally assert the result of the last statement.
-            if 'result' in test:
-                out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n" % test['result'])
-            out.write("\n")
+        # Test the output of the last SQL statement
+        if 'result' in test:
+            out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n" % \
+                      test['result'])
+
+        # If there are warnings we need to assert those at the end.
+        if 'warning' in test:
+            # We must always assert against an array, so convert a single
+            # (str) warnings into an array.
+            if not isinstance(test['warning'], list):
+                test['warning'] = [ test['warning'] ]
+
+            out.write("        self.assertEqual(warnings, %s)\n" % \
+                      json.dumps(test['warning']))
+
+        out.write("\n")
 
 
 for file in listdir('tests'):

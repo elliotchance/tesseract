@@ -100,12 +100,16 @@ class Server:
         :type select: SelectExpression
         """
         lua, args = self.compile_select(select)
-        result = json.loads(self.redis.eval(lua, 0, select.table_name, select.columns, *args))
+        try:
+            run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
+            result = json.loads(run)
 
-        if len(result['result']) == 0:
-            result['result'] = []
+            if len(result['result']) == 0:
+                result['result'] = []
 
-        return ServerResult(True, result['result'], warnings=self.warnings)
+            return ServerResult(True, result['result'], warnings=self.warnings)
+        except Exception as e:
+            return ServerResult(False, error=str(e)[106:].strip())
 
 
 class ServerResult:
