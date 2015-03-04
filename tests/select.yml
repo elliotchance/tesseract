@@ -123,3 +123,9 @@ tests:
     sql: SELECT first FROM table2
     result:
     - {"first": "Elliot"}
+
+  missing_column_will_not_appear_in_the_output:
+    data: table2
+    sql: SELECT does_not_exist FROM table2
+    result:
+    - {}

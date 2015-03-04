@@ -151,3 +151,8 @@ tests:
     warning:
     - Duplicate key "foo", using last value.
     - Duplicate key "foo", using last value.
+
+  string:
+    sql: SELECT "false"
+    result:
+    - {"col1": "false"}
