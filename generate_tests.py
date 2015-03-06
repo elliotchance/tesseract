@@ -2,15 +2,20 @@ import yaml
 import json
 from os import listdir
 
+def escape(string):
+    enclose = "'"
+    if string.find('\n'):
+        enclose = "'''"
+    return "%s%s%s" % (enclose, string.replace("'", "\\'"), enclose)
+
 def process_file(file):
     tests_file = yaml.load(open('tests/%s' % file, 'r'))
     out = open('tests/test_%s.py' % file[:-4], 'w')
 
-    out.write("import tesseract.sql.parser as parser\n")
-    out.write("from tesseract.server import Server\n")
-    out.write("from tesseract.sql.parser_test_case import ParserTestCase\n\n")
+    out.write("from unittest import TestCase\n")
+    out.write("from tesseract.server import Server\n\n")
 
-    out.write("class Test%s(ParserTestCase):\n" % file[:-4].capitalize())
+    out.write("class Test%s(TestCase):\n" % file[:-4].capitalize())
 
     if 'data' in tests_file:
         for name, table in tests_file['data'].iteritems():
@@ -36,7 +41,7 @@ def process_file(file):
         # Execute each SQL statement and make sure that it passed.
         for i in xrange(0, len(test['sql'])):
             sql = test['sql'][i]
-            out.write("        sql = '''%s'''\n" % sql)
+            out.write("        sql = %s\n" % escape(sql))
             out.write("        result = server.execute(sql)\n")
 
             # Every statement must pass except for the last one if this is an
@@ -51,7 +56,7 @@ def process_file(file):
         # An error must be asserted after the last SQL statement
         if 'error' in test:
             out.write("        self.assertFalse(result.success)\n")
-            out.write("        self.assertEquals(result.error, '%s')\n\n" % test['error'])
+            out.write("        self.assertEquals(result.error, %s)\n" % escape(test['error']))
 
         # Test the output of the last SQL statement
         if 'result' in test:

@@ -61,6 +61,7 @@ class Server:
         assert isinstance(expression, SelectStatement)
 
         offset = 3
+        args = []
 
         # Compile the `SELECT` expression
         if expression.columns == '*':
@@ -69,26 +70,47 @@ class Server:
             name = "col1"
             if isinstance(expression.columns, Identifier):
                 name = str(expression.columns)
-            select_expression = 'local tuple = {}\ntuple["%s"] = %s' % \
-                                (name, expression.columns.compile_lua(offset)[0])
+            e, offset, new_args = expression.columns.compile_lua(offset)
+            args.extend(new_args)
+            select_expression = 'local tuple = {}\ntuple["%s"] = %s' % (name, e)
 
         # Compile the WHERE into a Lua expression.
         where_expression = expression.where if expression.where else Value(True)
-        where_clause, offset, args = where_expression.compile_lua(offset)
+        where_clause, offset, new_args = where_expression.compile_lua(offset)
+        args.extend(new_args)
 
         # Generate the full Lua program.
         lua = """
-        local records = redis.call('LRANGE', ARGV[1], '0', '-1')
-        local matches = {}
+        -- First thing is to convert all the incoming values from JSON to
+        -- native. Skipping the first two arguments that are not JSON and will
+        -- always exist.
+        local args = {}
+        for i = 3, #ARGV do
+            args[i] = cjson.decode(ARGV[i])
+        end
 
+        -- Get one page - at the moment this is the whole table.
+        local records = redis.call('LRANGE', ARGV[1], '0', '-1')
+
+        -- Iterate each record in the page.
+        local matches = {}
         for i, data in ipairs(records) do
+            -- Each row is stored as a JSON string and needs to be decoded
+            -- before we can use it.
             local row = cjson.decode(data)
+
+            -- Process the fields in the SELECT clause.
             %s
+
+            -- Test if the WHERE clause allows this record to be added to the
+            -- result.
             if %s then
                 table.insert(matches, tuple)
             end
         end
 
+        -- The `matches` will be an array which Python can not decode on the
+        -- other end so we wrap it into an object.
         return cjson.encode({result = matches})
         """ % (select_expression, where_clause)
 
@@ -101,6 +123,7 @@ class Server:
         """
         lua, args = self.compile_select(select)
         try:
+            #print lua, args
             run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
             result = json.loads(run)
 
@@ -109,7 +132,14 @@ class Server:
 
             return ServerResult(True, result['result'], warnings=self.warnings)
         except Exception as e:
-            return ServerResult(False, error=str(e)[106:].strip())
+            # The actual exception message from Lua contains stuff we don't need
+            # to report on like the SHA1 of the program, the line number of the
+            # error, etc. So we need to trim down to what the actual usable
+            # message is.
+            message = str(e)
+            message = message[message.rfind(':') + 1:].strip()
+
+            return ServerResult(False, error=message)
 
 
 class ServerResult:

@@ -22,21 +22,30 @@ class Expression:
         # Let the magic of str() handle all the other cases.
         return str(object)
 
+    def compile_lua(self, offset):
+        """
+        This is just a placeholder to be overridden by sub-classes. It exists
+        here to satisfy PyCharms need to know that `compile_lua()` is available
+        on `Expression`
+        :param offset: integer
+        :return: str
+        """
+
 
 class Value(Expression):
-    NULL = 'null'
-    BOOLEAN = 'boolean'
-    INTEGER = 'integer'
-    FLOAT = 'float'
-    STRING = 'string'
-    ARRAY = 'array'
-    OBJECT = 'object'
-
     def __init__(self, value):
         self.value = value
 
     def __eq__(self, other):
+        """
+        This is more of a convenience method for testing. It allows us to
+        compare two `Value`s based on their internal value.
+
+        :return: boolean
+        """
         right = other
+
+        # `other` is allowed to be another `Value` instance of a raw value.
         if isinstance(other, Value):
             right = other.value
 
@@ -57,34 +66,12 @@ class Value(Expression):
             return '[%s]' % ', '.join(items)
 
         if isinstance(self.value, dict):
-            items = ['"%s": %s' % (key, str(value)) for key, value in self.value.iteritems()]
+            items = ['"%s": %s' % (key, str(value))
+                     for key, value
+                     in self.value.iteritems()]
             return '{%s}' % ', '.join(items)
 
         return '"%s"' % self.value
-
-    def eval(self):
-        return self
-
-    def type(self):
-        if isinstance(self.value, bool):
-            return self.BOOLEAN
-
-        if isinstance(self.value, int):
-            return self.INTEGER
-
-        if isinstance(self.value, float):
-            return self.FLOAT
-
-        if isinstance(self.value, str):
-            return self.STRING
-
-        if isinstance(self.value, list):
-            return self.ARRAY
-
-        if isinstance(self.value, dict):
-            return self.OBJECT
-
-        return self.NULL
 
     def compile_lua(self, offset):
         # In most cases we can render the literal value as a string and use
@@ -114,7 +101,14 @@ class Value(Expression):
 
 
 class Identifier(Expression):
+    """
+    And `Identifier` represents a field or column in the expression to be
+    evaluated at runtime with the value in a record.
+    """
+
     def __init__(self, identifier):
+        assert isinstance(identifier, str)
+
         self.identifier = identifier
 
     def __str__(self):
@@ -125,59 +119,66 @@ class Identifier(Expression):
 
 
 class BinaryExpression(Expression):
-    def __init__(self, left, operator, right):
+    """
+    Binary expressions represent any two expressions that contain an operator
+    between them. A simple example is "1 + 2".
+    """
+
+    def __init__(self, left, operator, right, lua_operator=None):
+        """
+        Initialise a binary expression.
+        :param left: Expression
+        :param operator: str
+        :param right: Expression
+        :param lua_operator: None|str
+        """
+        assert isinstance(left, Expression)
+        assert isinstance(operator, str)
+        assert isinstance(right, Expression)
+        assert lua_operator is None or isinstance(lua_operator, str)
+
+        # In most cases the SQL operator (`operator` - like '+') will be the
+        # same operator when we render this binary expression in Lua
+        # (`lua_operator`) - so addition in Lua also uses the '+' operator. But
+        # sometimes it will be different, for example equality in SQL ('=') uses
+        # the '==' operator in Lua to represent the same comparison.
+        # It is important to note that Lua word operators are case-sensitive and
+        # so 'AND' in SQL will not work in Lua, it must be made lowercase 'and'.
+        if lua_operator is None:
+            lua_operator = operator
+
+        # It is important to note that Lua word operators are case-sensitive and
+        # so 'AND' in SQL will not work in Lua, it must be made lowercase 'and'.
+        lua_operator = lua_operator.lower()
+
+        # Assign all the properties.
         self.left = left
         self.right = right
         self.operator = operator
+        self.lua_operator = lua_operator
 
     def __str__(self):
         return '%s %s %s' % (self.left, self.operator, self.right)
 
-    def internal_compile_lua(self, operator, offset):
-        args = []
-
-        if isinstance(self.left, BinaryExpression):
-            left, offset, new_args = self.left.compile_lua(offset)
-            args.extend(new_args)
-        else:
-            args.append(self.left)
-            if isinstance(self.left, Identifier):
-                left = "tonumber(tuple[ARGV[%d]])" % offset
-            else:
-                left = "tonumber(ARGV[%d])" % offset
-            offset += 1
-
-        if isinstance(self.right, BinaryExpression):
-            right, offset, new_args = self.right.compile_lua(offset)
-            args.extend(new_args)
-        else:
-            args.append(self.right)
-            if isinstance(self.right, Identifier):
-                right = "tonumber(tuple[ARGV[%d]])" % offset
-            else:
-                right = "tonumber(ARGV[%d])" % offset
-            offset += 1
-
-        return ('%s %s %s' % (left, operator, right), offset, args)
-
     def compile_lua(self, offset):
-        return BinaryExpression.internal_compile_lua(self, self.operator, offset)
+        left, offset, args1 = self.left.compile_lua(offset)
+        right, offset, args2 = self.right.compile_lua(offset)
+        args1.extend(args2)
+        return (
+            '%s %s %s' % (left, self.lua_operator, right),
+            offset,
+            args1
+        )
 
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '=', right)
-
-    def compile_lua(self, offset):
-        return BinaryExpression.internal_compile_lua(self, '==', offset)
+        BinaryExpression.__init__(self, left, '=', right, '==')
 
 
 class NotEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '<>', right)
-
-    def compile_lua(self, offset):
-        return BinaryExpression.internal_compile_lua(self, '~=', offset)
+        BinaryExpression.__init__(self, left, '<>', right, '~=')
 
 
 class GreaterExpression(BinaryExpression):
@@ -204,95 +205,27 @@ class AndExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, 'AND', right)
 
-    def compile_lua(self, offset):
-        return BinaryExpression.internal_compile_lua(self, 'and', offset)
-
-    def eval(self):
-        if self.left.type() == Value.BOOLEAN and self.right.type() == Value.BOOLEAN:
-            return self.left.value and self.right.value
-
-        raise RuntimeError('%s AND %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
-
 
 class OrExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, 'OR', right)
-
-    def compile_lua(self, offset):
-        return BinaryExpression.internal_compile_lua(self, 'or', offset)
-
-    def eval(self):
-        if self.left.type() == Value.BOOLEAN and self.right.type() == Value.BOOLEAN:
-            return self.left.value or self.right.value
-
-        raise RuntimeError('%s OR %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
 
 
 class AddExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '+', right)
 
-    def eval(self):
-        numeric = (Value.INTEGER, Value.FLOAT)
-
-        if self.left.type() in numeric and self.right.type() in numeric:
-            return self.left.value + self.right.value
-
-        raise RuntimeError('%s + %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
-
 
 class SubtractExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '-', right)
-
-    def eval(self):
-        numeric = (Value.INTEGER, Value.FLOAT)
-
-        if self.left.type() in numeric and self.right.type() in numeric:
-            return self.left.value - self.right.value
-
-        raise RuntimeError('%s - %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
 
 
 class MultiplyExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '*', right)
 
-    def eval(self):
-        numeric = (Value.INTEGER, Value.FLOAT)
-
-        if self.left.type() in numeric and self.right.type() in numeric:
-            return self.left.value * self.right.value
-
-        raise RuntimeError('%s * %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
-
 
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '/', right)
-
-    def eval(self):
-        numeric = (Value.INTEGER, Value.FLOAT)
-
-        if self.left.type() in numeric and self.right.type() in numeric:
-            return self.left.value / self.right.value
-
-        raise RuntimeError('%s / %s is not supported.' % (
-            self.left.type(),
-            self.right.type()
-        ))
