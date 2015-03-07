@@ -1,0 +1,316 @@
+tests:
+  null_null:
+    sql: SELECT null * null
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_boolean:
+    sql: SELECT null * true
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_integer:
+    sql: SELECT null * 123
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_stringinteger:
+    sql: SELECT null * "123"
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_float:
+    sql: SELECT null * 12.3
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_stringfloat:
+    sql: SELECT null * "12.3"
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_string:
+    sql: SELECT null * "foo"
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_array:
+    sql: 'SELECT null * [1, 2]'
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  null_object:
+    sql: 'SELECT null * {"foo": "bar"}'
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  boolean_null:
+    sql: SELECT true * null
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_boolean:
+    sql: SELECT true * true
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_integer:
+    sql: SELECT true * 123
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_stringinteger:
+    sql: SELECT true * "123"
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_float:
+    sql: SELECT true * 12.3
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_stringfloat:
+    sql: SELECT true * "12.3"
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_string:
+    sql: SELECT true * "foo"
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_array:
+    sql: 'SELECT true * [1, 2]'
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_object:
+    sql: 'SELECT true * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a boolean value
+
+  integer_null:
+    sql: SELECT 123 * null
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  integer_boolean:
+    sql: SELECT 123 * true
+    error: attempt to perform arithmetic on a boolean value
+
+  integer_integer:
+    sql: SELECT 123 * 123
+    result:
+    - {"col1": 15129}
+
+  integer_stringinteger:
+    sql: SELECT 123 * "123"
+    result:
+    - {"col1": 15129}
+
+  integer_float:
+    sql: SELECT 123 * 12.3
+    result:
+    - {"col1": 1512.9}
+
+  integer_stringfloat:
+    sql: SELECT 123 * "12.3"
+    result:
+    - {"col1": 1512.9}
+
+  integer_string:
+    sql: SELECT 123 * "foo"
+    error: attempt to perform arithmetic on a string value
+
+  integer_array:
+    sql: 'SELECT 123 * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  integer_object:
+    sql: 'SELECT 123 * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
+
+  stringinteger_boolean:
+    sql: SELECT "123" * true
+    error: attempt to perform arithmetic on a boolean value
+
+  stringinteger_integer:
+    sql: SELECT "123" * 123
+    result:
+    - {"col1": 15129}
+
+  stringinteger_stringinteger:
+    sql: SELECT "123" * "123"
+    result:
+    - {"col1": 15129}
+
+  stringinteger_float:
+    sql: SELECT "123" * 12.3
+    result:
+    - {"col1": 1512.9}
+
+  stringinteger_stringfloat:
+    sql: SELECT "123" * "12.3"
+    result:
+    - {"col1": 1512.9}
+
+  stringinteger_string:
+    sql: SELECT "123" * "foo"
+    error: attempt to perform arithmetic on a string value
+
+  stringinteger_array:
+    sql: 'SELECT "123" * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  stringinteger_object:
+    sql: 'SELECT "123" * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
+
+  float_boolean:
+    sql: SELECT 1.23 * true
+    error: attempt to perform arithmetic on a boolean value
+
+  float_integer:
+    sql: SELECT 1.23 * 123
+    result:
+    - {"col1": 151.29}
+
+  float_stringinteger:
+    sql: SELECT 1.23 * "123"
+    result:
+    - {"col1": 151.29}
+
+  float_float:
+    sql: SELECT 1.23 * 12.3
+    result:
+    - {"col1": 15.129}
+
+  float_stringfloat:
+    sql: SELECT 1.23 * "12.3"
+    result:
+    - {"col1": 15.129}
+
+  float_string:
+    sql: SELECT 1.23 * "foo"
+    error: attempt to perform arithmetic on a string value
+
+  float_array:
+    sql: 'SELECT 1.23 * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  float_object:
+    sql: 'SELECT 1.23 * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
+
+  stringfloat_boolean:
+    sql: SELECT "1.23" * true
+    error: attempt to perform arithmetic on a boolean value
+
+  stringfloat_integer:
+    sql: SELECT "1.23" * 123
+    result:
+    - {"col1": 151.29}
+
+  stringfloat_stringinteger:
+    sql: SELECT "1.23" * "123"
+    result:
+    - {"col1": 151.29}
+
+  stringfloat_float:
+    sql: SELECT "1.23" * 12.3
+    result:
+    - {"col1": 15.129}
+
+  stringfloat_stringfloat:
+    sql: SELECT "1.23" * "12.3"
+    result:
+    - {"col1": 15.129}
+
+  stringfloat_string:
+    sql: SELECT "1.23" * "foo"
+    error: attempt to perform arithmetic on a string value
+
+  stringfloat_array:
+    sql: 'SELECT "1.23" * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  stringfloat_object:
+    sql: 'SELECT "1.23" * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
+
+  string_boolean:
+    sql: SELECT "foo" * true
+    error: attempt to perform arithmetic on a string value
+
+  string_integer:
+    sql: SELECT "foo" * 123
+    error: attempt to perform arithmetic on a string value
+
+  string_stringinteger:
+    sql: SELECT "foo" * "123"
+    error: attempt to perform arithmetic on a string value
+
+  string_float:
+    sql: SELECT "foo" * 12.3
+    error: attempt to perform arithmetic on a string value
+
+  string_stringfloat:
+    sql: SELECT "foo" * "12.3"
+    error: attempt to perform arithmetic on a string value
+
+  string_string:
+    sql: SELECT "foo" * "foo"
+    error: attempt to perform arithmetic on a string value
+
+  string_array:
+    sql: 'SELECT "foo" * [1, 2]'
+    error: attempt to perform arithmetic on a string value
+
+  string_object:
+    sql: 'SELECT "foo" * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a string value
+
+  array_boolean:
+    sql: SELECT [1, 2] * true
+    error: attempt to perform arithmetic on a table value
+
+  array_integer:
+    sql: SELECT [1, 2] * 123
+    error: attempt to perform arithmetic on a table value
+
+  array_stringinteger:
+    sql: SELECT [1, 2] * "123"
+    error: attempt to perform arithmetic on a table value
+
+  array_float:
+    sql: SELECT [1, 2] * 12.3
+    error: attempt to perform arithmetic on a table value
+
+  array_stringfloat:
+    sql: SELECT [1, 2] * "12.3"
+    error: attempt to perform arithmetic on a table value
+
+  array_string:
+    sql: SELECT [1, 2] * "foo"
+    error: attempt to perform arithmetic on a table value
+
+  array_array:
+    sql: 'SELECT [1, 2] * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  array_object:
+    sql: 'SELECT [1, 2] * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
+
+  object_boolean:
+    sql: 'SELECT {"foo": "bar"} * true'
+    error: attempt to perform arithmetic on a table value
+
+  object_integer:
+    sql: 'SELECT {"foo": "bar"} * 123'
+    error: attempt to perform arithmetic on a table value
+
+  object_stringinteger:
+    sql: 'SELECT {"foo": "bar"} * "123"'
+    error: attempt to perform arithmetic on a table value
+
+  object_float:
+    sql: 'SELECT {"foo": "bar"} * 12.3'
+    error: attempt to perform arithmetic on a table value
+
+  object_stringfloat:
+    sql: 'SELECT {"foo": "bar"} * "12.3"'
+    error: attempt to perform arithmetic on a table value
+
+  object_string:
+    sql: 'SELECT {"foo": "bar"} * "foo"'
+    error: attempt to perform arithmetic on a table value
+
+  object_array:
+    sql: 'SELECT {"foo": "bar"} * [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  object_object:
+    sql: 'SELECT {"foo": "bar"} * {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
