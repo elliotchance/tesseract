@@ -6,5 +6,5 @@ class ServerTestCase(TestCase):
     def setUp(self):
         TestCase.setUp(self)
         self.table_name = ''.join(
-            random.choice(string.lowercase) for i in range(8)
+            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)
         )
