@@ -19,6 +19,10 @@ tests:
     sql: SELECT null + 12.3
     error: attempt to perform arithmetic on field 'null' (a userdata value)
 
+  null_stringfloat:
+    sql: SELECT null + "12.3"
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
   null_string:
     sql: SELECT null + "foo"
     error: attempt to perform arithmetic on field 'null' (a userdata value)
@@ -49,6 +53,10 @@ tests:
 
   boolean_float:
     sql: SELECT true + 12.3
+    error: attempt to perform arithmetic on a boolean value
+
+  boolean_stringfloat:
+    sql: SELECT true + "12.3"
     error: attempt to perform arithmetic on a boolean value
 
   boolean_string:
@@ -83,6 +91,11 @@ tests:
 
   integer_float:
     sql: SELECT 123 + 12.3
+    result:
+    - {"col1": 135.3}
+
+  integer_stringfloat:
+    sql: SELECT 123 + "12.3"
     result:
     - {"col1": 135.3}
 
