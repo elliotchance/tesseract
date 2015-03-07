@@ -27,7 +27,7 @@ class TestServer(ServerTestCase):
         server = Server()
         server.execute('INSERT INTO %s {"foo": "bar"}' % self.table_name)
         result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success)
+        self.assertTrue(result.success, msg=result.error)
         self.assertEqual(result.data, [
             {"foo": "bar"},
         ])
@@ -37,7 +37,7 @@ class TestServer(ServerTestCase):
         server.execute('INSERT INTO %s {"foo": "bar"}' % self.table_name)
         server.execute('INSERT INTO %s {"bar": "baz"}' % self.table_name)
         result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success)
+        self.assertTrue(result.success, msg=result.error)
         self.assertEqual(result.data, [
             {"bar": "baz"},
             {"foo": "bar"},
