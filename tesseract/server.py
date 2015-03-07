@@ -124,7 +124,11 @@ class Server:
         lua, args = self.compile_select(select)
         try:
             run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
-            result = json.loads(run)
+
+            # The extra `str()` is a requirement of Python 3 where
+            # `json.loads()` must take a `str` and will not accept the arbitrary
+            # bytes in `run`.
+            result = json.loads(str(run))
 
             if len(result['result']) == 0:
                 result['result'] = []
