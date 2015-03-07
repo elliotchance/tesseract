@@ -15,7 +15,7 @@ while True:
     # Does the person want to bail out at this point?
     if sql == 'exit\n':
         # Friendly goodbye.
-        print "Bye."
+        print("Bye.")
         break
 
     # Execute the SQL.
@@ -23,15 +23,15 @@ while True:
 
     if not result.success:
         # There was something wrong, lets print out the error.
-        print "Error: %s" % result.error
+        print("Error: %s" % result.error)
     else:
         # The result was successful. We can now print out the result rows.
-        print '['
+        print('[')
         first = True
         for row in result.data:
-            print "  %s%s" % (Expression.to_sql(row), ',' if first else '')
+            print("  %s%s" % (Expression.to_sql(row), ',' if first else ''))
             first = False
-        print ']'
+        print(']')
 
     # Print a blank line to give us some space between each prompt.
-    print
+    print()

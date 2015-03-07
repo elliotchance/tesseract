@@ -123,7 +123,6 @@ class Server:
         """
         lua, args = self.compile_select(select)
         try:
-            #print lua, args
             run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
             result = json.loads(run)
 

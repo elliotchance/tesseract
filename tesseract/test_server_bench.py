@@ -17,7 +17,7 @@ class TestServerBench(ServerTestCase):
         method(server)
 
         # Print out the results.
-        print "%s: %s seconds" % (method.__func__, time.time() - start)
+        print("%s: %s seconds" % (method.__func__, time.time() - start))
 
     def test_all(self):
         self.runner(self.insert)
