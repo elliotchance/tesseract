@@ -1,3 +1,4 @@
+import time
 import yaml
 import json
 from os import listdir
@@ -9,6 +10,7 @@ def escape(string):
     return "%s%s%s" % (enclose, string.replace("'", "\\'"), enclose)
 
 def process_file(file):
+    total = 0
     tests_file = yaml.load(open('tests/%s' % file, 'r'))
     out = open('tests/test_%s.py' % file[:-4], 'w')
 
@@ -26,6 +28,7 @@ def process_file(file):
             out.write("\n")
 
     for name, test in iter(sorted(tests_file['tests'].iteritems())):
+        total += 1
         out.write("    def test_%s(self):\n" % name)
         out.write("        warnings = []\n")
         out.write("        server = Server()\n")
@@ -75,7 +78,13 @@ def process_file(file):
 
         out.write("\n")
 
+    return total
 
+
+total = 0
+start = time.time()
 for file in listdir('tests'):
     if file.endswith('.yml'):
-        process_file(file)
+        total += process_file(file)
+
+print '%d tests generated in %f seconds.' % (total, time.time() - start)
