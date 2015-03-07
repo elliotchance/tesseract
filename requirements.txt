@@ -1,4 +1,2 @@
-coveralls
 ply
-pyyaml
 redis
