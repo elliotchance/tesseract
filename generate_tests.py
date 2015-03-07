@@ -9,6 +9,14 @@ def escape(string):
         enclose = "'''"
     return "%s%s%s" % (enclose, string.replace("'", "\\'"), enclose)
 
+def get_iterator(tests_file, name):
+    try:
+        # Python 2.x
+        return iter(sorted(tests_file[name].iteritems()))
+    except:
+        # Python 3.x
+        return tests_file[name].items()
+
 def process_file(file):
     total = 0
     tests_file = yaml.load(open('tests/%s' % file, 'r'))
@@ -20,21 +28,14 @@ def process_file(file):
     out.write("class Test%s(TestCase):\n" % file[:-4].capitalize())
 
     if 'data' in tests_file:
-        for name, table in tests_file['data'].iteritems():
+        for name, table in get_iterator(tests_file, 'data'):
             out.write("    def load_%s(self, server):\n" % name)
             out.write("        server.execute('DELETE FROM %s')\n" % name)
             for row in table:
                 out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
             out.write("\n")
 
-    try:
-        # Python 2.x
-        iterator = iter(sorted(tests_file['tests'].iteritems()))
-    except:
-        # Python 3.x
-        iterator = tests_file['tests'].items()
-
-    for name, test in iterator:
+    for name, test in get_iterator(tests_file, 'tests'):
         total += 1
         out.write("    def test_%s(self):\n" % name)
         out.write("        warnings = []\n")
