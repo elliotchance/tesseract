@@ -282,3 +282,35 @@ tests:
   array_object:
     sql: 'SELECT [1, 2] + {"foo": "bar"}'
     error: attempt to perform arithmetic on a table value
+
+  object_boolean:
+    sql: 'SELECT {"foo": "bar"} + true'
+    error: attempt to perform arithmetic on a table value
+
+  object_integer:
+    sql: 'SELECT {"foo": "bar"} + 123'
+    error: attempt to perform arithmetic on a table value
+
+  object_stringinteger:
+    sql: 'SELECT {"foo": "bar"} + "123"'
+    error: attempt to perform arithmetic on a table value
+
+  object_float:
+    sql: 'SELECT {"foo": "bar"} + 12.3'
+    error: attempt to perform arithmetic on a table value
+
+  object_stringfloat:
+    sql: 'SELECT {"foo": "bar"} + "12.3"'
+    error: attempt to perform arithmetic on a table value
+
+  object_string:
+    sql: 'SELECT {"foo": "bar"} + "foo"'
+    error: attempt to perform arithmetic on a table value
+
+  object_array:
+    sql: 'SELECT {"foo": "bar"} + [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  object_object:
+    sql: 'SELECT {"foo": "bar"} + {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
