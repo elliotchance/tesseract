@@ -48,5 +48,4 @@ class TestServer(ServerTestCase):
             Server('nowhere')
             self.fail("Expected failure")
         except Exception as e:
-            self.assertEqual('Error 8 connecting to nowhere:6379. nodename nor '
-                'servname provided, or not known.', str(e))
+            self.assertTrue(str(e).find('connecting to nowhere:6379') > 0)

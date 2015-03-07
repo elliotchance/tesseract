@@ -27,7 +27,14 @@ def process_file(file):
                 out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
             out.write("\n")
 
-    for name, test in iter(sorted(tests_file['tests'].iteritems())):
+    try:
+        # Python 2.x
+        iterator = tests_file['tests'].iteritems()
+    except:
+        # Python 3.x
+        iterator = tests_file['tests'].items()
+
+    for name, test in iter(sorted(iterator)):
         total += 1
         out.write("    def test_%s(self):\n" % name)
         out.write("        warnings = []\n")
