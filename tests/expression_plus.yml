@@ -182,3 +182,39 @@ tests:
   float_object:
     sql: 'SELECT 1.23 + {"foo": "bar"}'
     error: attempt to perform arithmetic on a table value
+
+  stringfloat_boolean:
+    sql: SELECT "1.23" + true
+    error: attempt to perform arithmetic on a boolean value
+
+  stringfloat_integer:
+    sql: SELECT "1.23" + 123
+    result:
+    - {"col1": 124.23}
+
+  stringfloat_stringinteger:
+    sql: SELECT "1.23" + "123"
+    result:
+    - {"col1": 124.23}
+
+  stringfloat_float:
+    sql: SELECT "1.23" + 12.3
+    result:
+    - {"col1": 13.53}
+
+  stringfloat_stringfloat:
+    sql: SELECT "1.23" + "12.3"
+    result:
+    - {"col1": 13.53}
+
+  stringfloat_string:
+    sql: SELECT "1.23" + "foo"
+    error: attempt to perform arithmetic on a string value
+
+  stringfloat_array:
+    sql: 'SELECT "1.23" + [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  stringfloat_object:
+    sql: 'SELECT "1.23" + {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
