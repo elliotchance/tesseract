@@ -125,10 +125,10 @@ class Server:
         try:
             run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
 
-            # The extra `str()` is a requirement of Python 3 where
+            # The extra `decode()` is a requirement of Python 3 where
             # `json.loads()` must take a `str` and will not accept the arbitrary
             # bytes in `run`.
-            result = json.loads(str(run))
+            result = json.loads(run.decode())
 
             if len(result['result']) == 0:
                 result['result'] = []
