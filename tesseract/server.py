@@ -1,6 +1,7 @@
 import json
+from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
-from tesseract.sql.objects import *
+from tesseract.sql.statements import *
 import redis
 
 class Server:
@@ -31,7 +32,6 @@ class Server:
             :param sql: str
             :return: boolean
         """
-
 
         # Try to parse the SQL.
         try:

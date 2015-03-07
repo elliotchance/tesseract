@@ -11,6 +11,10 @@ tests:
     sql: SELECT null + 123
     error: attempt to perform arithmetic on field 'null' (a userdata value)
 
+  null_stringinteger:
+    sql: SELECT null + "123"
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
   null_float:
     sql: SELECT null + 12.3
     error: attempt to perform arithmetic on field 'null' (a userdata value)
@@ -39,6 +43,10 @@ tests:
     sql: SELECT true + 123
     error: attempt to perform arithmetic on a boolean value
 
+  boolean_stringinteger:
+    sql: SELECT true + "123"
+    error: attempt to perform arithmetic on a boolean value
+
   boolean_float:
     sql: SELECT true + 12.3
     error: attempt to perform arithmetic on a boolean value
@@ -54,3 +62,38 @@ tests:
   boolean_object:
     sql: 'SELECT true + {"foo": "bar"}'
     error: attempt to perform arithmetic on a boolean value
+
+  integer_null:
+    sql: SELECT 123 + null
+    error: attempt to perform arithmetic on field 'null' (a userdata value)
+
+  integer_boolean:
+    sql: SELECT 123 + true
+    error: attempt to perform arithmetic on a boolean value
+
+  integer_integer:
+    sql: SELECT 123 + 123
+    result:
+    - {"col1": 246}
+
+  integer_stringinteger:
+    sql: SELECT 123 + "123"
+    result:
+    - {"col1": 246}
+
+  integer_float:
+    sql: SELECT 123 + 12.3
+    result:
+    - {"col1": 135.3}
+
+  integer_string:
+    sql: SELECT 123 + "foo"
+    error: attempt to perform arithmetic on a string value
+
+  integer_array:
+    sql: 'SELECT 123 + [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  integer_object:
+    sql: 'SELECT 123 + {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value

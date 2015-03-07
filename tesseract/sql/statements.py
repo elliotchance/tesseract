@@ -1,4 +1,4 @@
-from tesseract.sql.expressions import Expression, Value, Identifier
+from tesseract.sql.expressions import Expression, Identifier
 
 # Objects
 # =======

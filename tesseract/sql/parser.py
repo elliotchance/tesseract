@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-from tesseract.sql.objects import *
+from tesseract.sql.statements import *
 from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
 
