@@ -49,7 +49,14 @@ def process_file(file):
             test['sql'] = [ test['sql'] ]
 
         # Execute each SQL statement and make sure that it passed.
-        for i in xrange(0, len(test['sql'])):
+        try:
+            # Python 2.x
+            for_range = xrange(0, len(test['sql']))
+        except:
+            # Python 3.x
+            for_range = range(0, len(test['sql']))
+
+        for i in for_range:
             sql = test['sql'][i]
             out.write("        sql = %s\n" % escape(sql))
             out.write("        result = server.execute(sql)\n")
