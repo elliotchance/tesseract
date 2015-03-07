@@ -87,4 +87,4 @@ for file in listdir('tests'):
     if file.endswith('.yml'):
         total += process_file(file)
 
-print '%d tests generated in %f seconds.' % (total, time.time() - start)
+print('%d tests generated in %f seconds.' % (total, time.time() - start))
