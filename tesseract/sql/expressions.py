@@ -16,7 +16,8 @@ class Expression:
         # Render a JSON object.
         if isinstance(object, dict):
             items = ['"%s": %s' % (key, Expression.to_sql(value))
-                     for key, value in object.iteritems()]
+                     for key, value
+                     in Expression.dict_iterator(object)]
             return '{%s}' % ', '.join(items)
 
         # Let the magic of str() handle all the other cases.
@@ -30,6 +31,15 @@ class Expression:
         :param offset: integer
         :return: str
         """
+
+    @staticmethod
+    def dict_iterator(object):
+        try:
+            # Python 2.x
+            return object.iteritems()
+        except:
+            # Python 3.x
+            return object.items()
 
 
 class Value(Expression):
@@ -68,7 +78,7 @@ class Value(Expression):
         if isinstance(self.value, dict):
             items = ['"%s": %s' % (key, str(value))
                      for key, value
-                     in self.value.iteritems()]
+                     in Expression.dict_iterator(self.value)]
             return '{%s}' % ', '.join(items)
 
         return '"%s"' % self.value
@@ -94,7 +104,7 @@ class Value(Expression):
         if isinstance(self.value, dict):
             items = ['["%s"] = %s' % (key, value.compile_lua(offset)[0])
                      for key, value
-                     in self.value.iteritems()]
+                     in Expression.dict_iterator(self.value)]
             value = '{%s}' % ', '.join(items)
 
         return (value, offset, [])
