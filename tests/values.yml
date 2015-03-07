@@ -152,7 +152,12 @@ tests:
     - Duplicate key "foo", using last value.
     - Duplicate key "foo", using last value.
 
-  string:
+  string_double_quotes:
     sql: SELECT "false"
+    result:
+    - {"col1": "false"}
+
+  string_single_quotes:
+    sql: SELECT 'false'
     result:
     - {"col1": "false"}

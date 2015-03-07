@@ -208,16 +208,28 @@ def p_json_object_items(p):
     p[0] = p[1]
 
 
+# string
+# ------
+def p_string(p):
+    """
+        string : STRING_SINGLE
+               | STRING_DOUBLE
+    """
+
+    p[0] = p[1]
+
+
+
 # value
 # -----
 def p_value(p):
     """
         value : json_object
               | json_array
+              | string
               | NUMBER
               | MINUS NUMBER
               | PLUS NUMBER
-              | STRING
               | IDENTIFIER
     """
 
@@ -333,10 +345,9 @@ def p_arithmetic_expression(p):
 # ----------------
 def p_json_object_item(p):
     """
-        json_object_item : STRING COLON expression
+        json_object_item : string COLON expression
     """
 
-    # Remove the trailing and proceeding double-quotes around the STRING key.
     key = p[1].value
 
     # Create the key-value item.

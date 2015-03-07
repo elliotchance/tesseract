@@ -40,7 +40,8 @@ operators = (
 expression_types = (
     'NUMBER',
     'IDENTIFIER',
-    'STRING'
+    'STRING_SINGLE',
+    'STRING_DOUBLE',
 )
 
 # The actual tokens used will be the aggregation of all the groups above. It is
@@ -100,8 +101,14 @@ def t_NUMBER(t):
 
     return t
 
-def t_STRING(t):
+def t_STRING_DOUBLE(t):
     r'\".*?\"'
+
+    t.value = Value(t.value[1:-1])
+    return t
+
+def t_STRING_SINGLE(t):
+    r'\'.*?\''
 
     t.value = Value(t.value[1:-1])
     return t
