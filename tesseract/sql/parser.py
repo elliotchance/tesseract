@@ -204,7 +204,8 @@ def p_json_object_items(p):
         p.parser.warnings.append(message)
 
     # Regardless of duplicates, we will now combine the dictionaries.
-    p[0] = dict(p[1].items() + p[3].items())
+    p[1].update(p[3])
+    p[0] = p[1]
 
 
 # value
