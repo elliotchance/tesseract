@@ -78,7 +78,7 @@ def process_file(file):
 
         # Test the output of the last SQL statement
         if 'result' in test:
-            out.write("        self.assertEqual(sorted(result.data), sorted(%s))\n" % \
+            out.write("        self.assertEqual(result.data, %s)\n" % \
                       test['result'])
 
         # If there are warnings we need to assert those at the end.
