@@ -15,4 +15,7 @@ install:
   - "python generate_tests.py"
 
 # command to run tests
-script: nosetests
+script: coverage run --source=tesseract nosetests
+
+after_success:
+  coveralls
