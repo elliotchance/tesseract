@@ -110,3 +110,39 @@ tests:
   integer_object:
     sql: 'SELECT 123 + {"foo": "bar"}'
     error: attempt to perform arithmetic on a table value
+
+  stringinteger_boolean:
+    sql: SELECT "123" + true
+    error: attempt to perform arithmetic on a boolean value
+
+  stringinteger_integer:
+    sql: SELECT "123" + 123
+    result:
+    - {"col1": 246}
+
+  stringinteger_stringinteger:
+    sql: SELECT "123" + "123"
+    result:
+    - {"col1": 246}
+
+  stringinteger_float:
+    sql: SELECT "123" + 12.3
+    result:
+    - {"col1": 135.3}
+
+  stringinteger_stringfloat:
+    sql: SELECT "123" + "12.3"
+    result:
+    - {"col1": 135.3}
+
+  stringinteger_string:
+    sql: SELECT "123" + "foo"
+    error: attempt to perform arithmetic on a string value
+
+  stringinteger_array:
+    sql: 'SELECT "123" + [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  stringinteger_object:
+    sql: 'SELECT "123" + {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
