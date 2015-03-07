@@ -250,3 +250,35 @@ tests:
   string_object:
     sql: 'SELECT "foo" + {"foo": "bar"}'
     error: attempt to perform arithmetic on a string value
+
+  array_boolean:
+    sql: SELECT [1, 2] + true
+    error: attempt to perform arithmetic on a table value
+
+  array_integer:
+    sql: SELECT [1, 2] + 123
+    error: attempt to perform arithmetic on a table value
+
+  array_stringinteger:
+    sql: SELECT [1, 2] + "123"
+    error: attempt to perform arithmetic on a table value
+
+  array_float:
+    sql: SELECT [1, 2] + 12.3
+    error: attempt to perform arithmetic on a table value
+
+  array_stringfloat:
+    sql: SELECT [1, 2] + "12.3"
+    error: attempt to perform arithmetic on a table value
+
+  array_string:
+    sql: SELECT [1, 2] + "foo"
+    error: attempt to perform arithmetic on a table value
+
+  array_array:
+    sql: 'SELECT [1, 2] + [1, 2]'
+    error: attempt to perform arithmetic on a table value
+
+  array_object:
+    sql: 'SELECT [1, 2] + {"foo": "bar"}'
+    error: attempt to perform arithmetic on a table value
