@@ -13,3 +13,9 @@ tests:
 
   simple_insert:
     sql: 'INSERT INTO foo {"foo": "bar"}'
+
+  insert_into_table_that_doesnt_exist:
+    comment: |
+      Inserting into a table that doesn't exist is permitted because table only
+      come into existance from inserting records into them.
+    sql: 'INSERT INTO %table_name% {"foo": "bar"}'

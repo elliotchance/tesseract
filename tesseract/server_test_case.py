@@ -1,5 +1,4 @@
 from unittest import TestCase
-import string
 import random
 
 class ServerTestCase(TestCase):

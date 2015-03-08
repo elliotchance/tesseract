@@ -2,12 +2,30 @@ import time
 import yaml
 import json
 from os import listdir
+import re
 
 def escape(string):
+    # SQL statement can contain `%foo%` where `foo` is the name of the instance
+    # value to substitute
+    variables = re.findall('%([a-z_]+)%', string)
+    string = re.sub('%([a-z_]+)%', '%s', string)
+
+    # If the SQL is only one line it can be enclosed in simple quotes.
     enclose = "'"
-    if string.find('\n'):
+
+    # However, if the SQL is multiline then we need to use triple single quotes.
+    if string.count('\n') or string.count('\r'):
         enclose = "'''"
-    return "%s%s%s" % (enclose, string.replace("'", "\\'"), enclose)
+
+    sql = "%s%s%s" % (enclose, string.replace("'", "\\'"), enclose)
+
+    # If the SQL contains any `%foo%` identifiers lets create the substitution
+    # now.
+    if len(variables):
+        values = ['self.%s' % var for var in variables]
+        sql = '%s %% (%s)' % (sql, ', '.join(values))
+
+    return sql
 
 def get_iterator(tests_file, name):
     try:
@@ -23,9 +41,16 @@ def process_file(file):
     out = open('tests/test_%s.py' % file[:-4], 'w')
 
     out.write("from unittest import TestCase\n")
-    out.write("from tesseract.server import Server\n\n")
+    out.write("from tesseract.server import Server\n")
+    out.write("import random\n\n")
 
     out.write("class Test%s(TestCase):\n" % file[:-4].capitalize())
+
+    out.write("    def setUp(self):\n")
+    out.write("        TestCase.setUp(self)\n")
+    out.write("        self.table_name = ''.join(\n")
+    out.write("            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)\n")
+    out.write("        )\n\n")
 
     if 'data' in tests_file:
         for name, table in get_iterator(tests_file, 'data'):
