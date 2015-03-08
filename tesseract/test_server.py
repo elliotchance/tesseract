@@ -3,12 +3,6 @@ from tesseract.server_test_case import ServerTestCase
 
 
 class TestServer(ServerTestCase):
-    def test_select_from_table_that_doesnt_exist(self):
-        server = Server()
-        result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success)
-        self.assertEqual(result.data, [])
-
     def test_invalid_sql(self):
         server = Server()
         result = server.execute('INSERT INTO')

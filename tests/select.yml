@@ -135,3 +135,7 @@ tests:
     sql: SELECT First FROM table2
     result:
     - {}
+
+  select_from_table_that_doesnt_exist:
+    sql: SELECT * FROM %table_name%
+    result: []
