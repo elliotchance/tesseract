@@ -3,32 +3,6 @@ from tesseract.server_test_case import ServerTestCase
 
 
 class TestServer(ServerTestCase):
-    def test_invalid_sql(self):
-        server = Server()
-        result = server.execute('INSERT INTO')
-        self.assertFalse(result.success)
-        self.assertEqual(result.error, 'Expected table name after INTO.')
-
-    def test_insert_and_select(self):
-        server = Server()
-        server.execute('INSERT INTO %s {"foo": "bar"}' % self.table_name)
-        result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success, msg=result.error)
-        self.assertEqual(result.data, [
-            {"foo": "bar"},
-        ])
-
-    def test_insert_multiple_and_select(self):
-        server = Server()
-        server.execute('INSERT INTO %s {"foo": "bar"}' % self.table_name)
-        server.execute('INSERT INTO %s {"bar": "baz"}' % self.table_name)
-        result = server.execute('SELECT * FROM %s' % self.table_name)
-        self.assertTrue(result.success, msg=result.error)
-        self.assertEqual(result.data, [
-            {"bar": "baz"},
-            {"foo": "bar"},
-        ])
-
     def test_providing_a_server_that_doesnt_exist(self):
         try:
             Server('nowhere')
