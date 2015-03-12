@@ -1,6 +1,7 @@
 # Expressions
 # ===========
 
+
 class Expression:
     """
     A base class for all expressions.
@@ -157,10 +158,6 @@ class BinaryExpression(Expression):
         if lua_operator is None:
             lua_operator = operator
 
-        # It is important to note that Lua word operators are case-sensitive and
-        # so 'AND' in SQL will not work in Lua, it must be made lowercase 'and'.
-        lua_operator = lua_operator.lower()
-
         # Assign all the properties.
         self.left = left
         self.right = right
@@ -174,16 +171,22 @@ class BinaryExpression(Expression):
         left, offset, args1 = self.left.compile_lua(offset)
         right, offset, args2 = self.right.compile_lua(offset)
         args1.extend(args2)
-        return (
-            '%s %s %s' % (left, self.lua_operator, right),
-            offset,
-            args1
-        )
+
+        # If the `lua_operator` starts with a colon then we mean a local
+        # function rather than an operator, which has a different syntax.
+        if self.lua_operator[0] == ':':
+            lua = '%s(%s, %s)' % (self.lua_operator[1:], left, right)
+
+        # Otherwise we are just replacing the operator.
+        else:
+            lua = '%s %s %s' % (left, self.lua_operator, right)
+
+        return (lua, offset, args1)
 
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '=', right, '==')
+        BinaryExpression.__init__(self, left, '=', right, ':operator_equal')
 
 
 class NotEqualExpression(BinaryExpression):
@@ -213,12 +216,12 @@ class LessEqualExpression(BinaryExpression):
 
 class AndExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'AND', right)
+        BinaryExpression.__init__(self, left, 'AND', right, 'and')
 
 
 class OrExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'OR', right)
+        BinaryExpression.__init__(self, left, 'OR', right, 'or')
 
 
 class AddExpression(BinaryExpression):

@@ -1,0 +1,925 @@
+tests:
+  emptyarray_emptyarray:
+    sql: 'SELECT [] = []'
+    result:
+    - {"col1": true}
+
+  emptyarray_string:
+    sql: 'SELECT [] = "foo"'
+    result:
+    - {"col1": false}
+
+  emptyarray_floatstring:
+    sql: 'SELECT [] = "2.5"'
+    result:
+    - {"col1": false}
+
+  emptyarray_float:
+    sql: 'SELECT [] = 2.5'
+    result:
+    - {"col1": false}
+
+  emptyarray_one:
+    sql: 'SELECT [] = 1'
+    result:
+    - {"col1": false}
+
+  emptyarray_zero:
+    sql: 'SELECT [] = 0'
+    result:
+    - {"col1": false}
+
+  emptyarray_false:
+    sql: 'SELECT [] = false'
+    result:
+    - {"col1": true}
+
+  emptyarray_null:
+    sql: 'SELECT [] = null'
+    result:
+    - {"col1": null}
+
+  emptyarray_true:
+    sql: 'SELECT [] = true'
+    result:
+    - {"col1": false}
+
+  emptyarray_emptyobject:
+    sql: 'SELECT [] = {}'
+    result:
+    - {"col1": true}
+
+  emptyarray_zerostring:
+    sql: 'SELECT [] = "0"'
+    result:
+    - {"col1": false}
+
+  emptyarray_onestring:
+    sql: 'SELECT [] = "1"'
+    result:
+    - {"col1": false}
+
+  string_emptyarray:
+    sql: 'SELECT "foo" = []'
+    result:
+    - {"col1": false}
+
+  string_string:
+    sql: 'SELECT "foo" = "foo"'
+    result:
+    - {"col1": true}
+
+  string_floatstring:
+    sql: 'SELECT "foo" = "2.5"'
+    result:
+    - {"col1": false}
+
+  string_float:
+    sql: 'SELECT "foo" = 2.5'
+    result:
+    - {"col1": false}
+
+  string_one:
+    sql: 'SELECT "foo" = 1'
+    result:
+    - {"col1": false}
+
+  string_zero:
+    sql: 'SELECT "foo" = 0'
+    result:
+    - {"col1": false}
+
+  string_false:
+    sql: 'SELECT "foo" = false'
+    result:
+    - {"col1": false}
+
+  string_null:
+    sql: 'SELECT "foo" = null'
+    result:
+    - {"col1": null}
+
+  string_true:
+    sql: 'SELECT "foo" = true'
+    result:
+    - {"col1": true}
+
+  string_emptyobject:
+    sql: 'SELECT "foo" = {}'
+    result:
+    - {"col1": false}
+
+  string_zerostring:
+    sql: 'SELECT "foo" = "0"'
+    result:
+    - {"col1": false}
+
+  string_onestring:
+    sql: 'SELECT "foo" = "1"'
+    result:
+    - {"col1": false}
+
+  floatstring_emptyarray:
+    sql: 'SELECT "2.5" = []'
+    result:
+    - {"col1": false}
+
+  floatstring_string:
+    sql: 'SELECT "2.5" = "foo"'
+    result:
+    - {"col1": false}
+
+  floatstring_floatstring:
+    sql: 'SELECT "2.5" = "2.5"'
+    result:
+    - {"col1": true}
+
+  floatstring_float:
+    sql: 'SELECT "2.5" = 2.5'
+    result:
+    - {"col1": true}
+
+  floatstring_one:
+    sql: 'SELECT "2.5" = 1'
+    result:
+    - {"col1": false}
+
+  floatstring_zero:
+    sql: 'SELECT "2.5" = 0'
+    result:
+    - {"col1": false}
+
+  floatstring_false:
+    sql: 'SELECT "2.5" = false'
+    result:
+    - {"col1": false}
+
+  floatstring_null:
+    sql: 'SELECT "2.5" = null'
+    result:
+    - {"col1": null}
+
+  floatstring_true:
+    sql: 'SELECT "2.5" = true'
+    result:
+    - {"col1": true}
+
+  floatstring_emptyobject:
+    sql: 'SELECT "2.5" = {}'
+    result:
+    - {"col1": false}
+
+  floatstring_zerostring:
+    sql: 'SELECT "2.5" = "0"'
+    result:
+    - {"col1": false}
+
+  floatstring_onestring:
+    sql: 'SELECT "2.5" = "1"'
+    result:
+    - {"col1": false}
+
+  float_emptyarray:
+    sql: 'SELECT 2.5 = []'
+    result:
+    - {"col1": false}
+
+  float_string:
+    sql: 'SELECT 2.5 = "foo"'
+    result:
+    - {"col1": false}
+
+  float_floatstring:
+    sql: 'SELECT 2.5 = "2.5"'
+    result:
+    - {"col1": true}
+
+  float_float:
+    sql: 'SELECT 2.5 = 2.5'
+    result:
+    - {"col1": true}
+
+  float_one:
+    sql: 'SELECT 2.5 = 1'
+    result:
+    - {"col1": false}
+
+  float_zero:
+    sql: 'SELECT 2.5 = 0'
+    result:
+    - {"col1": false}
+
+  float_false:
+    sql: 'SELECT 2.5 = false'
+    result:
+    - {"col1": false}
+
+  float_null:
+    sql: 'SELECT 2.5 = null'
+    result:
+    - {"col1": null}
+
+  float_true:
+    sql: 'SELECT 2.5 = true'
+    result:
+    - {"col1": true}
+
+  float_emptyobject:
+    sql: 'SELECT 2.5 = {}'
+    result:
+    - {"col1": false}
+
+  float_zerostring:
+    sql: 'SELECT 2.5 = "0"'
+    result:
+    - {"col1": false}
+
+  float_onestring:
+    sql: 'SELECT 2.5 = "1"'
+    result:
+    - {"col1": false}
+
+  one_emptyarray:
+    sql: 'SELECT 1 = []'
+    result:
+    - {"col1": false}
+
+  one_string:
+    sql: 'SELECT 1 = "foo"'
+    result:
+    - {"col1": false}
+
+  one_floatstring:
+    sql: 'SELECT 1 = "2.5"'
+    result:
+    - {"col1": false}
+
+  one_float:
+    sql: 'SELECT 1 = 2.5'
+    result:
+    - {"col1": false}
+
+  one_one:
+    sql: 'SELECT 1 = 1'
+    result:
+    - {"col1": true}
+
+  one_zero:
+    sql: 'SELECT 1 = 0'
+    result:
+    - {"col1": false}
+
+  one_false:
+    sql: 'SELECT 1 = false'
+    result:
+    - {"col1": false}
+
+  one_null:
+    sql: 'SELECT 1 = null'
+    result:
+    - {"col1": null}
+
+  one_true:
+    sql: 'SELECT 1 = true'
+    result:
+    - {"col1": true}
+
+  one_emptyobject:
+    sql: 'SELECT 1 = {}'
+    result:
+    - {"col1": false}
+
+  one_zerostring:
+    sql: 'SELECT 1 = "0"'
+    result:
+    - {"col1": false}
+
+  one_onestring:
+    sql: 'SELECT 1 = "1"'
+    result:
+    - {"col1": true}
+
+  zero_emptyarray:
+    sql: 'SELECT 0 = []'
+    result:
+    - {"col1": false}
+
+  zero_string:
+    sql: 'SELECT 0 = "foo"'
+    result:
+    - {"col1": false}
+
+  zero_floatstring:
+    sql: 'SELECT 0 = "2.5"'
+    result:
+    - {"col1": false}
+
+  zero_float:
+    sql: 'SELECT 0 = 2.5'
+    result:
+    - {"col1": false}
+
+  zero_one:
+    sql: 'SELECT 0 = 1'
+    result:
+    - {"col1": false}
+
+  zero_zero:
+    sql: 'SELECT 0 = 0'
+    result:
+    - {"col1": true}
+
+  zero_false:
+    sql: 'SELECT 0 = false'
+    result:
+    - {"col1": true}
+
+  zero_null:
+    sql: 'SELECT 0 = null'
+    result:
+    - {"col1": null}
+
+  zero_true:
+    sql: 'SELECT 0 = true'
+    result:
+    - {"col1": false}
+
+  zero_emptyobject:
+    sql: 'SELECT 0 = {}'
+    result:
+    - {"col1": false}
+
+  zero_zerostring:
+    sql: 'SELECT 0 = "0"'
+    result:
+    - {"col1": true}
+
+  zero_onestring:
+    sql: 'SELECT 0 = "1"'
+    result:
+    - {"col1": false}
+
+  false_emptyarray:
+    sql: 'SELECT false = []'
+    result:
+    - {"col1": true}
+
+  false_string:
+    sql: 'SELECT false = "foo"'
+    result:
+    - {"col1": false}
+
+  false_floatstring:
+    sql: 'SELECT false = "2.5"'
+    result:
+    - {"col1": false}
+
+  false_float:
+    sql: 'SELECT false = 2.5'
+    result:
+    - {"col1": false}
+
+  false_one:
+    sql: 'SELECT false = 1'
+    result:
+    - {"col1": false}
+
+  false_zero:
+    sql: 'SELECT false = 0'
+    result:
+    - {"col1": true}
+
+  false_false:
+    sql: 'SELECT false = false'
+    result:
+    - {"col1": true}
+
+  false_null:
+    sql: 'SELECT false = null'
+    result:
+    - {"col1": null}
+
+  false_true:
+    sql: 'SELECT false = true'
+    result:
+    - {"col1": false}
+
+  false_emptyobject:
+    sql: 'SELECT false = {}'
+    result:
+    - {"col1": true}
+
+  false_zerostring:
+    sql: 'SELECT false = "0"'
+    result:
+    - {"col1": false}
+
+  false_onestring:
+    sql: 'SELECT false = "1"'
+    result:
+    - {"col1": false}
+
+  null_emptyarray:
+    sql: 'SELECT null = []'
+    result:
+    - {"col1": null}
+
+  null_string:
+    sql: 'SELECT null = "foo"'
+    result:
+    - {"col1": null}
+
+  null_floatstring:
+    sql: 'SELECT null = "2.5"'
+    result:
+    - {"col1": null}
+
+  null_float:
+    sql: 'SELECT null = 2.5'
+    result:
+    - {"col1": null}
+
+  null_one:
+    sql: 'SELECT null = 1'
+    result:
+    - {"col1": null}
+
+  null_zero:
+    sql: 'SELECT null = 0'
+    result:
+    - {"col1": null}
+
+  null_false:
+    sql: 'SELECT null = false'
+    result:
+    - {"col1": null}
+
+  null_null:
+    sql: 'SELECT null = null'
+    result:
+    - {"col1": null}
+
+  null_true:
+    sql: 'SELECT null = true'
+    result:
+    - {"col1": null}
+
+  null_emptyobject:
+    sql: 'SELECT null = {}'
+    result:
+    - {"col1": null}
+
+  null_zerostring:
+    sql: 'SELECT null = "0"'
+    result:
+    - {"col1": null}
+
+  null_onestring:
+    sql: 'SELECT null = "1"'
+    result:
+    - {"col1": null}
+
+  true_emptyarray:
+    sql: 'SELECT true = []'
+    result:
+    - {"col1": false}
+
+  true_string:
+    sql: 'SELECT true = "foo"'
+    result:
+    - {"col1": true}
+
+  true_floatstring:
+    sql: 'SELECT true = "2.5"'
+    result:
+    - {"col1": true}
+
+  true_float:
+    sql: 'SELECT true = 2.5'
+    result:
+    - {"col1": true}
+
+  true_one:
+    sql: 'SELECT true = 1'
+    result:
+    - {"col1": true}
+
+  true_zero:
+    sql: 'SELECT true = 0'
+    result:
+    - {"col1": false}
+
+  true_false:
+    sql: 'SELECT true = false'
+    result:
+    - {"col1": false}
+
+  true_null:
+    sql: 'SELECT true = null'
+    result:
+    - {"col1": null}
+
+  true_true:
+    sql: 'SELECT true = true'
+    result:
+    - {"col1": true}
+
+  true_emptyobject:
+    sql: 'SELECT true = {}'
+    result:
+    - {"col1": false}
+
+  true_zerostring:
+    sql: 'SELECT true = "0"'
+    result:
+    - {"col1": true}
+
+  true_onestring:
+    sql: 'SELECT true = "1"'
+    result:
+    - {"col1": true}
+
+  emptyobject_emptyarray:
+    sql: 'SELECT {} = []'
+    result:
+    - {"col1": true}
+
+  emptyobject_string:
+    sql: 'SELECT {} = "foo"'
+    result:
+    - {"col1": false}
+
+  emptyobject_floatstring:
+    sql: 'SELECT {} = "2.5"'
+    result:
+    - {"col1": false}
+
+  emptyobject_float:
+    sql: 'SELECT {} = 2.5'
+    result:
+    - {"col1": false}
+
+  emptyobject_one:
+    sql: 'SELECT {} = 1'
+    result:
+    - {"col1": false}
+
+  emptyobject_zero:
+    sql: 'SELECT {} = 0'
+    result:
+    - {"col1": false}
+
+  emptyobject_false:
+    sql: 'SELECT {} = false'
+    result:
+    - {"col1": true}
+
+  emptyobject_null:
+    sql: 'SELECT {} = null'
+    result:
+    - {"col1": null}
+
+  emptyobject_true:
+    sql: 'SELECT {} = true'
+    result:
+    - {"col1": false}
+
+  emptyobject_emptyobject:
+    sql: 'SELECT {} = {}'
+    result:
+    - {"col1": true}
+
+  emptyobject_zerostring:
+    sql: 'SELECT {} = "0"'
+    result:
+    - {"col1": false}
+
+  emptyobject_onestring:
+    sql: 'SELECT {} = "1"'
+    result:
+    - {"col1": false}
+
+  zerostring_emptyarray:
+    sql: 'SELECT "0" = []'
+    result:
+    - {"col1": false}
+
+  zerostring_string:
+    sql: 'SELECT "0" = "foo"'
+    result:
+    - {"col1": false}
+
+  zerostring_floatstring:
+    sql: 'SELECT "0" = "2.5"'
+    result:
+    - {"col1": false}
+
+  zerostring_float:
+    sql: 'SELECT "0" = 2.5'
+    result:
+    - {"col1": false}
+
+  zerostring_one:
+    sql: 'SELECT "0" = 1'
+    result:
+    - {"col1": false}
+
+  zerostring_zero:
+    sql: 'SELECT "0" = 0'
+    result:
+    - {"col1": true}
+
+  zerostring_false:
+    sql: 'SELECT "0" = false'
+    result:
+    - {"col1": false}
+
+  zerostring_null:
+    sql: 'SELECT "0" = null'
+    result:
+    - {"col1": null}
+
+  zerostring_true:
+    sql: 'SELECT "0" = true'
+    result:
+    - {"col1": true}
+
+  zerostring_emptyobject:
+    sql: 'SELECT "0" = {}'
+    result:
+    - {"col1": false}
+
+  zerostring_zerostring:
+    sql: 'SELECT "0" = "0"'
+    result:
+    - {"col1": true}
+
+  zerostring_onestring:
+    sql: 'SELECT "0" = "1"'
+    result:
+    - {"col1": false}
+
+  onestring_emptyarray:
+    sql: 'SELECT "1" = []'
+    result:
+    - {"col1": false}
+
+  onestring_string:
+    sql: 'SELECT "1" = "foo"'
+    result:
+    - {"col1": false}
+
+  onestring_floatstring:
+    sql: 'SELECT "1" = "2.5"'
+    result:
+    - {"col1": false}
+
+  onestring_float:
+    sql: 'SELECT "1" = 2.5'
+    result:
+    - {"col1": false}
+
+  onestring_one:
+    sql: 'SELECT "1" = 1'
+    result:
+    - {"col1": true}
+
+  onestring_zero:
+    sql: 'SELECT "1" = 0'
+    result:
+    - {"col1": false}
+
+  onestring_false:
+    sql: 'SELECT "1" = false'
+    result:
+    - {"col1": false}
+
+  onestring_null:
+    sql: 'SELECT "1" = null'
+    result:
+    - {"col1": null}
+
+  onestring_true:
+    sql: 'SELECT "1" = true'
+    result:
+    - {"col1": true}
+
+  onestring_emptyobject:
+    sql: 'SELECT "1" = {}'
+    result:
+    - {"col1": false}
+
+  onestring_zerostring:
+    sql: 'SELECT "1" = "0"'
+    result:
+    - {"col1": false}
+
+  onestring_onestring:
+    sql: 'SELECT "1" = "1"'
+    result:
+    - {"col1": true}
+
+  arraytwo1_arraytwo1:
+    sql: 'SELECT [1,2] = [1,2]'
+    result:
+    - {"col1": true}
+
+  arraytwo1_arraytwo2:
+    sql: 'SELECT [1,2] = [1,"2"]'
+    result:
+    - {"col1": true}
+
+  arraytwo1_arraytwo3:
+    sql: 'SELECT [1,2] = [2,3]'
+    result:
+    - {"col1": false}
+
+  arraytwo1_emptyarray:
+    sql: 'SELECT [1,2] = []'
+    result:
+    - {"col1": false}
+
+  arraytwo1_arrayone:
+    sql: 'SELECT [1,2] = [1]'
+    result:
+    - {"col1": false}
+
+  arraytwo2_arraytwo1:
+    sql: 'SELECT [1,"2"] = [1,2]'
+    result:
+    - {"col1": true}
+
+  arraytwo2_arraytwo2:
+    sql: 'SELECT [1,"2"] = [1,"2"]'
+    result:
+    - {"col1": true}
+
+  arraytwo2_arraytwo3:
+    sql: 'SELECT [1,"2"] = [2,3]'
+    result:
+    - {"col1": false}
+
+  arraytwo2_emptyarray:
+    sql: 'SELECT [1,"2"] = []'
+    result:
+    - {"col1": false}
+
+  arraytwo2_arrayone:
+    sql: 'SELECT [1,"2"] = [1]'
+    result:
+    - {"col1": false}
+
+  arraytwo3_arraytwo1:
+    sql: 'SELECT [2,3] = [1,2]'
+    result:
+    - {"col1": false}
+
+  arraytwo3_arraytwo2:
+    sql: 'SELECT [2,3] = [1,"2"]'
+    result:
+    - {"col1": false}
+
+  arraytwo3_arraytwo3:
+    sql: 'SELECT [2,3] = [2,3]'
+    result:
+    - {"col1": true}
+
+  arraytwo3_emptyarray:
+    sql: 'SELECT [2,3] = []'
+    result:
+    - {"col1": false}
+
+  arraytwo3_arrayone:
+    sql: 'SELECT [2,3] = [1]'
+    result:
+    - {"col1": false}
+
+  emptyarray_arraytwo1:
+    sql: 'SELECT [] = [1,2]'
+    result:
+    - {"col1": false}
+
+  emptyarray_arraytwo2:
+    sql: 'SELECT [] = [1,"2"]'
+    result:
+    - {"col1": false}
+
+  emptyarray_arraytwo3:
+    sql: 'SELECT [] = [2,3]'
+    result:
+    - {"col1": false}
+
+  emptyarray_emptyarray:
+    sql: 'SELECT [] = []'
+    result:
+    - {"col1": true}
+
+  emptyarray_arrayone:
+    sql: 'SELECT [] = [1]'
+    result:
+    - {"col1": false}
+
+  arrayone_arraytwo1:
+    sql: 'SELECT [1] = [1,2]'
+    result:
+    - {"col1": false}
+
+  arrayone_arraytwo2:
+    sql: 'SELECT [1] = [1,"2"]'
+    result:
+    - {"col1": false}
+
+  arrayone_arraytwo3:
+    sql: 'SELECT [1] = [2,3]'
+    result:
+    - {"col1": false}
+
+  arrayone_emptyarray:
+    sql: 'SELECT [1] = []'
+    result:
+    - {"col1": false}
+
+  arrayone_arrayone:
+    sql: 'SELECT [1] = [1]'
+    result:
+    - {"col1": true}
+
+  emptyobject_emptyobject:
+    sql: 'SELECT {} = {}'
+    result:
+    - {"col1": true}
+
+  emptyobject_objecttwo1:
+    sql: 'SELECT {} = {"x":"y", "y":"x"}'
+    result:
+    - {"col1": false}
+
+  emptyobject_objectone:
+    sql: 'SELECT {} = {"a":"b"}'
+    result:
+    - {"col1": false}
+
+  emptyobject_objecttwo2:
+    sql: 'SELECT {} = {"y":"x", "x":"y"}'
+    result:
+    - {"col1": false}
+
+  objecttwo1_emptyobject:
+    sql: 'SELECT {"x":"y", "y":"x"} = {}'
+    result:
+    - {"col1": false}
+
+  objecttwo1_objecttwo1:
+    sql: 'SELECT {"x":"y", "y":"x"} = {"x":"y", "y":"x"}'
+    result:
+    - {"col1": true}
+
+  objecttwo1_objectone:
+    sql: 'SELECT {"x":"y", "y":"x"} = {"a":"b"}'
+    result:
+    - {"col1": false}
+
+  objecttwo1_objecttwo2:
+    sql: 'SELECT {"x":"y", "y":"x"} = {"y":"x", "x":"y"}'
+    result:
+    - {"col1": true}
+
+  objectone_emptyobject:
+    sql: 'SELECT {"a":"b"} = {}'
+    result:
+    - {"col1": false}
+
+  objectone_objecttwo1:
+    sql: 'SELECT {"a":"b"} = {"x":"y", "y":"x"}'
+    result:
+    - {"col1": false}
+
+  objectone_objectone:
+    sql: 'SELECT {"a":"b"} = {"a":"b"}'
+    result:
+    - {"col1": true}
+
+  objectone_objecttwo2:
+    sql: 'SELECT {"a":"b"} = {"y":"x", "x":"y"}'
+    result:
+    - {"col1": false}
+
+  objecttwo2_emptyobject:
+    sql: 'SELECT {"y":"x", "x":"y"} = {}'
+    result:
+    - {"col1": false}
+
+  objecttwo2_objecttwo1:
+    sql: 'SELECT {"y":"x", "x":"y"} = {"x":"y", "y":"x"}'
+    result:
+    - {"col1": true}
+
+  objecttwo2_objectone:
+    sql: 'SELECT {"y":"x", "x":"y"} = {"a":"b"}'
+    result:
+    - {"col1": false}
+
+  objecttwo2_objecttwo2:
+    sql: 'SELECT {"y":"x", "x":"y"} = {"y":"x", "x":"y"}'
+    result:
+    - {"col1": true}

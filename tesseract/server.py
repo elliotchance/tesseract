@@ -1,4 +1,5 @@
 import json
+import os
 from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
@@ -79,8 +80,13 @@ class Server:
         where_clause, offset, new_args = where_expression.compile_lua(offset)
         args.extend(new_args)
 
+        # Lua dependencies
+        here = os.path.dirname(os.path.realpath(__file__))
+        with open(here + '/lua/operator_equal.lua') as lua_script:
+            lua = ''.join(lua_script.read())
+
         # Generate the full Lua program.
-        lua = """
+        lua += """
         -- First thing is to convert all the incoming values from JSON to
         -- native. Skipping the first two arguments that are not JSON and will
         -- always exist.
