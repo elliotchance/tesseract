@@ -94,38 +94,17 @@ class Server:
 
         # Generate the full Lua program.
         lua += """
-        -- First thing is to convert all the incoming values from JSON to
-        -- native. Skipping the first two arguments that are not JSON and will
-        -- always exist.
-        local args = {}
-        for i = 3, #ARGV do
-            args[i] = cjson.decode(ARGV[i])
-        end
-
-        -- Get one page - at the moment this is the whole table.
-        local records = redis.call('LRANGE', ARGV[1], '0', '-1')
-
-        -- Iterate each record in the page.
-        local matches = {}
-        for i, data in ipairs(records) do
-            -- Each row is stored as a JSON string and needs to be decoded
-            -- before we can use it.
-            local row = cjson.decode(data)
-
-            -- Process the fields in the SELECT clause.
+        local function process_fields_in_select_clause(row)
             %s
-
-            -- Test if the WHERE clause allows this record to be added to the
-            -- result.
-            if %s then
-                table.insert(matches, tuple)
-            end
+            return tuple
         end
 
-        -- The `matches` will be an array which Python can not decode on the
-        -- other end so we wrap it into an object.
-        return cjson.encode({result = matches})
+        local function matches_where_clause(row)
+            return %s
+        end
         """ % (select_expression, where_clause)
+
+        lua += self.load_lua_dependency('main')
 
         # Extract the values for the expression.
         return (lua, args)
@@ -137,7 +116,8 @@ class Server:
         select = result.statement
         lua, args = self.compile_select(result)
         try:
-            run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
+            run = self.redis.eval(lua, 0, select.table_name, select.columns,
+                                  *args)
 
             # The extra `decode()` is a requirement of Python 3 where
             # `json.loads()` must take a `str` and will not accept the arbitrary
