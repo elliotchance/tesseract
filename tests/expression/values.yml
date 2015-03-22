@@ -1,3 +1,5 @@
+# Testing values of all different types can be understood by the parser.
+
 tests:
   null:
     sql: SELECT null

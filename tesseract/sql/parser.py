@@ -307,6 +307,7 @@ def p_logic_expression(p):
 
     #     expression AND expression
     if p[2] == 'AND':
+        add_requirement(p, 'operator/and')
         p[0] = AndExpression(p[1], p[3])
 
     #     expression OR expression

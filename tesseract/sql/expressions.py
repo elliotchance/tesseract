@@ -216,7 +216,7 @@ class LessEqualExpression(BinaryExpression):
 
 class AndExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'AND', right, 'and')
+        BinaryExpression.__init__(self, left, 'AND', right, ':operator_and')
 
 
 class OrExpression(BinaryExpression):

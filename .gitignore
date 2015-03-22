@@ -10,5 +10,3 @@ parser.out
 .DS_Store
 
 /dump.rdb
-
-test_*.py

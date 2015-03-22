@@ -1,3 +1,5 @@
+import glob
+import os
 import time
 import yaml
 import json
@@ -38,14 +40,15 @@ def get_iterator(tests_file, name):
 
 def process_file(file):
     total = 0
-    tests_file = yaml.load(open('tests/%s' % file, 'r'))
-    out = open('tests/test_%s.py' % file[:-4], 'w')
+    tests_file = yaml.load(open(file, 'r'))
+    safe_name = file[6:-4].replace('/', '_')
+    out = open('tests_cache/test_%s.py' % safe_name, 'w')
 
     out.write("from unittest import TestCase\n")
     out.write("from tesseract.server import Server\n")
     out.write("import random\n\n")
 
-    out.write("class Test%s(TestCase):\n" % file[:-4].capitalize())
+    out.write("class Test%s(TestCase):\n" % safe_name.replace('_', ' ').title().replace(' ', ''))
 
     out.write("    def setUp(self):\n")
     out.write("        TestCase.setUp(self)\n")
@@ -121,10 +124,21 @@ def process_file(file):
 
     return total
 
-total = 0
+def process_folder(path):
+    total = 0
+    for file in listdir(path):
+        file_path = '%s/%s' % (path, file)
+        if os.path.isdir(file_path):
+            total += process_folder(file_path)
+        elif file.endswith('.yml'):
+            total += process_file(file_path)
+    return total
+
+# Clean out the cache before we generate all the tests
+for test in glob.glob("tests_cache/test_*.py"):
+    os.remove(test)
+
 start = time.time()
-for file in listdir('tests'):
-    if file.endswith('.yml'):
-        total += process_file(file)
+total = process_folder('tests')
 
 print('%d tests generated in %f seconds.' % (total, time.time() - start))
