@@ -15,7 +15,6 @@ precedence = (
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
-    #('right', 'UMINUS'),
 )
 
 
@@ -290,6 +289,7 @@ def p_comparison_expression(p):
 
     #     expression EQUAL expression
     elif p[2] == '=':
+        add_requirement(p, 'operator/equal')
         p[0] = EqualExpression(p[1], p[3])
 
     else:
@@ -326,18 +326,22 @@ def p_arithmetic_expression(p):
 
     #     expression PLUS expression
     if p[2].upper() == '+':
+        add_requirement(p, 'operator/plus')
         p[0] = AddExpression(p[1], p[3])
 
     #     expression TIMES expression
     elif p[2].upper() == '*':
+        add_requirement(p, 'operator/times')
         p[0] = MultiplyExpression(p[1], p[3])
 
     #     expression DIVIDE expression
     elif p[2].upper() == '/':
+        add_requirement(p, 'operator/divide')
         p[0] = DivideExpression(p[1], p[3])
 
     #     expression MINUS expression
     else:
+        add_requirement(p, 'operator/minus')
         p[0] = SubtractExpression(p[1], p[3])
 
 
@@ -361,11 +365,16 @@ def p_error(p):
     raise RuntimeError("Not valid SQL.")
 
 
+def add_requirement(p, function_name):
+    p.parser.lua_requirements.add(function_name)
+
+
 def parse(data):
     # Build the parser.
     parser = yacc.yacc()
     parser.statement = None
     parser.warnings = []
+    parser.lua_requirements = set()
 
     # Run the parser.
     parser.parse(data)

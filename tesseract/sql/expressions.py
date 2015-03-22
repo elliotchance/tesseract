@@ -226,19 +226,19 @@ class OrExpression(BinaryExpression):
 
 class AddExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '+', right)
+        BinaryExpression.__init__(self, left, '+', right, ':operator_plus')
 
 
 class SubtractExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '-', right)
+        BinaryExpression.__init__(self, left, '-', right, ':operator_minus')
 
 
 class MultiplyExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '*', right)
+        BinaryExpression.__init__(self, left, '*', right, ':operator_times')
 
 
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '/', right)
+        BinaryExpression.__init__(self, left, '/', right, ':operator_divide')

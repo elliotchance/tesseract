@@ -3,7 +3,6 @@ import yaml
 import json
 from os import listdir
 import re
-from tesseract.sql.expressions import Expression, Value
 
 
 def escape(string):
@@ -121,60 +120,6 @@ def process_file(file):
         out.write("\n")
 
     return total
-
-operators = {
-    'equal': '='
-}
-
-values = (
-    # Comparing scalars.
-    {
-        "null": 'null',
-        "true": 'true',
-        "false": 'false',
-        "zero": '0',
-        "one": '1',
-        "float": '2.5',
-        "zerostring": '"0"',
-        "onestring": '"1"',
-        "floatstring": '"2.5"',
-        "string": '"foo"',
-        "emptyarray": '[]',
-        "emptyobject": '{}',
-    },
-
-    # One-indexed arrays.
-    {
-        "emptyarray": '[]',
-        "arrayone": '[1]',
-        "arraytwo1": '[1,2]',
-        "arraytwo2": '[1,"2"]',
-        "arraytwo3": '[2,3]',
-    },
-
-    # Associative arrays.
-    {
-        "emptyobject": '{}',
-        "objectone": '{"a":"b"}',
-        "objecttwo1": '{"x":"y", "y":"x"}',
-        "objecttwo2": '{"y":"x", "x":"y"}'
-    }
-)
-
-for operator_name, operator in operators.items():
-    with open('tests/expression_%s.yml' % operator_name, 'r') as stream:
-        tests_file = yaml.load(stream)
-    with open('tests/expression_%s.yml' % operator_name, 'a') as tests_out:
-        for group in values:
-            for left_name, left in group.items():
-                for right_name, right in group.items():
-                    test_name = '%s_%s' % (left_name, right_name)
-                    if test_name not in tests_file['tests']:
-                        tests_out.write("\n  %s:\n" % test_name)
-                        tests_out.write("    sql: 'SELECT %s %s %s'\n" % \
-                                        (left, operator, right))
-                        tests_out.write("    result:\n")
-                        tests_out.write('    - {"col1": %s}\n' % ('null' if left_name == 'null' or right_name == 'null' else 'false'))
 
 total = 0
 start = time.time()

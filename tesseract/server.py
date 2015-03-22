@@ -56,9 +56,15 @@ class Server:
             return ServerResult(True)
 
         # This is a `SELECT`
-        return self.execute_select(result.statement)
+        return self.execute_select(result)
 
-    def compile_select(self, expression):
+    def load_lua_dependency(self, operator):
+        here = os.path.dirname(os.path.realpath(__file__))
+        with open(here + '/lua/%s.lua' % operator) as lua_script:
+            return ''.join(lua_script.read())
+
+    def compile_select(self, result):
+        expression = result.statement
         assert isinstance(expression, SelectStatement)
 
         offset = 3
@@ -80,10 +86,11 @@ class Server:
         where_clause, offset, new_args = where_expression.compile_lua(offset)
         args.extend(new_args)
 
-        # Lua dependencies
-        here = os.path.dirname(os.path.realpath(__file__))
-        with open(here + '/lua/operator_equal.lua') as lua_script:
-            lua = ''.join(lua_script.read())
+        # Lua dependencies. It is important we load the base before anything
+        # else otherwise Lua will throw an error about base stuff missing.
+        lua = self.load_lua_dependency('base')
+        for requirement in result.lua_requirements:
+            lua += self.load_lua_dependency(requirement)
 
         # Generate the full Lua program.
         lua += """
@@ -123,11 +130,12 @@ class Server:
         # Extract the values for the expression.
         return (lua, args)
 
-    def execute_select(self, select):
+    def execute_select(self, result):
         """
         :type select: SelectExpression
         """
-        lua, args = self.compile_select(select)
+        select = result.statement
+        lua, args = self.compile_select(result)
         try:
             run = self.redis.eval(lua, 0, select.table_name, select.columns, *args)
 
