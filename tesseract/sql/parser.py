@@ -294,6 +294,7 @@ def p_comparison_expression(p):
 
     else:
         #     expression NOT_EQUAL expression
+        add_requirement(p, 'operator/not_equal')
         p[0] = NotEqualExpression(p[1], p[3])
 
 

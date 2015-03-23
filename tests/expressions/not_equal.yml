@@ -1,102 +1,100 @@
 tests:
-  # NULLs
   left_null:
-    sql: 'SELECT null = 123'
+    sql: 'SELECT null != 123'
     result:
     - {"col1": null}
 
   right_null:
-    sql: 'SELECT 123 = null'
+    sql: 'SELECT 123 != null'
     result:
     - {"col1": null}
 
   both_null:
-    sql: 'SELECT null = null'
+    sql: 'SELECT null != null'
     result:
     - {"col1": null}
 
-  # Basic comparisons.
   boolean_equal:
-    sql: 'SELECT true = true'
+    sql: 'SELECT true != true'
     result:
-    - {"col1": true}
+    - {"col1": false}
 
   boolean_not_equal:
-    sql: 'SELECT true = false'
+    sql: 'SELECT true != false'
     result:
-    - {"col1": false}
+    - {"col1": true}
 
   number_equal:
-    sql: 'SELECT 123 = 123'
+    sql: 'SELECT 123 != 123'
     result:
-    - {"col1": true}
+    - {"col1": false}
 
   number_not_equal:
-    sql: 'SELECT 123 = 456'
-    result:
-    - {"col1": false}
-
-  string_equal:
-    sql: 'SELECT "foo" = "foo"'
+    sql: 'SELECT 123 != 456'
     result:
     - {"col1": true}
 
-  string_not_equal:
-    sql: 'SELECT "foo" = "bar"'
+  string_equal:
+    sql: 'SELECT "foo" != "foo"'
     result:
     - {"col1": false}
+
+  string_not_equal:
+    sql: 'SELECT "foo" != "bar"'
+    result:
+    - {"col1": true}
 
   # Array comparisons.
   comparing_empty_arrays:
-    sql: 'SELECT [] = []'
+    sql: 'SELECT [] != []'
     result:
-    - {"col1": true}
+    - {"col1": false}
 
   left_array_has_more_items:
-    sql: 'SELECT [1, 2] = [1]'
-    result:
-    - {"col1": false}
-
-  right_array_has_more_items:
-    sql: 'SELECT [1] = [1, 2]'
-    result:
-    - {"col1": false}
-
-  equal_arrays:
-    sql: 'SELECT [1, 2] = [1, 2]'
+    sql: 'SELECT [1, 2] != [1]'
     result:
     - {"col1": true}
 
-  non_equal_arrays:
-    sql: 'SELECT [1, 2] = [2, 1]'
+  right_array_has_more_items:
+    sql: 'SELECT [1] != [1, 2]'
+    result:
+    - {"col1": true}
+
+  equal_arrays:
+    sql: 'SELECT [1, 2] != [1, 2]'
     result:
     - {"col1": false}
+
+  non_equal_arrays:
+    sql: 'SELECT [1, 2] != [2, 1]'
+    result:
+    - {"col1": true}
 
   # Object comparisons.
   comparing_empty_objects:
-    sql: 'SELECT {} = {}'
+    sql: 'SELECT {} != {}'
     result:
-    - {"col1": true}
+    - {"col1": false}
 
   left_object_has_more_items:
-    sql: 'SELECT {"foo":"bar"} = {}'
-    result:
-    - {"col1": false}
-
-  right_object_has_more_items:
-    sql: 'SELECT {} = {"foo":"bar"}'
-    result:
-    - {"col1": false}
-
-  equal_objects:
-    sql: 'SELECT {"foo":"bar","bar":"baz"} = {"bar":"baz","foo":"bar"}'
+    sql: 'SELECT {"foo":"bar"} != {}'
     result:
     - {"col1": true}
 
-  non_equal_arrays:
-    sql: 'SELECT {"foo":"bar","bar":"baz"} = {"bar":"baz","foo":"barZ"}'
+  right_object_has_more_items:
+    sql: 'SELECT {} != {"foo":"bar"}'
+    result:
+    - {"col1": true}
+
+  equal_objects:
+    sql: 'SELECT {"foo":"bar","bar":"baz"} != {"bar":"baz","foo":"bar"}'
     result:
     - {"col1": false}
+
+  non_equal_arrays:
+    sql: 'SELECT {"foo":"bar","bar":"baz"} != {"bar":"baz","foo":"barZ"}'
+    result:
+    - {"col1": true}
 
   # Normally when we compare scalar values there must be a operator that
   # supports the comparison or an error is thrown like 'No such operator ...'.
@@ -104,6 +102,6 @@ tests:
   # individual items we want to make sure that recursion cascades back up to
   # `false` if anything cannot be compared rather than error.
   recursive_comparisons_return_booleans:
-    sql: 'SELECT [1] = [true]'
+    sql: 'SELECT [1] != [true]'
     result:
-    - {"col1": false}
+    - {"col1": true}

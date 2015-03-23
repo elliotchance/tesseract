@@ -191,7 +191,7 @@ class EqualExpression(BinaryExpression):
 
 class NotEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '<>', right, '~=')
+        BinaryExpression.__init__(self, left, '<>', right, ':operator_not_equal')
 
 
 class GreaterExpression(BinaryExpression):
