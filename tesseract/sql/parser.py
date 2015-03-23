@@ -312,6 +312,7 @@ def p_logic_expression(p):
 
     #     expression OR expression
     else:
+        add_requirement(p, 'operator/or')
         p[0] = OrExpression(p[1], p[3])
 
 

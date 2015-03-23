@@ -221,7 +221,7 @@ class AndExpression(BinaryExpression):
 
 class OrExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'OR', right, 'or')
+        BinaryExpression.__init__(self, left, 'OR', right, ':operator_or')
 
 
 class AddExpression(BinaryExpression):

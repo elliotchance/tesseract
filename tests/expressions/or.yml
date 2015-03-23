@@ -1,0 +1,39 @@
+tests:
+  both_null:
+    sql: SELECT null OR null
+    result:
+    - {"col1": null}
+
+  left_null:
+    sql: SELECT null OR true
+    result:
+    - {"col1": null}
+
+  right_null:
+    sql: SELECT true OR null
+    result:
+    - {"col1": null}
+
+  true_true:
+    sql: SELECT true OR true
+    result:
+    - {"col1": true}
+
+  true_false:
+    sql: SELECT true OR false
+    result:
+    - {"col1": true}
+
+  false_true:
+    sql: SELECT false OR true
+    result:
+    - {"col1": true}
+
+  false_false:
+    sql: SELECT false OR false
+    result:
+    - {"col1": false}
+
+  incompatible_types:
+    sql: SELECT false OR 3.5
+    error: No such operator boolean OR number.
