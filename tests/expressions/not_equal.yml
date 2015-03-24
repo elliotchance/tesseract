@@ -105,3 +105,7 @@ tests:
     sql: 'SELECT [1] != [true]'
     result:
     - {"col1": true}
+
+  incompatible_types:
+    sql: SELECT false != 3.5
+    error: No such operator boolean <> number.

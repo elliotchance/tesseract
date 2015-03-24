@@ -285,6 +285,7 @@ def p_comparison_expression(p):
 
     #     expression LESS expression
     elif p[2] == '<':
+        add_requirement(p, 'operator/less')
         p[0] = LessExpression(p[1], p[3])
 
     #     expression EQUAL expression

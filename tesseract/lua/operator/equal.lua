@@ -1,4 +1,8 @@
 local function operator_equal(left, right, should_error)
+    if should_error == nil then
+        should_error = true
+    end
+
     -- If either value is null then the result is always null.
     if left == cjson.null or right == cjson.null then
         return cjson.null
@@ -52,6 +56,11 @@ local function operator_equal(left, right, should_error)
         return (left == right)
     end
 
-    -- Perform comparison.
-    return left == right
+    -- We only allow the comparison of numbers and strings.
+    if (type(left) == 'number' or type(left) == 'string') and
+            (type(right) == 'number' or type(left) == 'string') then
+        return left == right
+    end
+
+    no_such_operator(left, '=', right)
 end

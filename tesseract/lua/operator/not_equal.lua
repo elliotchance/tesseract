@@ -1,4 +1,8 @@
 local function operator_not_equal(left, right, should_error)
+    if should_error == nil then
+        should_error = true
+    end
+
     -- If either value is null then the result is always null.
     if left == cjson.null or right == cjson.null then
         return cjson.null

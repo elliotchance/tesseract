@@ -1,0 +1,42 @@
+tests:
+  # NULLs
+  left_null:
+    sql: 'SELECT null < 123'
+    result:
+    - {"col1": null}
+
+  right_null:
+    sql: 'SELECT 123 < null'
+    result:
+    - {"col1": null}
+
+  both_null:
+    sql: 'SELECT null < null'
+    result:
+    - {"col1": null}
+
+  # Basic comparisons.
+  number_less_than:
+    sql: 'SELECT 100 < 200'
+    result:
+    - {"col1": true}
+
+  number_not_less_than:
+    sql: 'SELECT 200 < 100'
+    result:
+    - {"col1": false}
+
+  string_less_than:
+    sql: 'SELECT "ab" < "ba"'
+    result:
+    - {"col1": true}
+
+  string_not_less_than:
+    sql: 'SELECT "ba" < "ab"'
+    result:
+    - {"col1": false}
+
+  # Expected errors.
+  incompatible_types:
+    sql: SELECT false < 3.5
+    error: No such operator boolean < number.
