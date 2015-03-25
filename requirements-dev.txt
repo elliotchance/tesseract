@@ -1,3 +1,5 @@
 coveralls
 pyyaml
 nose
+markdown
+pygments

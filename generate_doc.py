@@ -30,6 +30,7 @@ def process_folder(path):
             )
             with open('%shtml' % file_path[:-2], 'w') as html:
                 html.write("""
+<link rel="stylesheet" type="text/css" href="./codehilite.css">
 <table width="100%%">
   <tr>
     <td width="200" valign="top">%s</td>
