@@ -242,3 +242,17 @@ class MultiplyExpression(BinaryExpression):
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '/', right, ':operator_divide')
+
+
+class FunctionCall(Expression):
+    def __init__(self, function_name, argument):
+        self.function_name = function_name
+        self.argument = argument
+
+    def compile_lua(self, offset):
+        # Compile the argument.
+        lua_arg, offset, new_args = self.argument.compile_lua(offset)
+
+        lua = 'function_%s(%s)' % (self.function_name, lua_arg)
+
+        return (lua, offset, new_args)

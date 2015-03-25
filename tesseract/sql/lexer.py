@@ -34,6 +34,8 @@ operators = (
     'DIVIDE',
     'SQUARE_CLOSE',
     'SQUARE_OPEN',
+    'PARAM_CLOSE',
+    'PARAM_OPEN',
 )
 
 # Values and identifiers.
@@ -66,6 +68,8 @@ t_TIMES = r'\*'
 t_DIVIDE = r'\/'
 t_SQUARE_CLOSE = r'\]'
 t_SQUARE_OPEN = r'\['
+t_PARAM_CLOSE = r'\)'
+t_PARAM_OPEN = r'\('
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

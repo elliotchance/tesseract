@@ -253,6 +253,7 @@ def p_expression(p):
         expression : arithmetic_expression
                    | comparison_expression
                    | logic_expression
+                   | function_call
                    | value
     """
 
@@ -300,6 +301,17 @@ def p_comparison_expression(p):
         #     expression NOT_EQUAL expression
         add_requirement(p, 'operator/not_equal')
         p[0] = NotEqualExpression(p[1], p[3])
+
+
+# function_call
+# -------------
+def p_function_call(p):
+    """
+        function_call : IDENTIFIER PARAM_OPEN expression PARAM_CLOSE
+    """
+
+    add_requirement(p, 'function/%s' % p[1])
+    p[0] = FunctionCall(p[1], p[3])
 
 
 # logic_expression

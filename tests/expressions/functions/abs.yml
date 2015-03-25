@@ -1,0 +1,5 @@
+tests:
+  null:
+    sql: SELECT abs(null)
+    result:
+    - {"col1": null}
