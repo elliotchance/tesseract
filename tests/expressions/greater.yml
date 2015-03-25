@@ -16,6 +16,11 @@ tests:
     - {"col1": null}
 
   # Basic comparisons.
+  number_equal:
+    sql: 'SELECT 100 > 100'
+    result:
+    - {"col1": false}
+
   number_less_than:
     sql: 'SELECT 100 > 200'
     result:
@@ -25,6 +30,11 @@ tests:
     sql: 'SELECT 200 > 100'
     result:
     - {"col1": true}
+
+  string_equal:
+    sql: 'SELECT "ab" > "ab"'
+    result:
+    - {"col1": false}
 
   string_less_than:
     sql: 'SELECT "ab" > "ba"'
