@@ -8,3 +8,8 @@ tests:
     sql: SELECT abs(1.23)
     result:
     - {"col1": 1.23}
+
+  negative_number:
+    sql: SELECT abs(-1.23)
+    result:
+    - {"col1": 1.23}
