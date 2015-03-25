@@ -3,5 +3,9 @@ local function function_abs(value)
         return value
     end
 
-    return math.abs(value)
+    if type(value) == 'number' then
+        return math.abs(value)
+    end
+
+    no_such_function('abs', value)
 end
