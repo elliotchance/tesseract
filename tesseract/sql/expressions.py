@@ -206,7 +206,7 @@ class LessExpression(BinaryExpression):
 
 class GreaterEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '>=', right)
+        BinaryExpression.__init__(self, left, '>=', right, ':operator_greater_equal')
 
 
 class LessEqualExpression(BinaryExpression):
