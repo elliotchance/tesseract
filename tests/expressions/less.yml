@@ -42,5 +42,5 @@ tests:
     error: No such operator boolean < number.
 
   different_types:
-    sql: SELECT false < "3.5"
-    error: No such operator boolean < string.
+    sql: SELECT 3.5 < "3.5"
+    error: No such operator number < string.

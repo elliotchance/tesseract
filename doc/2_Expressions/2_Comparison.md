@@ -76,6 +76,8 @@ Less than or equal to:
 * `number`
 * `string`
 
+When comparing strings it follows the same rules as how Lua compares strings.
+
 
 Logical
 -------

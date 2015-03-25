@@ -273,6 +273,7 @@ def p_comparison_expression(p):
 
     #     expression GREATER expression
     if p[2] == '>':
+        add_requirement(p, 'operator/greater')
         p[0] = GreaterExpression(p[1], p[3])
 
     #     expression GREATER_EQUAL expression
