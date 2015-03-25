@@ -26,15 +26,20 @@ def process_folder(path):
             output = StringIO.StringIO()
             markdown.markdownFromFile(
                 input=file_path,
-                output=output
+                output=output,
+                extensions=[
+                    'markdown.extensions.tables',
+                    'markdown.extensions.codehilite',
+                    'markdown.extensions.toc'
+                ]
             )
             with open('%shtml' % file_path[:-2], 'w') as html:
                 html.write("""
-<link rel="stylesheet" type="text/css" href="./codehilite.css">
+<link rel="stylesheet" type="text/css" href="../style.css">
 <table width="100%%">
   <tr>
     <td width="200" valign="top">%s</td>
-    <td valign="top">%s</td>
+    <td valign="top"><div class="markdown-body">%s</div></td>
   </tr>
 </table>
                 """ % (index, output.getvalue()))
