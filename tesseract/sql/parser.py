@@ -310,8 +310,11 @@ def p_function_call(p):
         function_call : IDENTIFIER PARAM_OPEN expression PARAM_CLOSE
     """
 
-    add_requirement(p, 'function/%s' % p[1])
-    p[0] = FunctionCall(p[1], p[3])
+    # Function names are not case sensitive.
+    function_name = str(p[1]).lower()
+
+    add_requirement(p, 'function/%s' % function_name)
+    p[0] = FunctionCall(function_name, p[3])
 
 
 # logic_expression

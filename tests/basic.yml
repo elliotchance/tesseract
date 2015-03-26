@@ -23,3 +23,9 @@ tests:
   ignore_carriage_return:
     sql: "SELECT *\rFROM foo"
     as: SELECT * FROM foo
+
+  functions_are_not_case_sensitive:
+    sql: SELECT ABS(-1)
+    as: SELECT abs(-1)
+    result:
+    - {"col1": 1}
