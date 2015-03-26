@@ -46,6 +46,7 @@ def process_file(file):
 
     out.write("from unittest import TestCase\n")
     out.write("from tesseract.server import Server\n")
+    out.write("import tesseract.sql.parser as parser\n")
     out.write("import random\n\n")
 
     out.write("class Test%s(TestCase):\n" % safe_name.replace('_', ' ').title().replace(' ', ''))
@@ -73,6 +74,16 @@ def process_file(file):
         # Load any data sets if needed.
         if 'data' in test:
             out.write("        self.load_%s(server)\n\n" % test['data'])
+
+        # We only generate a parse test if there is only one SQL statement
+        # provided.
+        if not isinstance(test['sql'], list) and 'error' not in test:
+            out.write("        sql = %s\n" % escape(test['sql']))
+            out.write("        result = parser.parse(sql)\n")
+            if 'as' in test:
+                out.write("        sql = %s\n" % escape(test['as']))
+            out.write("        self.assertEquals(sql, str(result.statement))\n")
+            out.write("\n")
 
         # Convert a single SQL into a list if we have to.
         if not isinstance(test['sql'], list):

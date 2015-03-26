@@ -1,5 +1,7 @@
 import json
 import os
+import socket
+from thread import start_new_thread
 from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
@@ -11,7 +13,7 @@ class Server:
     """
 
     def __init__(self, redis_host=None):
-        # The default Redis host is `localhost` if it is not provided
+        # The default Redis host is `localhost` if it is not provided.
         if not redis_host:
             redis_host = 'localhost'
 
@@ -25,6 +27,43 @@ class Server:
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
+
+
+    def start(self):
+        # Create an INET, STREAMing socket.
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Bind the socket to a public host, and the default port.
+        server_socket.bind(('0.0.0.0', 3679))
+
+        # Become a server socket.
+        server_socket.listen(5)
+
+        # Start accepting messages.
+        print("Server ready.")
+        while True:
+            # Accept connections from outside.
+            (client_socket, address) = server_socket.accept()
+
+            # A connection has been made, spawn off a new thread to handle it.
+            print("Accepted connection.")
+            start_new_thread(self.handle_client, (client_socket,))
+
+
+    def handle_client(self, client_socket):
+        while True:
+            # Read the incoming request.
+            data = client_socket.recv(1024)
+
+            # Decode the JSON.
+            request = json.loads(data)
+
+            # Process the request.
+            result = self.execute(request['sql'])
+
+            # Send the response.
+            client_socket.send(str(result))
+
 
     def execute(self, sql):
         """
@@ -58,10 +97,12 @@ class Server:
         # This is a `SELECT`
         return self.execute_select(result)
 
+
     def load_lua_dependency(self, operator):
         here = os.path.dirname(os.path.realpath(__file__))
         with open(here + '/lua/%s.lua' % operator) as lua_script:
             return ''.join(lua_script.read())
+
 
     def compile_select(self, result):
         expression = result.statement
@@ -109,6 +150,7 @@ class Server:
         # Extract the values for the expression.
         return (lua, args)
 
+
     def execute_select(self, result):
         """
         :type select: SelectExpression
@@ -145,3 +187,13 @@ class ServerResult:
         self.data = data
         self.error = error
         self.warnings = warnings
+
+
+    def __str__(self):
+        obj = {
+            "success": self.success,
+            "data": self.data,
+            "error": self.error,
+            "warnings": self.warnings,
+        }
+        return json.dumps(obj)

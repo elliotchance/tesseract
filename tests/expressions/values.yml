@@ -161,5 +161,6 @@ tests:
 
   string_single_quotes:
     sql: SELECT 'false'
+    as: SELECT "false"
     result:
     - {"col1": "false"}

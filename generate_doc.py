@@ -43,7 +43,8 @@ def process_folder(path, depth):
                 extensions=[
                     'markdown.extensions.tables',
                     'markdown.extensions.codehilite',
-                    'markdown.extensions.toc'
+                    'markdown.extensions.toc',
+                    'markdown.extensions.fenced_code'
                 ]
             )
             with open('%shtml' % file_path[:-2], 'w') as html:

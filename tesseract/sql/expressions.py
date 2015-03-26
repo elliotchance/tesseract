@@ -256,3 +256,7 @@ class FunctionCall(Expression):
         lua = 'function_%s(%s)' % (self.function_name, lua_arg)
 
         return (lua, offset, new_args)
+
+
+    def __str__(self):
+        return '%s(%s)' % (self.function_name, str(self.argument))

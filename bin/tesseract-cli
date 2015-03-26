@@ -1,9 +1,16 @@
-from tesseract.server import Server
+#!/usr/bin/env python
+
 import sys
+from os.path import dirname
+
+# This is to allow the server to be run before its installed properly.
+sys.path.append(dirname(__file__) + "/..")
+
+from tesseract.client import Client
 from tesseract.sql.expressions import Expression
 
-# Start up the server.
-server = Server()
+# Connect.
+client = Client()
 
 # Present an unlimited amount of prompts.
 while True:
@@ -19,19 +26,22 @@ while True:
         break
 
     # Execute the SQL.
-    result = server.execute(sql)
+    request = {
+        "sql": sql,
+    }
+    result = client.send(request)
 
-    if not result.success:
+    if not result['success']:
         # There was something wrong, lets print out the error.
-        print("Error: %s" % result.error)
+        print("Error: %s" % result['error'])
     else:
         # The result was successful. We can now print out the result rows.
         print('[')
         first = True
-        for row in result.data:
+        for row in result['data']:
             print("  %s%s" % (Expression.to_sql(row), ',' if first else ''))
             first = False
         print(']')
 
     # Print a blank line to give us some space between each prompt.
-    print()
+    print("")

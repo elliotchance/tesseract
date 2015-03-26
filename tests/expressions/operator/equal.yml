@@ -79,22 +79,23 @@ tests:
     - {"col1": true}
 
   left_object_has_more_items:
-    sql: 'SELECT {"foo":"bar"} = {}'
+    sql: 'SELECT {"foo": "bar"} = {}'
     result:
     - {"col1": false}
 
   right_object_has_more_items:
-    sql: 'SELECT {} = {"foo":"bar"}'
+    sql: 'SELECT {} = {"foo": "bar"}'
     result:
     - {"col1": false}
 
   equal_objects:
-    sql: 'SELECT {"foo":"bar","bar":"baz"} = {"bar":"baz","foo":"bar"}'
+    sql: 'SELECT {"foo": "bar", "bar": "baz"} = {"bar": "baz", "foo": "bar"}'
+    as: 'SELECT {"foo": "bar", "bar": "baz"} = {"foo": "bar", "bar": "baz"}'
     result:
     - {"col1": true}
 
-  non_equal_arrays:
-    sql: 'SELECT {"foo":"bar","bar":"baz"} = {"bar":"baz","foo":"barZ"}'
+  non_equal_objects:
+    sql: 'SELECT {"foo": "bar", "bar": "baz"} = {"foo": "barZ", "bar": "baz"}'
     result:
     - {"col1": false}
 
