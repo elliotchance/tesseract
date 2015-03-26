@@ -50,9 +50,9 @@ def process_folder(path, depth):
                 style_css = ("../" * depth) + "style.css"
                 html.write("""
 <link rel="stylesheet" type="text/css" href="%s">
-<table width="100%%">
+<table width="100%%" cellpadding="5" cellspacing="0">
   <tr>
-    <td width="200" valign="top">%s</td>
+    <td width="200" valign="top" style="border-right: 1px black solid" bgcolor="#ADD8E6">%s</td>
     <td valign="top"><div class="markdown-body">%s</div></td>
   </tr>
 </table>
