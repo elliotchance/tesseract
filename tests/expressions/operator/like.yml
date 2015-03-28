@@ -28,3 +28,18 @@ tests:
     sql: SELECT "elliot" LIKE "ell%iot"
     result:
     - {"col1": true}
+
+  value_is_null:
+    sql: SELECT null LIKE "foo"
+    result:
+    - {"col1": null}
+
+  regex_is_null:
+    sql: SELECT "foo" LIKE null
+    result:
+    - {"col1": null}
+
+  both_null:
+    sql: SELECT null LIKE null
+    result:
+    - {"col1": null}
