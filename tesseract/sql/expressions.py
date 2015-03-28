@@ -260,3 +260,8 @@ class FunctionCall(Expression):
 
     def __str__(self):
         return '%s(%s)' % (self.function_name, str(self.argument))
+
+
+class LikeExpression(BinaryExpression):
+    def __init__(self, value, regex):
+        BinaryExpression.__init__(self, value, 'LIKE', regex, ':operator_like')

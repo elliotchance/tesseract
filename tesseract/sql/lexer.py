@@ -11,6 +11,7 @@ sql_keywords = (
     'FROM',
     'INSERT',
     'INTO',
+    'LIKE',
     'OR',
     'SELECT',
     'WHERE',

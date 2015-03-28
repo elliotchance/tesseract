@@ -1,0 +1,5 @@
+tests:
+  exact_match:
+    sql: SELECT "elliot" LIKE "elliot"
+    result:
+    - {"col1": true}

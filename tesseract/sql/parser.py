@@ -15,6 +15,7 @@ precedence = (
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
+    ('left', 'LIKE'),
 )
 
 
@@ -254,6 +255,7 @@ def p_expression(p):
                    | comparison_expression
                    | logic_expression
                    | function_call
+                   | like_expression
                    | value
     """
 
@@ -315,6 +317,17 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# like_expression
+# ---------------
+def p_like_expression(p):
+    """
+        like_expression : expression LIKE expression
+    """
+
+    add_requirement(p, 'operator/like')
+    p[0] = LikeExpression(p[1], p[3])
 
 
 # logic_expression
