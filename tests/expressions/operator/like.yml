@@ -13,3 +13,8 @@ tests:
     sql: SELECT "elliot" LIKE "ell.ot"
     result:
     - {"col1": true}
+
+  single_character_should_not_match_multiple:
+    sql: SELECT "elliiot" LIKE "ell.ot"
+    result:
+    - {"col1": false}
