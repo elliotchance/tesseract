@@ -106,3 +106,29 @@ OR      | `true`  | `false`
 ------- | ------- | -------
 `true`  | `true`  | `true`
 `false` | `true`  | `false`
+
+
+Regular Expressions
+-------------------
+
+    value LIKE regex
+    value NOT LIKE regex
+
+`value` must be a string, but can be of any length.
+
+`regex` uses the SQL rules for `LIKE` expressions.
+
+Character | Description
+--------- | -----------
+`.`       | Match any single character.
+`%`       | Match zero or more characters.
+
+### Examples
+
+Test if a string starts with another string:
+
+    SELECT "Bob Smith" LIKE "Bob %"
+
+Test if a string ends with another string:
+
+    SELECT "Bob Smith" LIKE "% Smith"
