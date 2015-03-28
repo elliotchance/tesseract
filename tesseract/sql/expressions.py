@@ -263,5 +263,7 @@ class FunctionCall(Expression):
 
 
 class LikeExpression(BinaryExpression):
-    def __init__(self, value, regex):
-        BinaryExpression.__init__(self, value, 'LIKE', regex, ':operator_like')
+    def __init__(self, value, regex, is_not):
+        function = ':operator_not_like' if is_not else ':operator_like'
+        operator = 'NOT LIKE' if is_not else 'LIKE'
+        BinaryExpression.__init__(self, value, operator, regex, function)

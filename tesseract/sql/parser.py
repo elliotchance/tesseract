@@ -324,10 +324,18 @@ def p_function_call(p):
 def p_like_expression(p):
     """
         like_expression : expression LIKE expression
+                        | expression NOT LIKE expression
     """
 
-    add_requirement(p, 'operator/like')
-    p[0] = LikeExpression(p[1], p[3])
+    #     expression LIKE expression
+    if p[2] == 'LIKE':
+        add_requirement(p, 'operator/like')
+        p[0] = LikeExpression(p[1], p[3], False)
+
+    #     expression NOT LIKE expression
+    else:
+        add_requirement(p, 'operator/not_like')
+        p[0] = LikeExpression(p[1], p[4], True)
 
 
 # logic_expression

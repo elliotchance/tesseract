@@ -12,6 +12,7 @@ sql_keywords = (
     'INSERT',
     'INTO',
     'LIKE',
+    'NOT',
     'OR',
     'SELECT',
     'WHERE',
