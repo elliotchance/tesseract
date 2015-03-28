@@ -18,3 +18,8 @@ tests:
     sql: SELECT "elliiot" LIKE "ell.ot"
     result:
     - {"col1": false}
+
+  match_multiple_characters:
+    sql: SELECT "elliot" LIKE "e%t"
+    result:
+    - {"col1": true}
