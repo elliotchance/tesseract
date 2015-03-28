@@ -3,3 +3,8 @@ tests:
     sql: SELECT "elliot" LIKE "elliot"
     result:
     - {"col1": true}
+
+  not_exact_match:
+    sql: SELECT "elliot2" LIKE "elliot"
+    result:
+    - {"col1": false}
