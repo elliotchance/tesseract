@@ -43,3 +43,15 @@ tests:
     sql: SELECT null LIKE null
     result:
     - {"col1": null}
+
+  value_incompatible_type:
+    sql: SELECT false LIKE "foo"
+    error: No such operator boolean LIKE string.
+
+  regex_incompatible_type:
+    sql: SELECT "foo" LIKE false
+    error: No such operator string LIKE boolean.
+
+  both_incompatible_type:
+    sql: SELECT false LIKE false
+    error: No such operator boolean LIKE boolean.

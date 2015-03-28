@@ -4,6 +4,11 @@ local function operator_like(value, regex)
         return cjson.null
     end
 
+    -- We only allow strings to be processed
+    if type(value) ~= 'string' or type(regex) ~= 'string' then
+        no_such_operator(value, 'LIKE', regex)
+    end
+
     regex = '^' .. regex:gsub('%%', '.*') .. '$'
     return value:find(regex) ~= nil
 end
