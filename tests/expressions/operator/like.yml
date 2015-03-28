@@ -23,3 +23,8 @@ tests:
     sql: SELECT "elliot" LIKE "e%t"
     result:
     - {"col1": true}
+
+  match_zero_characters:
+    sql: SELECT "elliot" LIKE "ell%iot"
+    result:
+    - {"col1": true}
