@@ -50,20 +50,22 @@ class SelectStatement(Statement):
 
     NO_TABLE = Identifier('__no_table')
 
-    def __init__(self, table_name, columns, where=None):
+    def __init__(self, table_name, columns, where=None, order=None):
         """
             :param table_name: Identifier
             :param columns: Expression
             :param where: None|Expression
+            :param order: None|Identifier
         """
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, Expression) or columns == '*'
         assert where is None or isinstance(where, Expression)
+        assert order is None or isinstance(order, Identifier)
 
         self.table_name = table_name
         self.where = where
         self.columns = columns
-        self.order = None
+        self.order = order
 
     def __str__(self):
         r = "SELECT %s" % self.columns

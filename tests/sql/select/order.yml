@@ -16,3 +16,10 @@ tests:
     - {"foo": 50}
     - {"foo": 70}
     - {"foo": 100}
+
+  order_with_where:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo > 50 ORDER BY foo
+    result:
+    - {"foo": 70}
+    - {"foo": 100}

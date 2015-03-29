@@ -8,7 +8,7 @@ tests:
 
   not_even_close_to_sql:
     sql: FOO
-    error: Not valid SQL.
+    error: "Could not parse SQL. Error at or near: FOO"
 
   ignore_newline:
     sql: |
