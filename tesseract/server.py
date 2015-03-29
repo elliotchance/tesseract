@@ -2,7 +2,10 @@ import json
 import os
 import socket
 from thread import start_new_thread
-from tesseract.sql.expressions import Value
+from tesseract.engine.stage.expression import ExpressionStage
+from tesseract.engine.stage.manager import StageManager
+from tesseract.engine.stage.order import OrderStage
+from tesseract.engine.stage.where import WhereStage
 import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
 import redis
@@ -108,24 +111,18 @@ class Server:
         expression = result.statement
         assert isinstance(expression, SelectStatement)
 
-        offset = 3
+        offset = 2
         args = []
 
-        # Compile the `SELECT` expression
-        if expression.columns == '*':
-            select_expression = "local tuple = row"
-        else:
-            name = "col1"
-            if isinstance(expression.columns, Identifier):
-                name = str(expression.columns)
-            e, offset, new_args = expression.columns.compile_lua(offset)
-            args.extend(new_args)
-            select_expression = 'local tuple = {}\ntuple["%s"] = %s' % (name, e)
+        stages = StageManager()
 
-        # Compile the WHERE into a Lua expression.
-        where_expression = expression.where if expression.where else Value(True)
-        where_clause, offset, new_args = where_expression.compile_lua(offset)
-        args.extend(new_args)
+        # Compile WHERE stage.
+        if expression.where:
+            stages.add(WhereStage, (expression.where))
+
+        # Compile the ORDER BY clause.
+        if expression.order:
+            stages.add(OrderStage, (expression.order))
 
         # Lua dependencies. It is important we load the base before anything
         # else otherwise Lua will throw an error about base stuff missing.
@@ -135,17 +132,19 @@ class Server:
 
         # Generate the full Lua program.
         lua += """
-        local function process_fields_in_select_clause(row)
-            %s
-            return tuple
-        end
+-- First thing is to convert all the incoming values from JSON to native.
+-- Skipping the first two arguments that are not JSON and will always exist.
+local args = {}
+for i = 3, #ARGV do
+    args[i] = cjson.decode(ARGV[i])
+end
+"""
 
-        local function matches_where_clause(row)
-            return %s
-        end
-        """ % (select_expression, where_clause)
+        # Compile the `SELECT` columns
+        if expression.columns != '*':
+            stages.add(ExpressionStage, (expression.columns))
 
-        lua += self.load_lua_dependency('main')
+        lua += stages.compile_lua(offset, expression.table_name)
 
         # Extract the values for the expression.
         return (lua, args)
@@ -158,18 +157,16 @@ class Server:
         select = result.statement
         lua, args = self.compile_select(result)
         try:
-            run = self.redis.eval(lua, 0, select.table_name, select.columns,
-                                  *args)
+            run = self.redis.eval(lua, 0, select.table_name, *args)
 
-            # The extra `decode()` is a requirement of Python 3 where
-            # `json.loads()` must take a `str` and will not accept the arbitrary
-            # bytes in `run`.
-            result = json.loads(run.decode())
+            records = []
 
-            if len(result['result']) == 0:
-                result['result'] = []
+            # The value returns will be the name of the key that can be scanned
+            # for results.
+            for record in self.redis.lrange(run, 0, -1):
+                records.append(json.loads(record))
 
-            return ServerResult(True, result['result'], warnings=self.warnings)
+            return ServerResult(True, records, warnings=self.warnings)
         except Exception as e:
             # The actual exception message from Lua contains stuff we don't need
             # to report on like the SHA1 of the program, the line number of the

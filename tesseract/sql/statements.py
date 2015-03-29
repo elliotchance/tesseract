@@ -63,6 +63,7 @@ class SelectStatement(Statement):
         self.table_name = table_name
         self.where = where
         self.columns = columns
+        self.order = None
 
     def __str__(self):
         r = "SELECT %s" % self.columns
@@ -70,6 +71,8 @@ class SelectStatement(Statement):
             r += " FROM %s" % self.table_name
         if self.where:
             r += ' WHERE %s' % self.where
+        if self.order:
+            r += ' ORDER BY %s' % self.order
         return r
 
 

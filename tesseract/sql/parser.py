@@ -57,7 +57,8 @@ def p_delete_statement(p):
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT TIMES FROM IDENTIFIER WHERE expression
+        select_statement : SELECT TIMES FROM IDENTIFIER ORDER BY IDENTIFIER
+                         | SELECT TIMES FROM IDENTIFIER WHERE expression
                          | SELECT TIMES FROM IDENTIFIER
                          | SELECT TIMES FROM
                          | SELECT expression
@@ -93,6 +94,12 @@ def p_select_statement(p):
     #     SELECT TIMES FROM IDENTIFIER WHERE expression
     if len(p) == 7:
         p[0] = SelectStatement(p[4], '*', p[6])
+        return
+
+    #     SELECT TIMES FROM IDENTIFIER WHERE expression
+    if len(p) == 8:
+        p[0] = SelectStatement(p[4], '*')
+        p[0].order = p[7]
         return
 
     #     SELECT TIMES FROM IDENTIFIER
