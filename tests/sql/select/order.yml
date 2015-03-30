@@ -6,6 +6,11 @@ data:
   - {"foo": 20}
   - {"foo": 70}
 
+  table2:
+  - {"foo": "zzz"}
+  - {"foo": "abc"}
+  - {"foo": "def"}
+
 tests:
   order_by_integer:
     data: table1
@@ -33,3 +38,11 @@ tests:
     - {"foo": 50}
     - {"foo": 20}
     - {"foo": 70}
+
+  order_by_string:
+    data: table2
+    sql: SELECT * FROM table2 ORDER BY foo
+    result:
+    - {"foo": "abc"}
+    - {"foo": "def"}
+    - {"foo": "zzz"}

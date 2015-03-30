@@ -41,6 +41,12 @@ class OrderStage:
             "        all_numbers = false",
             "    end",
 
+            # If the value cannot be cast to a number then we have to fall back
+            # to alpha sorting.
+            "    if tonumber(value) == nil then",
+            "        all_numbers = false",
+            "    end",
+
             # There is one very important thing to note. The value must be
             # unique to represent the record. Since we cannot guarantee it's the
             # case (because you will often be sorting duplicate values) we need
