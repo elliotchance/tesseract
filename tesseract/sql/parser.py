@@ -1,5 +1,6 @@
 from ply.lex import LexToken
 import ply.yacc as yacc
+from tesseract.sql.clause.order_by import OrderByClause
 from tesseract.sql.statements import *
 from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
@@ -96,12 +97,12 @@ def p_optional_where_clause(p):
 def p_optional_order_clause(p):
     """
         optional_order_clause : empty
-                              | ORDER BY IDENTIFIER
+                              | ORDER BY IDENTIFIER optional_order_direction
     """
 
-    #     ORDER BY IDENTIFIER
-    if len(p) == 4:
-        p[0] = p[3]
+    #     ORDER BY IDENTIFIER optional_order_direction
+    if len(p) > 3:
+        p[0] = OrderByClause(p[3], p[4])
     else:
         p[0] = None
 
@@ -230,6 +231,17 @@ def p_json_object_items(p):
     # Regardless of duplicates, we will now combine the dictionaries.
     p[1].update(p[3])
     p[0] = p[1]
+
+
+# optional_order_direction
+# ------------------------
+def p_optional_order_direction(p):
+    """
+        optional_order_direction : empty
+                                 | ASC
+    """
+
+    p[0] = True if p[1] == 'ASC' else None
 
 
 # string

@@ -46,3 +46,16 @@ tests:
     - {"foo": "abc"}
     - {"foo": "def"}
     - {"foo": "zzz"}
+
+  order_by_integer_ascending:
+    description: |
+      This does the same thing as `order_by_integer` but adds the explicit
+      `ASC`.
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo ASC
+    result:
+    - {"foo": 20}
+    - {"foo": 40}
+    - {"foo": 50}
+    - {"foo": 70}
+    - {"foo": 100}

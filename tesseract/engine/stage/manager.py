@@ -12,7 +12,7 @@ class StageManager:
         lua = ''
         input_page = table_name
         for stage_details in self.stages:
-            stage = stage_details['class'](input_page, offset, stage_details['args'])
+            stage = stage_details['class'](str(input_page), offset, stage_details['args'])
             input_page, stage_lua, offset = stage.compile_lua()
             lua += stage_lua + "\n"
 

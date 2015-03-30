@@ -1,11 +1,18 @@
+from tesseract.sql.clause.order_by import OrderByClause
+
+
 class OrderStage:
     """
     This OrderStage represents the sorting of a set.
 
     """
-    def __init__(self, input_page, offset, field):
+    def __init__(self, input_page, offset, clause):
+        assert isinstance(input_page, str)
+        assert isinstance(offset, int)
+        assert isinstance(clause, OrderByClause)
+
         self.input_page = input_page
-        self.field = field
+        self.clause = clause
         self.offset = offset
 
     def compile_lua(self):
@@ -30,11 +37,11 @@ class OrderStage:
             "local all_numbers = true",
 
             "for i, data in ipairs(records) do",
-            "    local row = cjson.decode(data)" % self.field,
+            "    local row = cjson.decode(data)" % self.clause.field_name,
 
             # The first thing we need to do it get the value that we will be
             # sorting by.
-            "    local value = row['%s']" % self.field,
+            "    local value = row['%s']" % self.clause.field_name,
 
             "    if value == nil then",
             "        value = 'null'",
@@ -60,11 +67,11 @@ class OrderStage:
             "    end",
 
             # Now add the unique value into a list.
-            "    redis.call('RPUSH', 'order_index', value)" % self.field,
+            "    redis.call('RPUSH', 'order_index', value)" % self.clause.field_name,
 
             # And use it as a key for a hash that uses the full record as the
             # data.
-            "    redis.call('HSET', 'order', value, data)" % self.field,
+            "    redis.call('HSET', 'order', value, data)" % self.clause.field_name,
             "end",
         ])
 
@@ -82,7 +89,7 @@ class OrderStage:
             "local records = redis.call('LRANGE', '%s', '0', '-1')" % 'order_index_sorted',
             "for i, data in ipairs(records) do",
             "    local record = redis.call('HGET', 'order', data)",
-            "    redis.call('RPUSH', 'order_result', record)" % self.field,
+            "    redis.call('RPUSH', 'order_result', record)" % self.clause.field_name,
             "end"
         ])
 

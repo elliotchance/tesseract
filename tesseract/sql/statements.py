@@ -1,3 +1,4 @@
+from tesseract.sql.clause.order_by import OrderByClause
 from tesseract.sql.expressions import Expression, Identifier
 
 # Objects
@@ -55,12 +56,12 @@ class SelectStatement(Statement):
             :param table_name: Identifier
             :param columns: Expression
             :param where: None|Expression
-            :param order: None|Identifier
+            :param order: None|OrderByClause
         """
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, Expression) or columns == '*'
         assert where is None or isinstance(where, Expression)
-        assert order is None or isinstance(order, Identifier)
+        assert order is None or isinstance(order, OrderByClause)
 
         self.table_name = table_name
         self.where = where
@@ -74,7 +75,7 @@ class SelectStatement(Statement):
         if self.where:
             r += ' WHERE %s' % self.where
         if self.order:
-            r += ' ORDER BY %s' % self.order
+            r += ' %s' % self.order
         return r
 
 
