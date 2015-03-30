@@ -6,9 +6,13 @@ from tesseract.engine.stage.expression import ExpressionStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
+from tesseract.sql.expressions import Expression
 import tesseract.sql.parser as parser
-from tesseract.sql.statements import *
 import redis
+from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.insert import InsertStatement
+from tesseract.sql.statements.select import SelectStatement
+
 
 class Server:
     """

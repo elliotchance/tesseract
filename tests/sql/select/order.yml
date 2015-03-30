@@ -60,6 +60,8 @@ tests:
     - {"foo": 70}
     - {"foo": 100}
 
+  # The following tests are for DESC.
+
   order_by_integer_descending:
     data: table1
     sql: SELECT * FROM table1 ORDER BY foo DESC
@@ -69,3 +71,11 @@ tests:
     - {"foo": 50}
     - {"foo": 40}
     - {"foo": 20}
+
+  order_by_string_desc:
+    data: table2
+    sql: SELECT * FROM table2 ORDER BY foo DESC
+    result:
+    - {"foo": "zzz"}
+    - {"foo": "def"}
+    - {"foo": "abc"}

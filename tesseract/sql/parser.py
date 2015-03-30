@@ -9,6 +9,10 @@ import tesseract.sql.lexer as lexer
 # ======
 
 # Load in the tokens from lexer.
+from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.insert import InsertStatement
+from tesseract.sql.statements.select import SelectStatement
+
 tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
