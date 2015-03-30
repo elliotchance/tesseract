@@ -23,3 +23,13 @@ tests:
     result:
     - {"foo": 70}
     - {"foo": 100}
+
+  order_by_field_that_doesnt_exist:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY bar
+    result:
+    - {"foo": 40}
+    - {"foo": 100}
+    - {"foo": 50}
+    - {"foo": 20}
+    - {"foo": 70}

@@ -93,7 +93,7 @@ class Server:
 
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
-            self.redis.lpush(result.statement.table_name,
+            self.redis.rpush(result.statement.table_name,
                              Expression.to_sql(result.statement.fields))
             return ServerResult(True)
 

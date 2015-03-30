@@ -12,9 +12,9 @@ tests:
     data: table1
     sql: SELECT * FROM table1
     result:
-    - {"foo": 125}
-    - {"foo": 124}
     - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
 
   where:
     data: table1
