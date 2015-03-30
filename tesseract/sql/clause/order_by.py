@@ -11,7 +11,9 @@ class OrderByClause:
 
     def __str__(self):
         direction = ''
-        if self.ascending:
+        if self.ascending == True:
             direction = ' ASC'
+        elif self.ascending == False:
+            direction = ' DESC'
 
         return 'ORDER BY %s%s' % (self.field_name, direction)

@@ -10,6 +10,7 @@ sql_keywords = (
     'ASC',
     'BY',
     'DELETE',
+    'DESC',
     'FROM',
     'INSERT',
     'INTO',

@@ -75,12 +75,16 @@ class OrderStage:
             "end",
         ])
 
+        sort_command = "'SORT', 'order_index'"
+        if self.clause.ascending == False:
+            sort_command += ", 'DESC'"
+
         # Sort the values.
         lua.extend([
             "if all_numbers then",
-            "   redis.call('SORT', 'order_index', 'STORE', 'order_index_sorted')",
+            "   redis.call(%s, 'STORE', 'order_index_sorted')" % sort_command,
             "else",
-            "   redis.call('SORT', 'order_index', 'ALPHA', 'STORE', 'order_index_sorted')",
+            "   redis.call(%s, 'ALPHA', 'STORE', 'order_index_sorted')" % sort_command,
             "end",
         ])
 

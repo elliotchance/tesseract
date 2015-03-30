@@ -59,3 +59,13 @@ tests:
     - {"foo": 50}
     - {"foo": 70}
     - {"foo": 100}
+
+  order_by_integer_descending:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo DESC
+    result:
+    - {"foo": 100}
+    - {"foo": 70}
+    - {"foo": 50}
+    - {"foo": 40}
+    - {"foo": 20}

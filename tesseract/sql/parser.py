@@ -239,9 +239,15 @@ def p_optional_order_direction(p):
     """
         optional_order_direction : empty
                                  | ASC
+                                 | DESC
     """
 
-    p[0] = True if p[1] == 'ASC' else None
+    if p[1] == 'ASC':
+        p[0] = True
+    elif p[1] == 'DESC':
+        p[0] = False
+    else:
+        p[0] = None
 
 
 # string
