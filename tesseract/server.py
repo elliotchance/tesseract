@@ -1,11 +1,17 @@
 import json
 import os
 import socket
-from thread import start_new_thread
 from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
 import redis
+
+try:
+    # Python 2.x
+    from thread import start_new_thread
+except:
+    # Python 3.x
+    import threading
 
 class Server:
     """
@@ -47,8 +53,13 @@ class Server:
 
             # A connection has been made, spawn off a new thread to handle it.
             print("Accepted connection.")
-            start_new_thread(self.handle_client, (client_socket,))
-
+            
+            try:
+                # Python 2.x
+                start_new_thread(self.handle_client, (client_socket,))
+            except:
+                # Python 3.x
+                threading.Thread(target=self.handle_client, args=(client_socket)).start()
 
     def handle_client(self, client_socket):
         while True:
