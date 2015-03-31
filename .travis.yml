@@ -9,14 +9,20 @@ python:
 services:
   - redis-server
 
-# command to install dependencies
 install:
+  # Install dependencies.
   - "pip install -r requirements.txt"
   - "pip install -r requirements-dev.txt"
+  
+  # Connecting to the server will generate LALR tables.
+  - "python tesseract.py"
+  
+  # Generate tests from YAML.
   - "python generate_tests.py"
 
-# command to run tests
+# Run tests.
 script: nosetests --with-coverage --cover-package=tesseract
 
+# Submit code coverage data.
 after_success:
   coveralls
