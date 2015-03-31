@@ -14,6 +14,11 @@ data:
   - {"foo": 118}
   - {"foo": 23}
 
+  strings_and_nulls:
+  - {"foo": null}
+  - {"foo": "z"}
+  - {"foo": "ab"}
+
 tests:
 
   # Numbers Only
@@ -66,6 +71,17 @@ tests:
     result:
     - {"foo": 23}
     - {"foo": 118}
+    - {"foo": null}
+
+  order_by_strings_with_nulls:
+    comment: |
+      Unless otherwise specified a `null` value is to be considered larger than
+      a non-`null` value, so it should always appear at the bottom.
+    data: strings_and_nulls
+    sql: SELECT * FROM strings_and_nulls ORDER BY foo
+    result:
+    - {"foo": "ab"}
+    - {"foo": "z"}
     - {"foo": null}
 
   # Edge Cases

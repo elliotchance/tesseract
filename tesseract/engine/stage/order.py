@@ -20,10 +20,10 @@ class OrderStage:
 
         # Clean out sort buffer.
         lua.append(
-            "redis.call('DEL', 'order', 'order_index', 'order_index_sorted', 'order_result')"
+            "redis.call('DEL', 'order', 'order_index', 'order_index_sorted')"
+            "redis.call('DEL', 'order_result', 'order_null')"
         )
 
-        # Iterate the page and unroll the data into two new results.
         lua.extend([
             "local records = redis.call('LRANGE', '%s', '0', '-1')" % self.input_page,
 
@@ -32,10 +32,12 @@ class OrderStage:
             "local duplicate_index = 1",
 
             # We will assume that all values to be sorted are numerical until we
-            # come accross one that is not - this includes NULL - and sort by
+            # come across one that is not; except for NULLs which are handled
+            # separately. If any non-number value is encountered we will sort by
             # alpha.
             "local all_numbers = true",
 
+            # Iterate the page and unroll the data into two new results.
             "for i, data in ipairs(records) do",
             "    local row = cjson.decode(data)" % self.clause.field_name,
 
@@ -43,19 +45,18 @@ class OrderStage:
             # sorting by.
             "    local value = row['%s']" % self.clause.field_name,
 
-            # If the value cannot be cast to a number then we have to fall back
-            # to alpha sorting - unless the value was null to begin with, then
-            # it takes on a very large value so that it will come out at the end
-            # of the set.
-            "    if value == cjson.null then",
-            "        value = 10000"
-            "    elseif tonumber(value) == nil and all_numbers then",
-            "        all_numbers = false",
-            "    end",
+            # When `value` is `nil` then there is no field or if the field
+            # exists but has a value of `cjson.null` - in either case we treat
+            # it as a NULL which must be stored separately.
+            "    if value == nil or value == cjson.null then",
+            "       redis.call('RPUSH', 'order_null', data)",
+            "    else",
 
-            "    if value == cjson.null then",
-            "        value = 'null'",
-            "    end",
+            # If the value cannot be cast to a number then we have to fall back
+            # to alpha sorting.
+            "        if tonumber(value) == nil then",
+            "            all_numbers = false",
+            "        end",
 
             # There is one very important thing to note. The value must be
             # unique to represent the record. Since we cannot guarantee it's the
@@ -64,17 +65,18 @@ class OrderStage:
             #
             # I'm sure there is a better way to do this, but this will do for
             # now.
-            "    if redis.call('HEXISTS', 'order', value) then",
-            "        value = tostring(value) .. tostring(duplicate_index)",
-            "        duplicate_index = duplicate_index + 1",
-            "    end",
+            "        if redis.call('HEXISTS', 'order', value) == 1 then",
+            "            value = tostring(value) .. tostring(duplicate_index)",
+            "            duplicate_index = duplicate_index + 1",
+            "        end",
 
             # Now add the unique value into a list.
-            "    redis.call('RPUSH', 'order_index', value)" % self.clause.field_name,
+            "        redis.call('RPUSH', 'order_index', value)" % self.clause.field_name,
 
             # And use it as a key for a hash that uses the full record as the
             # data.
-            "    redis.call('HSET', 'order', value, data)" % self.clause.field_name,
+            "        redis.call('HSET', 'order', value, data)" % self.clause.field_name,
+            "    end",
             "end",
         ])
 
@@ -93,10 +95,19 @@ class OrderStage:
 
         # Now use the sorted data to construct the result.
         lua.extend([
-            "local records = redis.call('LRANGE', '%s', '0', '-1')" % 'order_index_sorted',
+            "local records = redis.call('LRANGE', 'order_index_sorted', '0', '-1')",
             "for i, data in ipairs(records) do",
             "    local record = redis.call('HGET', 'order', data)",
-            "    redis.call('RPUSH', 'order_result', record)" % self.clause.field_name,
+            "    redis.call('RPUSH', 'order_result', record)",
+            "end"
+        ])
+
+        # `null`s are greater than any non-`null` value so we can append all the
+        # `null`s now.
+        lua.extend([
+            "local records = redis.call('LRANGE', 'order_null', '0', '-1')",
+            "for i, data in ipairs(records) do",
+            "    redis.call('RPUSH', 'order_result', data)",
             "end"
         ])
 
