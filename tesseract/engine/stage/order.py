@@ -43,15 +43,18 @@ class OrderStage:
             # sorting by.
             "    local value = row['%s']" % self.clause.field_name,
 
-            "    if value == nil then",
-            "        value = 'null'",
+            # If the value cannot be cast to a number then we have to fall back
+            # to alpha sorting - unless the value was null to begin with, then
+            # it takes on a very large value so that it will come out at the end
+            # of the set.
+            "    if value == cjson.null then",
+            "        value = 10000"
+            "    elseif tonumber(value) == nil and all_numbers then",
             "        all_numbers = false",
             "    end",
 
-            # If the value cannot be cast to a number then we have to fall back
-            # to alpha sorting.
-            "    if tonumber(value) == nil then",
-            "        all_numbers = false",
+            "    if value == cjson.null then",
+            "        value = 'null'",
             "    end",
 
             # There is one very important thing to note. The value must be
@@ -62,7 +65,7 @@ class OrderStage:
             # I'm sure there is a better way to do this, but this will do for
             # now.
             "    if redis.call('HEXISTS', 'order', value) then",
-            "        value = value .. duplicate_index",
+            "        value = tostring(value) .. tostring(duplicate_index)",
             "        duplicate_index = duplicate_index + 1",
             "    end",
 
