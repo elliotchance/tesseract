@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/elliotchance/tesseract.svg?branch=master)](https://travis-ci.org/elliotchance/tesseract)
+[![Coverage Status](https://coveralls.io/repos/elliotchance/tesseract/badge.svg?branch=master)](https://coveralls.io/r/elliotchance/tesseract?branch=master)
 
 **tesseract** is a distributed SQL object database with Redis as the backend,
 think of it like a document store that you run SQL statements against.
