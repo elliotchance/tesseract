@@ -1,7 +1,6 @@
 import json
 import os
 import socket
-from thread import start_new_thread
 from tesseract.engine.stage.expression import ExpressionStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
@@ -13,6 +12,13 @@ from tesseract.sql.statements.delete import DeleteStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
+
+try:
+    # Python 2.x
+    from thread import start_new_thread
+except:
+    # Python 3.x
+    import threading
 
 class Server:
     """
@@ -54,8 +60,13 @@ class Server:
 
             # A connection has been made, spawn off a new thread to handle it.
             print("Accepted connection.")
-            start_new_thread(self.handle_client, (client_socket,))
-
+            
+            try:
+                # Python 2.x
+                start_new_thread(self.handle_client, (client_socket,))
+            except:
+                # Python 3.x
+                threading.Thread(target=self.handle_client, args=(client_socket)).start()
 
     def handle_client(self, client_socket):
         while True:
