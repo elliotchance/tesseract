@@ -1,123 +1,103 @@
 data:
-  only_numbers:
-  - {"foo": 40}
-  - {"foo": 100}
-  - {"foo": 50}
+  duplicates:
+  - {"foo": null, "bar": 1}
+  - {"foo": 40, "bar": 2}
+  - {"foo": "abc", "bar": 3}
+  - {"foo": "50", "bar": 4}
+  - {"foo": 100, "bar": 5}
+  - {"foo": "zzz", "bar": 6}
+  - {"foo": null, "bar": 7}
+  - {"foo": 100, "bar": 8}
+  - {"foo": "abc", "bar": 9}
+  - {"foo": 50, "bar": 10}
+  - {"bar": 11}
 
-  only_strings:
-  - {"foo": "zzz"}
-  - {"foo": "abc"}
-  - {"foo": "def"}
-
-  numbers_and_nulls:
-  - {"foo": null}
-  - {"foo": 118}
-  - {"foo": 23}
-
-  strings_and_nulls:
-  - {"foo": null}
-  - {"foo": "z"}
-  - {"foo": "ab"}
+  non_duplicates:
+  - {"foo": null, "bar": 1}
+  - {"foo": 40, "bar": 2}
+  - {"foo": "abc", "bar": 3}
+  - {"foo": "50", "bar": 4}
+  - {"foo": 100, "bar": 5}
+  - {"foo": "zzz", "bar": 6}
+  - {"foo": 50, "bar": 10}
 
 tests:
-
-  # Numbers Only
-  # ------------
-
-  order_by_numbers_only:
-    data: only_numbers
-    sql: SELECT * FROM only_numbers ORDER BY foo
+  order_by_mixed:
+    data-randomized: non_duplicates
+    repeat: 10
+    sql: SELECT * FROM non_duplicates ORDER BY foo
     result:
-    - {"foo": 40}
-    - {"foo": 50}
-    - {"foo": 100}
+    - {"foo": 40, "bar": 2}
+    - {"foo": 50, "bar": 10}
+    - {"foo": 100, "bar": 5}
+    - {"foo": "50", "bar": 4}
+    - {"foo": "abc", "bar": 3}
+    - {"foo": "zzz", "bar": 6}
+    - {"foo": null, "bar": 1}
 
-  order_by_numbers_only_descending:
-    data: only_numbers
-    sql: SELECT * FROM only_numbers ORDER BY foo DESC
+  explicit_asc:
+    data: duplicates
+    sql: SELECT * FROM duplicates ORDER BY foo ASC
     result:
-    - {"foo": 100}
-    - {"foo": 50}
-    - {"foo": 40}
+    - {"foo": 40, "bar": 2}
+    - {"foo": 50, "bar": 10}
+    - {"foo": 100, "bar": 5}
+    - {"foo": 100, "bar": 8}
+    - {"foo": "50", "bar": 4}
+    - {"foo": "abc", "bar": 3}
+    - {"foo": "abc", "bar": 9}
+    - {"foo": "zzz", "bar": 6}
+    - {"foo": null, "bar": 1}
+    - {"foo": null, "bar": 7}
+    - {"bar": 11}
 
-  # Strings Only
-  # ------------
-
-  order_by_strings_only:
-    data: only_strings
-    sql: SELECT * FROM only_strings ORDER BY foo
+  order_by_mixed_descending:
+    data-randomized: non_duplicates
+    repeat: 10
+    sql: SELECT * FROM non_duplicates ORDER BY foo DESC
     result:
-    - {"foo": "abc"}
-    - {"foo": "def"}
-    - {"foo": "zzz"}
+    - {"foo": null, "bar": 1}
+    - {"foo": "zzz", "bar": 6}
+    - {"foo": "abc", "bar": 3}
+    - {"foo": "50", "bar": 4}
+    - {"foo": 100, "bar": 5}
+    - {"foo": 50, "bar": 10}
+    - {"foo": 40, "bar": 2}
 
-  order_by_strings_only_descending:
-    data: only_strings
-    sql: SELECT * FROM only_strings ORDER BY foo DESC
-    result:
-    - {"foo": "zzz"}
-    - {"foo": "def"}
-    - {"foo": "abc"}
-
-  # Numbers and NULLs
-  # -----------------
-
-  order_by_numbers_with_nulls:
-    comment: |
-      Unless otherwise specified a `null` value is to be considered larger than
-      a non-`null` value, so it should always appear at the bottom.
-    data: numbers_and_nulls
-    sql: SELECT * FROM numbers_and_nulls ORDER BY foo
-    result:
-    - {"foo": 23}
-    - {"foo": 118}
-    - {"foo": null}
-
-  order_by_strings_with_nulls:
-    comment: |
-      Unless otherwise specified a `null` value is to be considered larger than
-      a non-`null` value, so it should always appear at the bottom.
-    data: strings_and_nulls
-    sql: SELECT * FROM strings_and_nulls ORDER BY foo
-    result:
-    - {"foo": "ab"}
-    - {"foo": "z"}
-    - {"foo": null}
-
-  # Edge Cases
-  # ----------
-
-  order_by_field_that_doesnt_exist:
-    comment: |
-      A field that does not exist will take on the value `null` and be sorted
-      with the same rules.
-    data: only_numbers
-    sql: SELECT * FROM only_numbers ORDER BY bar
-    result:
-    - {"foo": 40}
-    - {"foo": 100}
-    - {"foo": 50}
-
-  order_by_explicit_asc:
-    description: |
-      This does the same thing as `order_by_numbers_only` but adds the explicit
-      `ASC`.
-    data: only_numbers
-    sql: SELECT * FROM only_numbers ORDER BY foo ASC
-    result:
-    - {"foo": 40}
-    - {"foo": 50}
-    - {"foo": 100}
-
-  # Miscellaneous
-  # -------------
-
-  order_with_where:
-    comment: |
-      Combining a `WHERE` clause with an `ORDER BY` makes sure that multiple
-      stages are being executed in succession successfully.
-    data: only_numbers
-    sql: SELECT * FROM only_numbers WHERE foo > 40 ORDER BY foo
-    result:
-    - {"foo": 50}
-    - {"foo": 100}
+  ## Edge Cases
+  ## ----------
+#
+  #order_by_field_that_doesnt_exist:
+  #  comment: |
+  #    A field that does not exist will take on the value `null` and be sorted
+  #    with the same rules.
+  #  data: only_numbers
+  #  sql: SELECT * FROM only_numbers ORDER BY bar
+  #  result:
+  #  - {"foo": 40}
+  #  - {"foo": 100}
+  #  - {"foo": 50}
+#
+  #order_by_explicit_asc:
+  #  description: |
+  #    This does the same thing as `order_by_numbers_only` but adds the explicit
+  #    `ASC`.
+  #  data: only_numbers
+  #  sql: SELECT * FROM only_numbers ORDER BY foo ASC
+  #  result:
+  #  - {"foo": 40}
+  #  - {"foo": 50}
+  #  - {"foo": 100}
+#
+  ## Miscellaneous
+  ## -------------
+#
+  #order_with_where:
+  #  comment: |
+  #    Combining a `WHERE` clause with an `ORDER BY` makes sure that multiple
+  #    stages are being executed in succession successfully.
+  #  data: only_numbers
+  #  sql: SELECT * FROM only_numbers WHERE foo > 40 ORDER BY foo
+  #  result:
+  #  - {"foo": 50}
+  #  - {"foo": 100}

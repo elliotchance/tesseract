@@ -31,9 +31,18 @@ A filter expression.
 This can be any field you wish to sort by. If field does not exist in a given
 record it will be sorted as if the value were `null`.
 
-There are two modifiers for a column; `ASC` and `DESC`. If no sort order is
-specified then `ASC` is assumed.
+There are two modifiers for a column; `ASC` and `DESC` which represent
+**asc**ending and **desc**ending respectively. If no sort order is specified
+then `ASC` is assumed.
 
-Data will be sorted numerically if and only if all the values in the sort set
-are numbers with the exclusion of `null`. If a set contains only numbers and one
-or more `null` values the `null` values will appear at the end.
+When data is sorted it is separated into three types:
+
+ * Numbers. Integers and floating point, not including strings that look like
+   numbers like `"123"`.
+ * Strings.
+ * Nulls.
+ 
+Data will sorted by type, then value in the same order as above. That is to say:
+
+ * Any string is considered greater than a number.
+ * `null` is considered to be greater than any non-`null` value.

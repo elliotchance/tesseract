@@ -4,8 +4,8 @@ Testing
 [TOC]
 
 
-Introduction
-------------
+Basic Test (`sql`)
+------------------
 
 Tesseract generates tests from YAML files. This makes it very easy to read,
 maintain and organise.
@@ -25,8 +25,7 @@ In the example above we have created one test called `my_test` that will run the
 SQL statement and confirm that the server returns one row containing that exact
 data.
 
-Parser
-------
+### Parser (`as`)
 
 All tests that contain a `sql` attribute will be run through the parser and the
 statement will be rendered. This rendered statement is expected to be the same
@@ -42,8 +41,37 @@ tests:
     - {"col1": null}
 ```
 
-Expecting Errors
-----------------
+### Commenting (`comment`)
+
+Test can have an optional comment, this is preferred over using YAML inline
+comments so that comments can be injected is creating reports in the future.
+
+```yml
+tests:
+  my_test:
+    comment: Test everything!
+    sql: 'SELECT 123'
+```
+
+### Repeating Tests (`repeat`)
+
+If a test lacks some predictability or you need to test the outcome multiple
+times for another reason you can use the `repeat`. This will still generate one
+test but it will loop through the `repeat` many times.
+
+```yml
+tests:
+  my_test:
+    sql: 'SELECT 123'
+    repeat: 20
+    result:
+    - {"col1": 123}
+```
+
+Failures
+--------
+
+### Expecting Errors (`error`)
 
 Use the `error` to test for an expected error:
 
@@ -56,8 +84,7 @@ tests:
 
 Errors will be raised by the parser or by executing the SQL statement(s).
 
-Expecting Warnings
-------------------
+### Expecting Warnings (`warning`)
 
 You can assert one or more warnings are raised:
 
@@ -76,8 +103,8 @@ tests:
     - Duplicate key "foo", using last value.
 ```
 
-Data Sets
----------
+Data Sets (`data`)
+------------------
 
 It is common that you will want to test against an existing data fixture.
 Instead of inserting the data you need manually you can use fixtures:
@@ -95,4 +122,27 @@ tests:
     sql: SELECT * FROM table1 WHERE foo = 124
     result:
     - {"foo": 124}
+```
+
+### Randomizing Data (`data-randomized`)
+
+For some tests you may want to randomize the order in which the records are
+loaded in. It is often used in conjunction with `repeat`.
+
+```yml
+data:
+  table1:
+  - {"foo": 125}
+  - {"foo": 124}
+  - {"foo": 123}
+
+tests:
+  where:
+    data: table1
+    repeat: 10
+    sql: SELECT * FROM table1 ORDER BY foo
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
 ```
