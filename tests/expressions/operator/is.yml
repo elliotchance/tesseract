@@ -1,0 +1,5 @@
+tests:
+  null_is_null:
+    sql: SELECT null IS null
+    result:
+    - {"col1": true}

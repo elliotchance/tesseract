@@ -16,6 +16,7 @@ precedence = (
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
     ('left', 'LIKE'),
+    ('right', 'IS'),
 )
 
 
@@ -256,6 +257,7 @@ def p_expression(p):
                    | logic_expression
                    | function_call
                    | like_expression
+                   | is_expression
                    | value
     """
 
@@ -317,6 +319,17 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# is_expression
+# -------------
+def p_is_expression(p):
+    """
+        is_expression : expression IS IDENTIFIER
+    """
+
+    add_requirement(p, 'operator/is')
+    p[0] = IsExpression(p[1], p[3])
 
 
 # like_expression
