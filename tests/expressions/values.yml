@@ -105,9 +105,9 @@ tests:
     - {"col1": {"foo": "bar", "baz": 123}}
 
   json_object_with_three_elements:
-    sql: 'SELECT {"foo": "bar", "bar": "baz", "abc": "def"}'
+    sql: 'SELECT {"abc": "def", "bar": "baz", "foo": "bar"}'
     result:
-    - {"col1": {"foo": "bar", "bar": "baz", "abc": "def"}}
+    - {"col1": {"abc": "def", "bar": "baz", "foo": "bar"}}
 
   json_object_duplicate_item_uses_second:
     comment: |
