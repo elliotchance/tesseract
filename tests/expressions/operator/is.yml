@@ -42,6 +42,50 @@ tests:
     result:
     - {"col1": false}
 
+  # IS FALSE
+  is_false:
+    sql: SELECT false IS false
+    result:
+    - {"col1": true}
+
+  is_false_false:
+    sql: SELECT "false" IS false
+    result:
+    - {"col1": false}
+
+  is_false_false2:
+    sql: SELECT true IS false
+    result:
+    - {"col1": false}
+
+  is_false_missing:
+    data: missing
+    sql: SELECT missing IS false FROM missing
+    result:
+    - {"col1": false}
+
+  # IS BOOLEAN
+  is_boolean1:
+    sql: SELECT true IS boolean
+    result:
+    - {"col1": true}
+
+  is_boolean2:
+    sql: SELECT false IS boolean
+    result:
+    - {"col1": true}
+
+  is_boolean_false:
+    sql: SELECT "false" IS boolean
+    result:
+    - {"col1": false}
+
+  is_boolean_missing:
+    data: missing
+    sql: SELECT missing IS boolean FROM missing
+    result:
+    - {"col1": false}
+
   # IS NUMBER
   is_number:
     sql: SELECT 123 IS number
@@ -56,5 +100,22 @@ tests:
   is_number_missing:
     data: missing
     sql: SELECT missing IS number FROM missing
+    result:
+    - {"col1": false}
+
+  # IS STRING
+  is_string:
+    sql: SELECT "123" IS string
+    result:
+    - {"col1": true}
+
+  is_string_false:
+    sql: SELECT 123 IS string
+    result:
+    - {"col1": false}
+
+  is_string_missing:
+    data: missing
+    sql: SELECT missing IS string FROM missing
     result:
     - {"col1": false}
