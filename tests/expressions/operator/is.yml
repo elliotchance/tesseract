@@ -23,3 +23,8 @@ tests:
     sql: SELECT 123 IS number
     result:
     - {"col1": true}
+
+  number_is_number_false:
+    sql: SELECT "123" IS number
+    result:
+    - {"col1": false}
