@@ -260,3 +260,10 @@ class FunctionCall(Expression):
 
     def __str__(self):
         return '%s(%s)' % (self.function_name, str(self.argument))
+
+
+class LikeExpression(BinaryExpression):
+    def __init__(self, value, regex, is_not):
+        function = ':operator_not_like' if is_not else ':operator_like'
+        operator = 'NOT LIKE' if is_not else 'LIKE'
+        BinaryExpression.__init__(self, value, operator, regex, function)
