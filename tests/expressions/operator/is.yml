@@ -3,3 +3,8 @@ tests:
     sql: SELECT null IS null
     result:
     - {"col1": true}
+
+  null_is_null_false:
+    sql: SELECT 123 IS null
+    result:
+    - {"col1": false}

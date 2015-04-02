@@ -1,3 +1,3 @@
 local function operator_is(left, right)
-    return true
+    return left == cjson.null
 end
