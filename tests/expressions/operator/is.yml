@@ -1,3 +1,7 @@
+data:
+  missing:
+  - {}
+
 tests:
   null_is_null:
     sql: SELECT null IS null
@@ -8,3 +12,9 @@ tests:
     sql: SELECT 123 IS null
     result:
     - {"col1": false}
+
+  null_is_null_missing:
+    data: missing
+    sql: SELECT missing IS null FROM missing
+    result:
+    - {"col1": true}
