@@ -3,6 +3,7 @@ data:
   - {}
 
 tests:
+  # IS NULL
   is_null:
     sql: SELECT null IS null
     result:
@@ -19,6 +20,29 @@ tests:
     result:
     - {"col1": true}
 
+  # IS TRUE
+  is_true:
+    sql: SELECT true IS true
+    result:
+    - {"col1": true}
+
+  is_true_false:
+    sql: SELECT "true" IS true
+    result:
+    - {"col1": false}
+
+  is_true_false2:
+    sql: SELECT false IS true
+    result:
+    - {"col1": false}
+
+  is_true_missing:
+    data: missing
+    sql: SELECT missing IS true FROM missing
+    result:
+    - {"col1": false}
+
+  # IS NUMBER
   is_number:
     sql: SELECT 123 IS number
     result:
