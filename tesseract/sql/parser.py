@@ -329,7 +329,7 @@ def p_is_expression(p):
     """
 
     add_requirement(p, 'operator/is')
-    p[0] = IsExpression(p[1], p[3])
+    p[0] = IsExpression(p[1], Value(str(p[3])))
 
 
 # like_expression

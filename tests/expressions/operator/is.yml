@@ -18,3 +18,8 @@ tests:
     sql: SELECT missing IS null FROM missing
     result:
     - {"col1": true}
+
+  number_is_number:
+    sql: SELECT 123 IS number
+    result:
+    - {"col1": true}

@@ -257,7 +257,6 @@ class FunctionCall(Expression):
 
         return (lua, offset, new_args)
 
-
     def __str__(self):
         return '%s(%s)' % (self.function_name, str(self.argument))
 
@@ -272,3 +271,6 @@ class LikeExpression(BinaryExpression):
 class IsExpression(BinaryExpression):
     def __init__(self, value, type):
         BinaryExpression.__init__(self, value, 'IS', type, ':operator_is')
+
+    def __str__(self):
+        return '%s IS %s' % (str(self.left), self.right.value)
