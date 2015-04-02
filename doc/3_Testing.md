@@ -96,3 +96,18 @@ tests:
     result:
     - {"foo": 124}
 ```
+
+Ignoring the Parser
+-------------------
+
+Sometimes the SQL rendered from the SQL provided is not predictable, so we have
+to disable the parser test:
+
+```
+tests:
+  json_object_with_two_elements:
+    sql: 'SELECT {"foo": "bar", "baz": 123}'
+    parse: false
+    result:
+    - {"col1": {"foo": "bar", "baz": 123}}
+```

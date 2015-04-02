@@ -101,13 +101,15 @@ tests:
 
   json_object_with_two_elements:
     sql: 'SELECT {"foo": "bar", "baz": 123}'
+    parse: false
     result:
     - {"col1": {"foo": "bar", "baz": 123}}
 
   json_object_with_three_elements:
-    sql: 'SELECT {"abc": "def", "bar": "baz", "foo": "bar"}'
+    sql: 'SELECT {"foo": "bar", "bar": "baz", "abc": "def"}'
+    parse: false
     result:
-    - {"col1": {"abc": "def", "bar": "baz", "foo": "bar"}}
+    - {"col1": {"foo": "bar", "bar": "baz", "abc": "def"}}
 
   json_object_duplicate_item_uses_second:
     comment: |
