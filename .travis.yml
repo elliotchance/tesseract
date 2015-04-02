@@ -6,10 +6,6 @@ python:
   - "3.3"
   - "3.4"
 
-secure:
-  # SCRUTINIZER_TOKEN
-  - "UQMXhAqAKu89NQGz/cinWaJILL7SaIpWrrRxNRoVee6b4OJt+3vvkVNZUZguVmh2xEsJnFkL4ILrzYdRJ7eJL/tgb7fSPamcBirL3l5irL4m867a0jRCZrPMf9OChKw+RRXhHaMm9dd/G4BDbsanovwmx2vXDV26M7lC/uVeZh4="
-
 services:
   - redis-server
 
@@ -32,4 +28,4 @@ script: nosetests --with-coverage --cover-package=tesseract
 # Submit code coverage data.
 after_success:
   - coveralls
-  - ocular --access-token "$SCRUTINIZER_TOKEN"
+  - ocular
