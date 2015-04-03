@@ -26,10 +26,21 @@ def p_statement(p):
         statement : delete_statement
                   | insert_statement
                   | select_statement
+                  | create_notification_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# create_notification_statement
+# -----------------------------
+def p_create_notification_statement(p):
+    """
+        create_notification_statement : CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
+    """
+
+    p[0] = CreateNotificationStatement(p[3], p[5])
 
 
 # delete_statement

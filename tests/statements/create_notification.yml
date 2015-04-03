@@ -1,0 +1,3 @@
+tests:
+  create_notification:
+    sql: CREATE NOTIFICATION foo ON some_table

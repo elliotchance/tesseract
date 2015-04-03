@@ -105,6 +105,10 @@ class Server:
                              Expression.to_sql(result.statement.fields))
             return ServerResult(True)
 
+        # If the statement is a `CREATE NOTIFICATION`
+        if isinstance(result.statement, CreateNotificationStatement):
+            return ServerResult(True)
+
         # This is a `SELECT`
         return self.execute_select(result)
 

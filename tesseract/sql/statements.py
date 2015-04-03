@@ -88,3 +88,19 @@ class DeleteStatement(Statement):
 
     def __str__(self):
         return "DELETE FROM %s" % self.table_name
+
+
+class CreateNotificationStatement(Statement):
+    """
+    Represents an `CREATE NOTIFICATION` statement.
+    """
+
+    def __init__(self, notification_name, table_name):
+        assert isinstance(notification_name, Identifier)
+        assert isinstance(table_name, Identifier)
+
+        self.notification_name = notification_name
+        self.table_name = table_name
+
+    def __str__(self):
+        return "CREATE NOTIFICATION %s ON %s" % (self.notification_name, self.table_name)
