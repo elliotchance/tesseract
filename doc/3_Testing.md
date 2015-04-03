@@ -103,11 +103,30 @@ Ignoring the Parser
 Sometimes the SQL rendered from the SQL provided is not predictable, so we have
 to disable the parser test:
 
-```
+```yml
 tests:
   json_object_with_two_elements:
     sql: 'SELECT {"foo": "bar", "baz": 123}'
     parse: false
     result:
     - {"col1": {"foo": "bar", "baz": 123}}
+```
+
+
+Verifying Notifications
+-----------------------
+
+When under test all notifications throughout the entire test case will be
+recorded. They can be asserted after all the SQL is executed. To test for a
+single notification:
+
+```yml
+tests:
+  notification_will_be_fired_for_insert:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      to: foo
+      with: {"a": "b"}
 ```

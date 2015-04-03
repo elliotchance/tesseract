@@ -34,6 +34,8 @@ class Server:
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
 
+        self.notifications = {}
+
 
     def start(self):
         # Create an INET, STREAMing socket.
@@ -101,12 +103,15 @@ class Server:
 
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
-            self.redis.lpush(result.statement.table_name,
-                             Expression.to_sql(result.statement.fields))
+            data = Expression.to_sql(result.statement.fields)
+            self.redis.lpush(result.statement.table_name, data)
+            self.publish('foo', data)
             return ServerResult(True)
 
         # If the statement is a `CREATE NOTIFICATION`
         if isinstance(result.statement, CreateNotificationStatement):
+            self.notifications[result.statement.notification_name] = \
+                result.statement.table_name
             return ServerResult(True)
 
         # This is a `SELECT`
@@ -165,6 +170,10 @@ class Server:
         # Extract the values for the expression.
         return (lua, args)
 
+    def publish(self, name, value):
+        #print name
+        #print value
+        pass
 
     def execute_select(self, result):
         """

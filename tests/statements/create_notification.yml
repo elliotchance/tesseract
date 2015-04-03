@@ -1,3 +1,11 @@
 tests:
   create_notification:
     sql: CREATE NOTIFICATION foo ON some_table
+
+  notification_will_be_fired_for_insert:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      to: foo
+      with: {"a": "b"}
