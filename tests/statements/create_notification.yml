@@ -21,3 +21,6 @@ tests:
     - CREATE NOTIFICATION foo ON some_table
     - CREATE NOTIFICATION foo ON some_table
     error: Notification 'foo' already exists.
+
+  create_notification_with_where:
+    sql: CREATE NOTIFICATION foo ON some_table WHERE foo = "bar"

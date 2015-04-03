@@ -38,9 +38,17 @@ def p_statement(p):
 def p_create_notification_statement(p):
     """
         create_notification_statement : CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
+                                      | CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER WHERE expression
     """
 
-    p[0] = CreateNotificationStatement(p[3], p[5])
+    #     CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
+    if len(p) == 6:
+        p[0] = CreateNotificationStatement(p[3], p[5])
+
+    #     CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER WHERE expression
+    else:
+        p[0] = CreateNotificationStatement(p[3], p[5], p[7])
+
 
 
 # delete_statement
