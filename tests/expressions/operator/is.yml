@@ -158,3 +158,9 @@ tests:
   is_foobar:
     sql: SELECT "123" IS foobar
     error: No such type 'foobar'.
+
+  not_case_sensitive:
+    sql: SELECT "123" IS NumBer
+    as: SELECT "123" IS number
+    result:
+    - {"col1": false}

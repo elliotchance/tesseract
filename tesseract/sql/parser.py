@@ -331,10 +331,10 @@ def p_is_expression(p):
 
     if len(p) == 4:
         add_requirement(p, 'operator/is')
-        p[0] = IsExpression(p[1], Value(str(p[3])), False)
+        p[0] = IsExpression(p[1], Value(str(p[3]).lower()), False)
     else:
         add_requirement(p, 'operator/is_not')
-        p[0] = IsExpression(p[1], Value(str(p[4])), True)
+        p[0] = IsExpression(p[1], Value(str(p[4]).lower()), True)
 
 
 # like_expression
