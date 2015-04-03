@@ -109,14 +109,20 @@ class Server:
             for notification_name in self.notifications:
                 table_name = self.notifications[notification_name]
                 if str(table_name) == str(result.statement.table_name):
-                    self.publish('foo', data)
+                    self.publish(notification_name, data)
 
             return ServerResult(True)
 
         # If the statement is a `CREATE NOTIFICATION`
         if isinstance(result.statement, CreateNotificationStatement):
-            self.notifications[result.statement.notification_name] = \
+            notification_name = str(result.statement.notification_name)
+            if notification_name in self.notifications:
+                message = "Notification '%s' already exists." % notification_name
+                return ServerResult(False, error=message)
+
+            self.notifications[notification_name] = \
                 result.statement.table_name
+
             return ServerResult(True)
 
         # This is a `SELECT`

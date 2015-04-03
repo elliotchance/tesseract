@@ -15,3 +15,9 @@ tests:
     - CREATE NOTIFICATION foo ON some_table
     - 'INSERT INTO some_other_table {"a": "b"}'
     notification: []
+
+  create_notification_that_already_exists:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - CREATE NOTIFICATION foo ON some_table
+    error: Notification 'foo' already exists.
