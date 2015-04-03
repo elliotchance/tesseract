@@ -9,3 +9,9 @@ tests:
     notification:
       to: foo
       with: {"a": "b"}
+
+  notification_only_fires_for_watched_table:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - 'INSERT INTO some_other_table {"a": "b"}'
+    notification: []

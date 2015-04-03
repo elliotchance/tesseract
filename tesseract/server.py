@@ -30,11 +30,11 @@ class Server:
         self.redis = redis.StrictRedis(host=redis_host, port=6379, db=0)
         self.redis.set('tesseract_server', 1)
 
+        self.notifications = {}
+
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
-
-        self.notifications = {}
 
 
     def start(self):
@@ -105,7 +105,12 @@ class Server:
         if isinstance(result.statement, InsertStatement):
             data = Expression.to_sql(result.statement.fields)
             self.redis.lpush(result.statement.table_name, data)
-            self.publish('foo', data)
+
+            for notification_name in self.notifications:
+                table_name = self.notifications[notification_name]
+                if str(table_name) == str(result.statement.table_name):
+                    self.publish('foo', data)
+
             return ServerResult(True)
 
         # If the statement is a `CREATE NOTIFICATION`
@@ -171,8 +176,6 @@ class Server:
         return (lua, args)
 
     def publish(self, name, value):
-        #print name
-        #print value
         pass
 
     def execute_select(self, result):
