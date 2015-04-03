@@ -14,5 +14,9 @@ local function operator_is(left, right)
     if right == 'string' then
         return type(left) == 'string';
     end
-    return left == cjson.null or left == nil
+    if right == 'null' then
+        return left == cjson.null or left == nil
+    end
+
+    return no_such_type(right)
 end

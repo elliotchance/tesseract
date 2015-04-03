@@ -119,3 +119,8 @@ tests:
     sql: SELECT missing IS string FROM missing
     result:
     - {"col1": false}
+
+  # Extra
+  is_foobar:
+    sql: SELECT "123" IS foobar
+    error: No such type 'foobar'.
