@@ -269,8 +269,10 @@ class LikeExpression(BinaryExpression):
 
 
 class IsExpression(BinaryExpression):
-    def __init__(self, value, type):
-        BinaryExpression.__init__(self, value, 'IS', type, ':operator_is')
+    def __init__(self, value, type, is_not):
+        function = ':operator_is_not' if is_not else ':operator_is'
+        operator = 'IS NOT' if is_not else 'IS'
+        BinaryExpression.__init__(self, value, operator, type, function)
 
     def __str__(self):
-        return '%s IS %s' % (str(self.left), self.right.value)
+        return '%s %s %s' % (str(self.left), self.operator, self.right.value)

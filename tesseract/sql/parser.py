@@ -326,10 +326,15 @@ def p_function_call(p):
 def p_is_expression(p):
     """
         is_expression : expression IS IDENTIFIER
+                      | expression IS NOT IDENTIFIER
     """
 
-    add_requirement(p, 'operator/is')
-    p[0] = IsExpression(p[1], Value(str(p[3])))
+    if len(p) == 4:
+        add_requirement(p, 'operator/is')
+        p[0] = IsExpression(p[1], Value(str(p[3])), False)
+    else:
+        add_requirement(p, 'operator/is_not')
+        p[0] = IsExpression(p[1], Value(str(p[4])), True)
 
 
 # like_expression

@@ -1,0 +1,160 @@
+data:
+  missing:
+  - {}
+
+tests:
+  # IS NOT NULL
+  is_null:
+    sql: SELECT null IS NOT null
+    result:
+    - {"col1": false}
+
+  is_null_false:
+    sql: SELECT 123 IS NOT null
+    result:
+    - {"col1": true}
+
+  is_null_missing:
+    data: missing
+    sql: SELECT missing IS NOT null FROM missing
+    result:
+    - {"col1": false}
+
+  # IS NOT TRUE
+  is_true:
+    sql: SELECT true IS NOT true
+    result:
+    - {"col1": false}
+
+  is_true_false:
+    sql: SELECT "true" IS NOT true
+    result:
+    - {"col1": true}
+
+  is_true_false2:
+    sql: SELECT false IS NOT true
+    result:
+    - {"col1": true}
+
+  is_true_missing:
+    data: missing
+    sql: SELECT missing IS NOT true FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT FALSE
+  is_false:
+    sql: SELECT false IS NOT false
+    result:
+    - {"col1": false}
+
+  is_false_false:
+    sql: SELECT "false" IS NOT false
+    result:
+    - {"col1": true}
+
+  is_false_false2:
+    sql: SELECT true IS NOT false
+    result:
+    - {"col1": true}
+
+  is_false_missing:
+    data: missing
+    sql: SELECT missing IS NOT false FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT BOOLEAN
+  is_boolean1:
+    sql: SELECT true IS NOT boolean
+    result:
+    - {"col1": false}
+
+  is_boolean2:
+    sql: SELECT false IS NOT boolean
+    result:
+    - {"col1": false}
+
+  is_boolean_false:
+    sql: SELECT "false" IS NOT boolean
+    result:
+    - {"col1": true}
+
+  is_boolean_missing:
+    data: missing
+    sql: SELECT missing IS NOT boolean FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT NUMBER
+  is_number:
+    sql: SELECT 123 IS NOT number
+    result:
+    - {"col1": false}
+
+  is_number_false:
+    sql: SELECT "123" IS NOT number
+    result:
+    - {"col1": true}
+
+  is_number_missing:
+    data: missing
+    sql: SELECT missing IS NOT number FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT STRING
+  is_string:
+    sql: SELECT "123" IS NOT string
+    result:
+    - {"col1": false}
+
+  is_string_false:
+    sql: SELECT 123 IS NOT string
+    result:
+    - {"col1": true}
+
+  is_string_missing:
+    data: missing
+    sql: SELECT missing IS NOT string FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT ARRAY
+  is_array:
+    sql: SELECT [1, 2] IS NOT array
+    result:
+    - {"col1": false}
+
+  is_array_false:
+    sql: SELECT 123 IS NOT array
+    result:
+    - {"col1": true}
+
+  is_array_missing:
+    data: missing
+    sql: SELECT missing IS NOT array FROM missing
+    result:
+    - {"col1": true}
+
+  # IS NOT OBJECT
+  is_object:
+    sql: 'SELECT {"foo": "bar"} IS NOT object'
+    result:
+    - {"col1": false}
+
+  is_object_false:
+    sql: SELECT 123 IS NOT object
+    result:
+    - {"col1": true}
+
+  is_object_missing:
+    data: missing
+    sql: SELECT missing IS NOT object FROM missing
+    result:
+    - {"col1": true}
+
+  # Extra
+  is_foobar:
+    sql: SELECT "123" IS NOT foobar
+    error: No such type 'foobar'.
