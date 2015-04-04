@@ -11,6 +11,7 @@ sql_keywords = (
     'FROM',
     'INSERT',
     'INTO',
+    'IS',
     'LIKE',
     'NOT',
     'OR',
@@ -93,7 +94,8 @@ def t_IDENTIFIER(t):
 
     # If all the above fail then it really is an identifier.
     else:
-        t.value = Identifier(t.value)
+        # The extra `str()` conversion here is to handle `unicode`.
+        t.value = Identifier(str(t.value))
 
     return t
 
