@@ -38,14 +38,10 @@ def get_iterator(tests_file, name):
         # Python 3.x
         return tests_file[name].items()
 
-def process_file(file):
+def process_tests(tests_file, out, safe_name):
     total = 0
-    tests_file = yaml.load(open(file, 'r'))
-    safe_name = file[6:-4].replace('/', '_')
-    out = open('tests_cache/test_%s.py' % safe_name, 'w')
 
     out.write("from unittest import TestCase\n")
-    out.write("from tesseract.server import Server\n")
     out.write("import tesseract.sql.parser as parser\n")
     out.write("import random\n\n")
 
@@ -56,14 +52,6 @@ def process_file(file):
     out.write("        self.table_name = ''.join(\n")
     out.write("            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)\n")
     out.write("        )\n\n")
-
-    if 'data' in tests_file:
-        for name, table in get_iterator(tests_file, 'data'):
-            out.write("    def load_%s(self, server):\n" % name)
-            out.write("        server.execute('DELETE FROM %s')\n" % name)
-            for row in table:
-                out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
-            out.write("\n")
 
     for name, test in get_iterator(tests_file, 'tests'):
         total += 1
@@ -132,6 +120,50 @@ def process_file(file):
                       json.dumps(test['warning']))
 
         out.write("\n")
+
+    return total
+
+def process_benchmark(tests_file, out):
+    out.write("import time\n\n")
+
+    out.write("server = Server()\n\n")
+    for name, test in get_iterator(tests_file, 'benchmark'):
+        out.write("# %s\n" % name)
+        out.write("print('Running %s...')\n" % name)
+        if 'repeat' not in test:
+            test['repeat'] = 1
+        out.write("start_time = time.time()\n")
+        out.write("for iteration in xrange(1, %d):\n" % test['repeat'])
+        iteration = 1
+        sql = test['sql'].replace('%iteration%', str(iteration))
+        out.write("    result = server.execute(%s)\n" % escape(sql))
+        out.write("    assert result.success\n")
+        out.write("elapsed = time.time() - start_time\n")
+        out.write("print('Total %s seconds' % elapsed)\n")
+        out.write("\n")
+        iteration += 1
+
+
+def process_file(file):
+    tests_file = yaml.load(open(file, 'r'))
+    safe_name = file[6:-4].replace('/', '_')
+    out = open('tests_cache/test_%s.py' % safe_name, 'w')
+
+    out.write("from tesseract.server import Server\n\n")
+
+    if 'data' in tests_file:
+        for name, table in get_iterator(tests_file, 'data'):
+            out.write("    def load_%s(self, server):\n" % name)
+            out.write("        server.execute('DELETE FROM %s')\n" % name)
+            for row in table:
+                out.write("        server.execute('INSERT INTO %s %s')\n" % (name, json.dumps(row)))
+            out.write("\n")
+
+    total = 0
+    if 'tests' in tests_file:
+        total = process_tests(tests_file, out, safe_name)
+    elif 'benchmark' in tests_file:
+        process_benchmark(tests_file, out)
 
     return total
 
