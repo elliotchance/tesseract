@@ -30,3 +30,11 @@ tests:
     - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
     - 'INSERT INTO some_table {"a": "b"}'
     notification: []
+
+  notification_will_respect_where_clause_false:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table WHERE a = "b"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      to: foo
+      with: {"a": "b"}
