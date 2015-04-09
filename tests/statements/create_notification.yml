@@ -38,3 +38,16 @@ tests:
     notification:
       to: foo
       with: {"a": "b"}
+
+  multiple_notifications_can_be_fired_from_a_single_select:
+    sql:
+    - CREATE NOTIFICATION foo1 ON some_table WHERE a = "b"
+    - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      -
+        to: foo1
+        with: {"a": "b"}
+      -
+        to: foo2
+        with: {"a": "b"}

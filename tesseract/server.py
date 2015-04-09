@@ -150,11 +150,11 @@ class Server:
                         test_table,
                         str(notification.where)
                     )
-                    result = self.execute(select_sql)
+                    select_result = self.execute(select_sql)
 
-                    assert result.success
+                    assert select_result.success
 
-                    if len(result.data):
+                    if len(select_result.data):
                         self.publish(notification_name, data)
 
                     # Always cleanup.
