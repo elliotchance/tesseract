@@ -130,3 +130,32 @@ tests:
       to: foo
       with: {"a": "b"}
 ```
+
+If you need to assert more than one notification:
+
+```yml
+tests:
+  multiple_notifications_can_be_fired_from_a_single_select:
+    sql:
+    - CREATE NOTIFICATION foo1 ON some_table WHERE a = "b"
+    - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      -
+        to: foo1
+        with: {"a": "b"}
+      -
+        to: foo2
+        with: {"a": "b"}
+```
+
+Or validate that no notifications have been fired:
+
+```yml
+tests:
+  notification_will_respect_where_clause:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification: []
+```
