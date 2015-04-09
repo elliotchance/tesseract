@@ -1,0 +1,14 @@
+tests:
+  null:
+    sql: SELECT bit_length(null)
+    result:
+    - {"col1": null}
+
+  positive_number:
+    sql: SELECT bit_length("1.23")
+    result:
+    - {"col1": 32}
+
+  bad_type:
+    sql: SELECT bit_length(1.23)
+    error: No such function bit_length(number).

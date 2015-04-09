@@ -1,0 +1,14 @@
+tests:
+  null:
+    sql: SELECT octet_length(null)
+    result:
+    - {"col1": null}
+
+  positive_number:
+    sql: SELECT octet_length("1.23")
+    result:
+    - {"col1": 4}
+
+  bad_type:
+    sql: SELECT octet_length(1.23)
+    error: No such function octet_length(number).
