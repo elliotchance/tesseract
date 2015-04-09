@@ -7,10 +7,10 @@ import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
 import redis
 
-try:
+try: # pragma: no cover
     # Python 2.x
     from thread import start_new_thread
-except:
+except: # pragma: no cover
     # Python 3.x
     import threading
 
@@ -36,22 +36,6 @@ class Server:
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
-
-
-    def compile_lua_notifications(self):
-        lua = 'local notifications = {}\n'
-        for notification in self.notifications.itervalues():
-            print str(notification)
-            notification_lua = 'table.insert(notifications, "%s")\n' % notification.notification_name
-            if notification.where is not None:
-                notification_lua = 'if %s then\n  %send\n' % (
-                    notification.where.compile_lua(0)[0],
-                    notification_lua
-                )
-            lua += notification_lua
-        lua += "return notifications"
-        print lua
-        return lua
 
 
     def start(self):
