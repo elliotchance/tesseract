@@ -2,7 +2,7 @@ tests:
   null:
     sql: SELECT floor(null)
     result:
-    - {"col1": floor}
+    - {"col1": null}
 
   near_top:
     sql: SELECT floor(1.9)
