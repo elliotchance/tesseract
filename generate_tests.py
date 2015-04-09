@@ -53,7 +53,7 @@ def process_file(file):
     out.write("class Test%s(TestCase):\n" % safe_name.replace('_', ' ').title().replace(' ', ''))
 
     out.write("    def publish(self, name, value):\n")
-    out.write("        self.notifications.append({'to': str(name), 'with': json.loads(value)})\n")
+    out.write("        self.notifications.append({'to': name, 'with': json.loads(value)})\n")
 
     out.write("    def setUp(self):\n")
     out.write("        TestCase.setUp(self)\n")

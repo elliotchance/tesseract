@@ -118,7 +118,7 @@ class Identifier(Expression):
     """
 
     def __init__(self, identifier):
-        assert isinstance(identifier, str)
+        assert isinstance(identifier, (str, unicode))
 
         self.identifier = identifier
 

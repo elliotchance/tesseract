@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import socket
 from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
@@ -37,6 +38,22 @@ class Server:
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
 
 
+    def compile_lua_notifications(self):
+        lua = 'local notifications = {}\n'
+        for notification in self.notifications.itervalues():
+            print str(notification)
+            notification_lua = 'table.insert(notifications, "%s")\n' % notification.notification_name
+            if notification.where is not None:
+                notification_lua = 'if %s then\n  %send\n' % (
+                    notification.where.compile_lua(0)[0],
+                    notification_lua
+                )
+            lua += notification_lua
+        lua += "return notifications"
+        print lua
+        return lua
+
+
     def start(self):
         # Create an INET, STREAMing socket.
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -69,7 +86,10 @@ class Server:
             data = client_socket.recv(1024)
 
             # Decode the JSON.
-            request = json.loads(data)
+            try:
+                request = json.loads(data)
+            except ValueError:
+                print data
 
             # Process the request.
             result = self.execute(request['sql'])
@@ -106,10 +126,39 @@ class Server:
             data = Expression.to_sql(result.statement.fields)
             self.redis.lpush(result.statement.table_name, data)
 
-            for notification_name in self.notifications:
-                table_name = self.notifications[notification_name]
-                if str(table_name) == str(result.statement.table_name):
+            for notification in self.notifications.itervalues():
+                # Ignore the notification if this does not apply to this table.
+                if str(notification.table_name) != str(result.statement.table_name):
+                    continue
+
+                notification_name = str(notification.notification_name)
+
+                if notification.where is None:
                     self.publish(notification_name, data)
+                else:
+                    # Generate a random table name.
+                    test_table = ''.join(
+                        random.choice('abcdefghijklmnopqrstuvwxyz')
+                        for i in range(8)
+                    )
+
+                    # Insert the record into this random table.
+                    self.redis.lpush(test_table, data)
+
+                    # Perform a select to test if the notification matches.
+                    select_sql = 'SELECT * FROM %s WHERE %s' % (
+                        test_table,
+                        str(notification.where)
+                    )
+                    result = self.execute(select_sql)
+
+                    assert result.success
+
+                    if len(result.data):
+                        self.publish(notification_name, data)
+
+                    # Always cleanup.
+                    self.redis.delete(test_table)
 
             return ServerResult(True)
 
@@ -120,8 +169,7 @@ class Server:
                 message = "Notification '%s' already exists." % notification_name
                 return ServerResult(False, error=message)
 
-            self.notifications[notification_name] = \
-                result.statement.table_name
+            self.notifications[notification_name] = result.statement
 
             return ServerResult(True)
 
@@ -182,7 +230,7 @@ class Server:
         return (lua, args)
 
     def publish(self, name, value):
-        pass
+        self.redis.publish(name, value)
 
     def execute_select(self, result):
         """

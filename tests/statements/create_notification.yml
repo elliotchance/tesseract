@@ -24,3 +24,9 @@ tests:
 
   create_notification_with_where:
     sql: CREATE NOTIFICATION foo ON some_table WHERE foo = "bar"
+
+  notification_will_respect_where_clause:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification: []

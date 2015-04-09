@@ -95,7 +95,7 @@ class CreateNotificationStatement(Statement):
     Represents an `CREATE NOTIFICATION` statement.
     """
 
-    def __init__(self, notification_name, table_name, where = None):
+    def __init__(self, notification_name, table_name, where=None):
         assert isinstance(notification_name, Identifier)
         assert isinstance(table_name, Identifier)
         assert where is None or isinstance(where, Expression)
