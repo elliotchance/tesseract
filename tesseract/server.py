@@ -5,6 +5,7 @@ from tesseract.sql.expressions import Value
 import tesseract.sql.parser as parser
 from tesseract.sql.statements import *
 import redis
+import time
 
 try:
     # Python 2.x
@@ -33,6 +34,8 @@ class Server:
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
+
+        self.lua_cache = {}
 
 
     def start(self):
@@ -86,33 +89,46 @@ class Server:
 
         # Try to parse the SQL.
         try:
+            start_time = time.time()
             result = parser.parse(sql)
+            parser_time = time.time() - start_time
+
             self.warnings = result.warnings
+
+            # If the statement is a `DELETE`
+            if isinstance(result.statement, DeleteStatement):
+                self.redis.delete(result.statement.table_name)
+                server_result = ServerResult(True)
+
+            # If the statement is an `INSERT` we always return success.
+            elif isinstance(result.statement, InsertStatement):
+                self.redis.lpush(result.statement.table_name,
+                                 Expression.to_sql(result.statement.fields))
+                server_result = ServerResult(True)
+
+            # This is a `SELECT`
+            else:
+                server_result = self.execute_select(result)
+
+            server_result.time = {
+                'parser': parser_time,
+                'execute': time.time() - start_time - parser_time,
+            }
+            return server_result
 
         # We could not parse the SQL, so return the error message in the
         # response.
         except RuntimeError as e:
             return ServerResult(False, None, str(e))
 
-        # If the statement is a `DELETE`
-        if isinstance(result.statement, DeleteStatement):
-            self.redis.delete(result.statement.table_name)
-            return ServerResult(True)
-
-        # If the statement is an `INSERT` we always return success.
-        if isinstance(result.statement, InsertStatement):
-            self.redis.lpush(result.statement.table_name,
-                             Expression.to_sql(result.statement.fields))
-            return ServerResult(True)
-
-        # This is a `SELECT`
-        return self.execute_select(result)
-
 
     def load_lua_dependency(self, operator):
-        here = os.path.dirname(os.path.realpath(__file__))
-        with open(here + '/lua/%s.lua' % operator) as lua_script:
-            return ''.join(lua_script.read())
+        key = '/lua/%s.lua' % operator
+        if key not in self.lua_cache:
+            here = os.path.dirname(os.path.realpath(__file__))
+            with open(here + key) as lua_script:
+                self.lua_cache[key] = ''.join(lua_script.read())
+        return self.lua_cache[key]
 
 
     def compile_select(self, result):
@@ -198,6 +214,7 @@ class ServerResult:
         self.data = data
         self.error = error
         self.warnings = warnings
+        self.time = {}
 
 
     def __str__(self):
@@ -206,5 +223,6 @@ class ServerResult:
             "data": self.data,
             "error": self.error,
             "warnings": self.warnings,
+            "time": self.time,
         }
         return json.dumps(obj)

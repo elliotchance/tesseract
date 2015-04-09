@@ -1,0 +1,9 @@
+benchmark:
+  1_setup:
+    sql: DELETE FROM mytable
+
+  2_insert_records:
+    sql: 'INSERT INTO mytable {"id": %d}'
+    arguments:
+    - iteration
+    repeat: 10000

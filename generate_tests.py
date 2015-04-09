@@ -133,15 +133,27 @@ def process_benchmark(tests_file, out):
         if 'repeat' not in test:
             test['repeat'] = 1
         out.write("start_time = time.time()\n")
-        out.write("for iteration in xrange(1, %d):\n" % test['repeat'])
-        iteration = 1
-        sql = test['sql'].replace('%iteration%', str(iteration))
-        out.write("    result = server.execute(%s)\n" % escape(sql))
+        out.write("parser_time = 0\n")
+        out.write("execute_time = 0\n")
+        out.write("for iteration in xrange(0, %d):\n" % test['repeat'])
+
+        # Convert a single SQL into a list if we have to.
+        if not isinstance(test['sql'], list):
+            test['sql'] = [ test['sql'] ]
+
+        for sql in test['sql']:
+            if 'arguments' in test:
+                out.write("    result = server.execute(%s %% iteration)\n" % escape(sql))
+            else:
+                out.write("    result = server.execute(%s)\n" % escape(sql))
+        out.write("    parser_time += result.time['parser']\n")
+        out.write("    execute_time += result.time['execute']\n")
         out.write("    assert result.success\n")
         out.write("elapsed = time.time() - start_time\n")
-        out.write("print('Total %s seconds' % elapsed)\n")
+        out.write("print('  Total: %.3f seconds' % elapsed)\n")
+        out.write("print('  Parser: %.3f seconds' % parser_time)\n")
+        out.write("print('  Execute: %.3f seconds' % execute_time)\n")
         out.write("\n")
-        iteration += 1
 
 
 def process_file(file):

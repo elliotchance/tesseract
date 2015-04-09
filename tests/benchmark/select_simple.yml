@@ -1,0 +1,9 @@
+benchmark:
+  1_setup:
+    sql:
+    - DELETE FROM mytable
+    - 'INSERT INTO mytable {"id": 1}'
+
+  2_select_by_id:
+    sql: SELECT * FROM mytable WHERE id = 1
+    repeat: 10000
