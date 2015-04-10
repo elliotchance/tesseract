@@ -179,7 +179,7 @@ end
             # The value returns will be the name of the key that can be scanned
             # for results.
             for record in self.redis.lrange(run, 0, -1):
-                records.append(json.loads(record))
+                records.append(json.loads(record.decode()))
 
             return ServerResult(True, records, warnings=self.warnings)
         except Exception as e:
