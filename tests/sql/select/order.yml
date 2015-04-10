@@ -97,3 +97,12 @@ tests:
     - {"foo": 50, "bar": 10}
     - {"foo": 100, "bar": 5}
     - {"foo": 100, "bar": 8}
+
+  order_by_string_only:
+    data: duplicates
+    sql: SELECT * FROM duplicates WHERE foo IS string ORDER BY foo
+    result:
+    - {"foo": "50", "bar": 4}
+    - {"foo": "abc", "bar": 3}
+    - {"foo": "abc", "bar": 9}
+    - {"foo": "zzz", "bar": 6}
