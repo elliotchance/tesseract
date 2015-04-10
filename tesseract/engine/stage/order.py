@@ -20,10 +20,10 @@ class OrderStage:
 
         # Clean out sort buffer.
         lua.append(
-            "redis.call('DEL', 'order_null', 'order_number', 'order_string')"
-            "redis.call('DEL', 'order_number_sorted', 'order_string_sorted')"
+            "redis.call('DEL', 'order_null', 'order_boolean', 'order_number', 'order_string')"
+            "redis.call('DEL', 'order_boolean_sorted', 'order_number_sorted', 'order_string_sorted')"
             "redis.call('DEL', 'order_result')"
-            "redis.call('DEL', 'order_number_hash', 'order_string_hash')"
+            "redis.call('DEL', 'order_boolean_hash', 'order_number_hash', 'order_string_hash')"
         )
 
         lua.extend([
@@ -49,7 +49,19 @@ class OrderStage:
             "    if value == nil or value == cjson.null then",
             "       redis.call('RPUSH', 'order_null', data)",
 
-            # The second category is for all numbers.
+            # The second category is for all booleans.
+            "    elseif type(value) == 'boolean' then",
+            "       if value then",
+            "          value = 't'",
+            "       else",
+            "          value = 'f'",
+            "       end",
+            "       value = value .. duplicate_number",
+            "       duplicate_number = duplicate_number + 1",
+            "       redis.call('HSET', 'order_boolean_hash', value, data)",
+            "       redis.call('RPUSH', 'order_boolean', value)",
+
+            # The third category is for all numbers.
             "    elseif type(value) == 'number' then",
             "       value = value .. '.00000' .. duplicate_number"
             "       duplicate_number = duplicate_number + 1"
@@ -70,14 +82,24 @@ class OrderStage:
 
         # Sort the values.
         lua.extend([
+            "redis.call('SORT', 'order_boolean'%s, 'ALPHA', 'STORE', 'order_boolean_sorted')" % desc,
             "redis.call('SORT', 'order_number'%s, 'STORE', 'order_number_sorted')" % desc,
             "redis.call('SORT', 'order_string'%s, 'ALPHA', 'STORE', 'order_string_sorted')" % desc,
         ])
 
+        # Now use the sorted data to construct the result.
         reconstruct = [
+            # Start with booleans.
             [
-                # Now use the sorted data to construct the result. Starting with
-                # numbers.
+                "local records = redis.call('LRANGE', 'order_boolean_sorted', '0', '-1')",
+                "for i, data in ipairs(records) do",
+                "    local record = redis.call('HGET', 'order_boolean_hash', data)",
+                "    redis.call('RPUSH', 'order_result', record)",
+                "end"
+            ],
+
+            # Now numbers.
+            [
                 "local records = redis.call('LRANGE', 'order_number_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
                 "    local record = redis.call('HGET', 'order_number_hash', data)",
@@ -104,6 +126,8 @@ class OrderStage:
             ]
         ]
 
+        # For reverse sort we need to flip all the groups of data backwards as
+        # well.
         for sorter in (reversed(reconstruct)
                        if self.clause.ascending is False
                        else reconstruct):

@@ -5,21 +5,25 @@ data:
   - {"foo": "abc", "bar": 3}
   - {"foo": "50", "bar": 4}
   - {"foo": 100, "bar": 5}
+  - {"foo": false, "bar": 13}
   - {"foo": "zzz", "bar": 6}
   - {"foo": null, "bar": 7}
   - {"foo": 100, "bar": 8}
   - {"foo": "abc", "bar": 9}
   - {"foo": 50, "bar": 10}
   - {"bar": 11}
+  - {"foo": true, "bar": 12}
 
   non_duplicates:
   - {"foo": null, "bar": 1}
   - {"foo": 40, "bar": 2}
   - {"foo": "abc", "bar": 3}
+  - {"foo": false, "bar": 13}
   - {"foo": "50", "bar": 4}
   - {"foo": 100, "bar": 5}
   - {"foo": "zzz", "bar": 6}
   - {"foo": 50, "bar": 10}
+  - {"foo": true, "bar": 12}
 
 tests:
   order_by_mixed:
@@ -27,6 +31,8 @@ tests:
     repeat: 10
     sql: SELECT * FROM non_duplicates ORDER BY foo
     result:
+    - {"foo": false, "bar": 13}
+    - {"foo": true, "bar": 12}
     - {"foo": 40, "bar": 2}
     - {"foo": 50, "bar": 10}
     - {"foo": 100, "bar": 5}
@@ -39,6 +45,8 @@ tests:
     data: duplicates
     sql: SELECT * FROM duplicates ORDER BY foo ASC
     result:
+    - {"foo": false, "bar": 13}
+    - {"foo": true, "bar": 12}
     - {"foo": 40, "bar": 2}
     - {"foo": 50, "bar": 10}
     - {"foo": 100, "bar": 5}
@@ -63,10 +71,20 @@ tests:
     - {"foo": 100, "bar": 5}
     - {"foo": 50, "bar": 10}
     - {"foo": 40, "bar": 2}
+    - {"foo": true, "bar": 12}
+    - {"foo": false, "bar": 13}
 
   order_by_null_only:
+    data: duplicates
     sql: SELECT * FROM duplicates WHERE foo IS null ORDER BY foo
     result:
     - {"foo": null, "bar": 1}
     - {"foo": null, "bar": 7}
     - {"bar": 11}
+
+  order_by_boolean_only:
+    data: duplicates
+    sql: SELECT * FROM duplicates WHERE foo IS boolean ORDER BY foo
+    result:
+    - {"foo": false, "bar": 13}
+    - {"foo": true, "bar": 12}
