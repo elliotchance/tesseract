@@ -1,0 +1,19 @@
+tests:
+  null:
+    sql: SELECT ceil(null)
+    result:
+    - {"col1": null}
+
+  near_top:
+    sql: SELECT ceil(1.9)
+    result:
+    - {"col1": 2}
+
+  near_bottom:
+    sql: SELECT ceil(1.1)
+    result:
+    - {"col1": 2}
+
+  bad_type:
+    sql: SELECT ceil("foo")
+    error: No such function ceil(string).

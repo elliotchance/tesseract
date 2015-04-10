@@ -7,16 +7,21 @@ from tesseract.sql.expressions import Value, Identifier
 # SQL keywords.
 sql_keywords = (
     'AND',
+    'ASC',
+    'BY',
     'CREATE',
     'DELETE',
+    'DESC',
     'FROM',
     'INSERT',
     'INTO',
+    'IS',
     'LIKE',
     'NOT',
     'NOTIFICATION',
     'ON',
     'OR',
+    'ORDER',
     'SELECT',
     'WHERE',
 )
@@ -96,7 +101,8 @@ def t_IDENTIFIER(t):
 
     # If all the above fail then it really is an identifier.
     else:
-        t.value = Identifier(t.value)
+        # The extra `str()` conversion here is to handle `unicode`.
+        t.value = Identifier(str(t.value))
 
     return t
 

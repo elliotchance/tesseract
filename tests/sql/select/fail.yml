@@ -1,0 +1,4 @@
+tests:
+  fail_1:
+    sql: SELECT
+    error: Expected expression after SELECT.

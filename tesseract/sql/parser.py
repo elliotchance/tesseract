@@ -1,4 +1,6 @@
+from ply.lex import LexToken
 import ply.yacc as yacc
+from tesseract.sql.clause.order_by import OrderByClause
 from tesseract.sql.statements import *
 from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
@@ -7,6 +9,12 @@ import tesseract.sql.lexer as lexer
 # ======
 
 # Load in the tokens from lexer.
+from tesseract.sql.statements.create_notification import \
+    CreateNotificationStatement
+from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.insert import InsertStatement
+from tesseract.sql.statements.select import SelectStatement
+
 tokens = lexer.tokens
 
 # Set precedence for operators. We do not need these yet.
@@ -16,6 +24,7 @@ precedence = (
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
     ('left', 'LIKE'),
+    ('right', 'IS'),
 )
 
 
@@ -73,16 +82,63 @@ def p_delete_statement(p):
     p[0] = DeleteStatement(p[3])
 
 
+# empty
+# -----
+def p_empty(p):
+    'empty :'
+    pass
+
+
+# optional_from_clause
+# --------------------
+def p_optional_from_clause(p):
+    """
+        optional_from_clause : empty
+                             | FROM IDENTIFIER
+    """
+
+    #     FROM IDENTIFIER
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = None
+
+
+# optional_where_clause
+# ---------------------
+def p_optional_where_clause(p):
+    """
+        optional_where_clause : empty
+                              | WHERE expression
+    """
+
+    #     WHERE expression
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = None
+
+
+# optional_order_clause
+# ---------------------
+def p_optional_order_clause(p):
+    """
+        optional_order_clause : empty
+                              | ORDER BY IDENTIFIER optional_order_direction
+    """
+
+    #     ORDER BY IDENTIFIER optional_order_direction
+    if len(p) > 3:
+        p[0] = OrderByClause(p[3], p[4])
+    else:
+        p[0] = None
+
+
 # select_statement
 # ----------------
 def p_select_statement(p):
     """
-        select_statement : SELECT TIMES FROM IDENTIFIER WHERE expression
-                         | SELECT TIMES FROM IDENTIFIER
-                         | SELECT TIMES FROM
-                         | SELECT expression
-                         | SELECT expression FROM IDENTIFIER
-                         | SELECT TIMES
+        select_statement : SELECT expression optional_from_clause optional_where_clause optional_order_clause
                          | SELECT
     """
 
@@ -90,33 +146,10 @@ def p_select_statement(p):
     if len(p) == 2:
         raise RuntimeError("Expected expression after SELECT.")
 
-    #     SELECT TIMES
-    if len(p) == 3 and p[2] == '*':
-        raise RuntimeError("Missing FROM clause.")
+    if not p[3]:
+        p[3] = SelectStatement.NO_TABLE
 
-    #     SELECT expression
-    if len(p) == 3:
-        p[0] = SelectStatement(SelectStatement.NO_TABLE, p[2])
-        return
-
-    #     SELECT TIMES FROM
-    if len(p) == 4:
-        raise RuntimeError("Expected table name after FROM.")
-
-    # Only valid `SELECT`s beyond this point.
-
-    #     SELECT expression FROM IDENTIFIER
-    if len(p) == 5:
-        p[0] = SelectStatement(p[4], p[2])
-        return
-
-    #     SELECT TIMES FROM IDENTIFIER WHERE expression
-    if len(p) == 7:
-        p[0] = SelectStatement(p[4], '*', p[6])
-        return
-
-    #     SELECT TIMES FROM IDENTIFIER
-    p[0] = SelectStatement(p[4], '*')
+    p[0] = SelectStatement(table_name=p[3], columns=p[2], where=p[4], order=p[5])
 
 
 # insert_statement
@@ -227,6 +260,23 @@ def p_json_object_items(p):
     p[0] = p[1]
 
 
+# optional_order_direction
+# ------------------------
+def p_optional_order_direction(p):
+    """
+        optional_order_direction : empty
+                                 | ASC
+                                 | DESC
+    """
+
+    if p[1] == 'ASC':
+        p[0] = True
+    elif p[1] == 'DESC':
+        p[0] = False
+    else:
+        p[0] = None
+
+
 # string
 # ------
 def p_string(p):
@@ -275,7 +325,9 @@ def p_expression(p):
                    | logic_expression
                    | function_call
                    | like_expression
+                   | is_expression
                    | value
+                   | TIMES
     """
 
     p[0] = p[1]
@@ -336,6 +388,22 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# is_expression
+# -------------
+def p_is_expression(p):
+    """
+        is_expression : expression IS IDENTIFIER
+                      | expression IS NOT IDENTIFIER
+    """
+
+    if len(p) == 4:
+        add_requirement(p, 'operator/is')
+        p[0] = IsExpression(p[1], Value(str(p[3]).lower()), False)
+    else:
+        add_requirement(p, 'operator/is_not')
+        p[0] = IsExpression(p[1], Value(str(p[4]).lower()), True)
 
 
 # like_expression
@@ -424,7 +492,7 @@ def p_json_object_item(p):
 # -----
 def p_error(p):
     # This is really bad error, we cannot recover from this.
-    raise RuntimeError("Not valid SQL.")
+    raise RuntimeError("Could not parse SQL. Error at or near: " + str(p.value))
 
 
 def add_requirement(p, function_name):
