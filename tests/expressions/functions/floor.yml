@@ -1,0 +1,19 @@
+tests:
+  null:
+    sql: SELECT floor(null)
+    result:
+    - {"col1": null}
+
+  near_top:
+    sql: SELECT floor(1.9)
+    result:
+    - {"col1": 1}
+
+  near_bottom:
+    sql: SELECT floor(1.1)
+    result:
+    - {"col1": 1}
+
+  bad_type:
+    sql: SELECT floor("foo")
+    error: No such function floor(string).

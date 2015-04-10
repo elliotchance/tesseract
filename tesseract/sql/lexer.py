@@ -7,7 +7,10 @@ from tesseract.sql.expressions import Value, Identifier
 # SQL keywords.
 sql_keywords = (
     'AND',
+    'ASC',
+    'BY',
     'DELETE',
+    'DESC',
     'FROM',
     'INSERT',
     'INTO',
@@ -15,6 +18,7 @@ sql_keywords = (
     'LIKE',
     'NOT',
     'OR',
+    'ORDER',
     'SELECT',
     'WHERE',
 )

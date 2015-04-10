@@ -1,25 +1,13 @@
 data:
   table1:
-  - {"foo": 125}
-  - {"foo": 124}
   - {"foo": 123}
+  - {"foo": 124}
+  - {"foo": 125}
 
   table2:
   - {"first": "Elliot", "last": "Chance"}
 
 tests:
-  fail_1:
-    sql: SELECT
-    error: Expected expression after SELECT.
-
-  fail_2:
-    sql: SELECT *
-    error: Missing FROM clause.
-
-  fail_3:
-    sql: SELECT * FROM
-    error: Expected table name after FROM.
-
   simple:
     data: table1
     sql: SELECT * FROM table1
@@ -46,7 +34,7 @@ tests:
     result:
     - {}
 
-  colums_are_case_sensitive:
+  columns_are_case_sensitive:
     data: table2
     sql: SELECT First FROM table2
     result:

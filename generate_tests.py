@@ -53,24 +53,46 @@ def process_tests(tests_file, out, safe_name):
     out.write("            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)\n")
     out.write("        )\n\n")
 
+    if 'data' in tests_file:
+        for name, table in get_iterator(tests_file, 'data'):
+            out.write("    def load_%s(self, server, randomize):\n" % name)
+            out.write("        server.execute('DELETE FROM %s')\n" % name)
+            out.write("        records = [\n")
+            for row in table:
+                out.write("            'INSERT INTO %s %s',\n" % (name, json.dumps(row)))
+            out.write("        ]\n")
+            out.write("        if randomize:\n")
+            out.write("            random.shuffle(records)\n")
+            out.write("        for sql in records:\n")
+            out.write("            server.execute(sql)\n")
+            out.write("\n")
+
     for name, test in get_iterator(tests_file, 'tests'):
         total += 1
         out.write("    def test_%s(self):\n" % name)
-        out.write("        warnings = []\n")
-        out.write("        server = Server()\n")
+
+        # If the `repeat` is not set then let's set it to 1.
+        if 'repeat' not in test:
+            test['repeat'] = 1
+
+        out.write("        for repeat in range(0, %d):\n" % test['repeat'])
+        out.write("            warnings = []\n")
+        out.write("            server = Server()\n")
 
         # Load any data sets if needed.
         if 'data' in test:
-            out.write("        self.load_%s(server)\n\n" % test['data'])
+            out.write("            self.load_%s(server, False)\n\n" % test['data'])
+        elif 'data-randomized' in test:
+            out.write("            self.load_%s(server, True)\n\n" % test['data-randomized'])
 
         # We only generate a parse test if there is only one SQL statement
         # provided.
         if not isinstance(test['sql'], list) and 'error' not in test and 'parse' not in test:
-            out.write("        sql = %s\n" % escape(test['sql']))
-            out.write("        result = parser.parse(sql)\n")
+            out.write("            sql = %s\n" % escape(test['sql']))
+            out.write("            result = parser.parse(sql)\n")
             if 'as' in test:
-                out.write("        sql = %s\n" % escape(test['as']))
-            out.write("        self.assertEquals(sql, str(result.statement))\n")
+                out.write("            sql = %s\n" % escape(test['as']))
+            out.write("            self.assertEquals(sql, str(result.statement))\n")
             out.write("\n")
 
         # Convert a single SQL into a list if we have to.
@@ -87,26 +109,26 @@ def process_tests(tests_file, out, safe_name):
 
         for i in for_range:
             sql = test['sql'][i]
-            out.write("        sql = %s\n" % escape(sql))
-            out.write("        result = server.execute(sql)\n")
+            out.write("            sql = %s\n" % escape(sql))
+            out.write("            result = server.execute(sql)\n")
 
             # Every statement must pass except for the last one if this is an
             # error test
             if not ('error' in test and i == len(test['sql']) - 1):
-                out.write("        self.assertTrue(result.success, msg=result.error)\n")
+                out.write("            self.assertTrue(result.success, msg=result.error)\n")
 
             # Catch all the warnings along the way
-            out.write("        if isinstance(result.warnings, list):\n")
-            out.write("            warnings.extend(result.warnings)\n")
+            out.write("            if isinstance(result.warnings, list):\n")
+            out.write("                warnings.extend(result.warnings)\n")
 
         # An error must be asserted after the last SQL statement
         if 'error' in test:
-            out.write("        self.assertFalse(result.success, msg=result.error)\n")
-            out.write("        self.assertEquals(result.error, %s)\n" % escape(test['error']))
+            out.write("            self.assertFalse(result.success, msg=result.error)\n")
+            out.write("            self.assertEquals(result.error, %s)\n" % escape(test['error']))
 
         # Test the output of the last SQL statement
         if 'result' in test:
-            out.write("        self.assertEqual(result.data, %s)\n" % \
+            out.write("            self.assertEqual(result.data, %s)\n" % \
                       test['result'])
 
         # If there are warnings we need to assert those at the end.
@@ -116,7 +138,7 @@ def process_tests(tests_file, out, safe_name):
             if not isinstance(test['warning'], list):
                 test['warning'] = [ test['warning'] ]
 
-            out.write("        self.assertEqual(warnings, %s)\n" % \
+            out.write("            self.assertEqual(warnings, %s)\n" % \
                       json.dumps(test['warning']))
 
         out.write("\n")
