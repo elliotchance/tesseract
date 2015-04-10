@@ -37,7 +37,7 @@ class OrderStage:
             "for i, data in ipairs(records) do",
 
             # Decode the record.
-            "    local row = cjson.decode(data)" % self.clause.field_name,
+            "    local row = cjson.decode(data)",
 
             # The first thing we need to do it get the value that we will be
             # sorting by.
