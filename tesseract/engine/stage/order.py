@@ -43,10 +43,14 @@ class OrderStage:
             # sorting by.
             "    local value = row['%s']" % self.clause.field_name,
 
+            # For not ordering by an array or object is not supported.
+            "    if type(value) == 'table' then",
+            "       error('ORDER BY used on an array or object.')",
+
             # When `value` is `nil` then there is no field, or if the field
             # exists but has a value of `cjson.null` - this goes into first
             # category.
-            "    if value == nil or value == cjson.null then",
+            "    elseif value == nil or value == cjson.null then",
             "       redis.call('RPUSH', 'order_null', data)",
 
             # The second category is for all booleans.

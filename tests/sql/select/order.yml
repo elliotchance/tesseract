@@ -25,6 +25,12 @@ data:
   - {"foo": 50, "bar": 10}
   - {"foo": true, "bar": 12}
 
+  array:
+  - {"foo": [1, 2]}
+
+  object:
+  - {"foo": {"foo": 50, "bar": 10}}
+
 tests:
   order_by_mixed:
     data-randomized: non_duplicates
@@ -106,3 +112,8 @@ tests:
     - {"foo": "abc", "bar": 3}
     - {"foo": "abc", "bar": 9}
     - {"foo": "zzz", "bar": 6}
+
+  order_by_array_is_not_supported:
+    data: array
+    sql: SELECT * FROM array ORDER BY foo
+    error: ORDER BY used on an array or object.
