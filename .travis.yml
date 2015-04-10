@@ -13,11 +13,12 @@ install:
   # Install dependencies.
   - "pip install -r requirements.txt"
   - "pip install -r requirements-dev.txt"
-  
+  - "pip install scrutinizer-ocular"
+
   # Start the server in the background. We don't acutally use this for tests but we
   # need to generate the LALR tables.
   - "bin/tesseract &"
-  
+
   # Generate tests from YAML.
   - "python generate_tests.py"
 
@@ -26,4 +27,5 @@ script: nosetests --with-coverage --cover-package=tesseract
 
 # Submit code coverage data.
 after_success:
-  coveralls
+  - coveralls
+  - ocular

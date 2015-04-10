@@ -8,3 +8,7 @@ end
 local function no_such_function(name, arg)
     error(string.format('No such function %s(%s).', name, type(arg)))
 end
+
+local function no_such_type(type)
+    error(string.format("No such type '%s'.", type))
+end

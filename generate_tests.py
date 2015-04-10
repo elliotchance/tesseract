@@ -91,7 +91,7 @@ def process_file(file):
 
         # We only generate a parse test if there is only one SQL statement
         # provided.
-        if not isinstance(test['sql'], list) and 'error' not in test:
+        if not isinstance(test['sql'], list) and 'error' not in test and 'parse' not in test:
             out.write("            sql = %s\n" % escape(test['sql']))
             out.write("            result = parser.parse(sql)\n")
             if 'as' in test:

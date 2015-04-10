@@ -21,6 +21,8 @@ precedence = (
     ('left', 'AND', 'OR'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
+    ('left', 'LIKE'),
+    ('right', 'IS'),
 )
 
 
@@ -301,6 +303,8 @@ def p_expression(p):
                    | comparison_expression
                    | logic_expression
                    | function_call
+                   | like_expression
+                   | is_expression
                    | value
                    | TIMES
     """
@@ -363,6 +367,41 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# is_expression
+# -------------
+def p_is_expression(p):
+    """
+        is_expression : expression IS IDENTIFIER
+                      | expression IS NOT IDENTIFIER
+    """
+
+    if len(p) == 4:
+        add_requirement(p, 'operator/is')
+        p[0] = IsExpression(p[1], Value(str(p[3]).lower()), False)
+    else:
+        add_requirement(p, 'operator/is_not')
+        p[0] = IsExpression(p[1], Value(str(p[4]).lower()), True)
+
+
+# like_expression
+# ---------------
+def p_like_expression(p):
+    """
+        like_expression : expression LIKE expression
+                        | expression NOT LIKE expression
+    """
+
+    #     expression LIKE expression
+    if p[2] == 'LIKE':
+        add_requirement(p, 'operator/like')
+        p[0] = LikeExpression(p[1], p[3], False)
+
+    #     expression NOT LIKE expression
+    else:
+        add_requirement(p, 'operator/not_like')
+        p[0] = LikeExpression(p[1], p[4], True)
 
 
 # logic_expression

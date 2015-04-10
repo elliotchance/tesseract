@@ -88,12 +88,13 @@ tests:
 
   equal_objects:
     sql: 'SELECT {"foo": "bar", "bar": "baz"} <> {"bar": "baz", "foo": "bar"}'
-    as: 'SELECT {"foo": "bar", "bar": "baz"} <> {"foo": "bar", "bar": "baz"}'
+    parse: false
     result:
     - {"col1": false}
 
   non_equal_objects:
     sql: 'SELECT {"foo": "bar", "bar": "baz"} <> {"foo": "barZ", "bar": "baz"}'
+    parse: false
     result:
     - {"col1": true}
 

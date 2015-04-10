@@ -41,6 +41,20 @@ tests:
     - {"col1": null}
 ```
 
+### Ignoring the Parser (`parse`)
+
+Sometimes the SQL rendered from the SQL provided is not predictable, so we have
+to disable the parser test:
+
+```
+tests:
+  json_object_with_two_elements:
+    sql: 'SELECT {"foo": "bar", "baz": 123}'
+    parse: false
+    result:
+    - {"col1": {"foo": "bar", "baz": 123}}
+```
+
 ### Commenting (`comment`)
 
 Test can have an optional comment, this is preferred over using YAML inline
