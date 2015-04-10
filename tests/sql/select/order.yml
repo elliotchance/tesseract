@@ -88,3 +88,12 @@ tests:
     result:
     - {"foo": false, "bar": 13}
     - {"foo": true, "bar": 12}
+
+  order_by_number_only:
+    data: duplicates
+    sql: SELECT * FROM duplicates WHERE foo IS number ORDER BY foo
+    result:
+    - {"foo": 40, "bar": 2}
+    - {"foo": 50, "bar": 10}
+    - {"foo": 100, "bar": 5}
+    - {"foo": 100, "bar": 8}
