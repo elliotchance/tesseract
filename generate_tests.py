@@ -79,7 +79,7 @@ def process_file(file):
         if 'repeat' not in test:
             test['repeat'] = 1
 
-        out.write("        for repeat in xrange(0, %d):\n" % test['repeat'])
+        out.write("        for repeat in range(0, %d):\n" % test['repeat'])
         out.write("            warnings = []\n")
         out.write("            server = Server()\n")
 

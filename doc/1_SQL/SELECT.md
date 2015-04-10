@@ -35,8 +35,9 @@ There are two modifiers for a column; `ASC` and `DESC` which represent
 **asc**ending and **desc**ending respectively. If no sort order is specified
 then `ASC` is assumed.
 
-When data is sorted it is separated into three types:
+When data is sorted it is separated into four types:
 
+ * Booleans. Explicit `true` and `false`.
  * Numbers. Integers and floating point, not including strings that look like
    numbers like `"123"`.
  * Strings.
@@ -44,5 +45,6 @@ When data is sorted it is separated into three types:
  
 Data will sorted by type, then value in the same order as above. That is to say:
 
+ * Any number is considered greater than a boolean.
  * Any string is considered greater than a number.
  * `null` is considered to be greater than any non-`null` value.
