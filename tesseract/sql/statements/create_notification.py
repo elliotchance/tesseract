@@ -17,7 +17,12 @@ class CreateNotificationStatement(Statement):
         self.where = where
 
     def __str__(self):
-        sql = "CREATE NOTIFICATION %s ON %s" % (self.notification_name, self.table_name)
+        sql = "CREATE NOTIFICATION %s ON %s" % (
+            self.notification_name,
+            self.table_name
+        )
+
         if self.where:
             sql += ' WHERE %s' % str(self.where)
+
         return sql
