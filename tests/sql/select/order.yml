@@ -64,40 +64,9 @@ tests:
     - {"foo": 50, "bar": 10}
     - {"foo": 40, "bar": 2}
 
-  ## Edge Cases
-  ## ----------
-#
-  #order_by_field_that_doesnt_exist:
-  #  comment: |
-  #    A field that does not exist will take on the value `null` and be sorted
-  #    with the same rules.
-  #  data: only_numbers
-  #  sql: SELECT * FROM only_numbers ORDER BY bar
-  #  result:
-  #  - {"foo": 40}
-  #  - {"foo": 100}
-  #  - {"foo": 50}
-#
-  #order_by_explicit_asc:
-  #  description: |
-  #    This does the same thing as `order_by_numbers_only` but adds the explicit
-  #    `ASC`.
-  #  data: only_numbers
-  #  sql: SELECT * FROM only_numbers ORDER BY foo ASC
-  #  result:
-  #  - {"foo": 40}
-  #  - {"foo": 50}
-  #  - {"foo": 100}
-#
-  ## Miscellaneous
-  ## -------------
-#
-  #order_with_where:
-  #  comment: |
-  #    Combining a `WHERE` clause with an `ORDER BY` makes sure that multiple
-  #    stages are being executed in succession successfully.
-  #  data: only_numbers
-  #  sql: SELECT * FROM only_numbers WHERE foo > 40 ORDER BY foo
-  #  result:
-  #  - {"foo": 50}
-  #  - {"foo": 100}
+  order_by_null_only:
+    sql: SELECT * FROM duplicates WHERE foo IS null ORDER BY foo
+    result:
+    - {"foo": null, "bar": 1}
+    - {"foo": null, "bar": 7}
+    - {"bar": 11}
