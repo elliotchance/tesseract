@@ -276,3 +276,19 @@ class IsExpression(BinaryExpression):
 
     def __str__(self):
         return '%s %s %s' % (str(self.left), self.operator, self.right.value)
+
+
+class NotExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return 'NOT %s' % str(self.value)
+
+    def compile_lua(self, offset):
+        # Compile the argument.
+        lua_arg, offset, new_args = self.value.compile_lua(offset)
+
+        lua = 'operator_not(%s)' % lua_arg
+
+        return (lua, offset, new_args)

@@ -18,10 +18,10 @@ from tesseract.sql.statements.select import SelectStatement
 
 tokens = lexer.tokens
 
-# Set precedence for operators. We do not need these yet.
+# Set precedence for operators.
 precedence = (
     ('left', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE'),
-    ('left', 'AND', 'OR'),
+    ('left', 'AND', 'OR', 'NOT'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
     ('left', 'LIKE'),
@@ -443,10 +443,16 @@ def p_logic_expression(p):
     """
         logic_expression : expression AND expression
                          | expression OR expression
+                         | NOT expression
     """
 
+    #     NOT expression
+    if p[1] == 'NOT':
+        add_requirement(p, 'operator/not')
+        p[0] = NotExpression(p[2])
+
     #     expression AND expression
-    if p[2] == 'AND':
+    elif p[2] == 'AND':
         add_requirement(p, 'operator/and')
         p[0] = AndExpression(p[1], p[3])
 
