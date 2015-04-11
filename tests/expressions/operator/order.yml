@@ -19,7 +19,12 @@ tests:
     result:
     - {"col1": 0.75}
 
-  # multiply
+  power_before_modulo:
+    sql: SELECT 3 % 2 ^ 2
+    result:
+    - {"col1": 3}
+
+  # multiply divide modulo
   multiply_before_add:
     sql: SELECT 3 + 2 * 2
     result:
@@ -37,5 +42,15 @@ tests:
 
   divide_before_subtract:
     sql: SELECT 3 - 2 / 2
+    result:
+    - {"col1": 2}
+
+  modulo_before_add:
+    sql: SELECT 3 + 3 % 2
+    result:
+    - {"col1": 4}
+
+  modulo_before_subtract:
+    sql: SELECT 3 - 3 % 2
     result:
     - {"col1": 2}

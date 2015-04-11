@@ -1,0 +1,10 @@
+tests:
+  in_one_true:
+    sql: SELECT 123 IN (123)
+    result:
+    - {"col1": true}
+
+  in_one_false:
+    sql: SELECT 123 IN (124)
+    result:
+    - {"col1": false}

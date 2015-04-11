@@ -302,3 +302,11 @@ class PowerExpression(BinaryExpression):
 class ModuloExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '%', right, ':operator_modulo')
+
+
+class InExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, 'IN', right, ':operator_in')
+
+    def __str__(self):
+        return '%s IN (%s)' % (str(self.left), str(self.right))

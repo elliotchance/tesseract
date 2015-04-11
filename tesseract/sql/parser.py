@@ -341,6 +341,7 @@ def p_expression(p):
                    | function_call
                    | like_expression
                    | is_expression
+                   | in_expression
                    | value
                    | TIMES
     """
@@ -403,6 +404,19 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# in_expression
+# -------------
+def p_in_expression(p):
+    """
+        in_expression : expression IN PARAM_OPEN expression PARAM_CLOSE
+    """
+
+    # Notice that the 'operator/equal' dependency must come before 'operator/in'
+    add_requirement(p, 'operator/equal')
+    add_requirement(p, 'operator/in')
+    p[0] = InExpression(p[1], p[4])
 
 
 # is_expression
@@ -529,7 +543,10 @@ def p_error(p):
 
 
 def add_requirement(p, function_name):
-    p.parser.lua_requirements.add(function_name)
+    # Check if it already exists.
+    if function_name not in p.parser.lua_requirements:
+        # Add new unique operator.
+        p.parser.lua_requirements.append(function_name)
 
 
 def parse(data):
@@ -537,7 +554,10 @@ def parse(data):
     parser = yacc.yacc()
     parser.statement = None
     parser.warnings = []
-    parser.lua_requirements = set()
+
+    # It might make sense to use a set() for unique operators but we need to
+    # retain the order in which they are required.
+    parser.lua_requirements = []
 
     # Run the parser.
     parser.parse(data)

@@ -15,6 +15,7 @@ sql_keywords = (
     'DROP',
     'FROM',
     'INSERT',
+    'IN',
     'INTO',
     'IS',
     'LIKE',
