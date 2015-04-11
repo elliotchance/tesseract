@@ -4,13 +4,16 @@ local function operator_in(left, right)
         return cjson.null
     end
 
-    -- Try to find the value in the set.
+    -- We must check for any `null` value before testing for equality.
     for key in pairs(right) do
         -- If any of the values are null we can end here.
         if right[key] == cjson.null then
             return cjson.null
         end
+    end
 
+    -- All the values are known, try to find the value in the set.
+    for key in pairs(right) do
         -- Do crash-safe comparison.
         if operator_equal(right[key], left, false) then
             return true

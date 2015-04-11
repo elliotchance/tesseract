@@ -23,3 +23,22 @@ tests:
     sql: SELECT 2 IN (1, 2, 3)
     result:
     - {"col1": true}
+
+  in_three_false:
+    sql: SELECT 4 IN (1, 2, 3)
+    result:
+    - {"col1": false}
+
+  in_three_null_before:
+    sql: SELECT 3 IN (1, null, 3)
+    result:
+    - {"col1": null}
+
+  in_three_null_after:
+    comment: |
+      In this case the `null` appears after the match has been made but it must
+      check all the elements for a single `null` to truly determine if the
+      result is `null`.
+    sql: SELECT 1 IN (1, null, 3)
+    result:
+    - {"col1": null}
