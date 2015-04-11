@@ -309,4 +309,5 @@ class InExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, 'IN', right, ':operator_in')
 
     def __str__(self):
-        return '%s IN (%s)' % (str(self.left), str(self.right))
+        items = [str(item) for item in self.right.value]
+        return '%s IN (%s)' % (str(self.left), ', '.join(items))

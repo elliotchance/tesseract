@@ -8,3 +8,18 @@ tests:
     sql: SELECT 123 IN (124)
     result:
     - {"col1": false}
+
+  left_is_null:
+    sql: SELECT null IN (124)
+    result:
+    - {"col1": null}
+
+  right_is_null:
+    sql: SELECT 123 IN (null)
+    result:
+    - {"col1": null}
+
+  in_three_true:
+    sql: SELECT 2 IN (1, 2, 3)
+    result:
+    - {"col1": true}

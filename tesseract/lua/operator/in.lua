@@ -1,3 +1,22 @@
 local function operator_in(left, right)
-    return operator_equal(left, right)
+    -- If the value is null then the result is always null.
+    if left == cjson.null then
+        return cjson.null
+    end
+
+    -- Try to find the value in the set.
+    for key in pairs(right) do
+        -- If any of the values are null we can end here.
+        if right[key] == cjson.null then
+            return cjson.null
+        end
+
+        -- Do crash-safe comparison.
+        if operator_equal(right[key], left, false) then
+            return true
+        end
+    end
+
+    -- We must conclude that the value was not in the set.
+    return false
 end
