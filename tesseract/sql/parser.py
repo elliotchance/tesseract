@@ -12,6 +12,7 @@ import tesseract.sql.lexer as lexer
 from tesseract.sql.statements.create_notification import \
     CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
@@ -36,10 +37,21 @@ def p_statement(p):
                   | insert_statement
                   | select_statement
                   | create_notification_statement
+                  | drop_notification_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# drop_notification_statement
+# ---------------------------
+def p_drop_notification_statement(p):
+    """
+        drop_notification_statement : DROP NOTIFICATION IDENTIFIER
+    """
+
+    p[0] = DropNotificationStatement(p[3])
 
 
 # create_notification_statement

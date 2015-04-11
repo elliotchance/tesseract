@@ -12,6 +12,7 @@ sql_keywords = (
     'CREATE',
     'DELETE',
     'DESC',
+    'DROP',
     'FROM',
     'INSERT',
     'INTO',

@@ -1,0 +1,3 @@
+tests:
+  drop_notification:
+    sql: DROP NOTIFICATION foo

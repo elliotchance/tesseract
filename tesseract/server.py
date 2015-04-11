@@ -8,6 +8,7 @@ from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.create_notification import CreateNotification
 from tesseract.engine.statements.delete import Delete
+from tesseract.engine.statements.drop_notification import DropNotification
 from tesseract.engine.statements.insert import Insert
 from tesseract.engine.statements.select import Select
 from tesseract.server_result import ServerResult
@@ -17,6 +18,7 @@ import redis
 from tesseract.sql.statements.create_notification import \
     CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
@@ -129,6 +131,11 @@ class Server:
         # If the statement is a `CREATE NOTIFICATION`
         if isinstance(result.statement, CreateNotificationStatement):
             statement = CreateNotification()
+            return statement.execute(result, self.notifications)
+
+        # If the statement is a `DROP NOTIFICATION`
+        if isinstance(result.statement, DropNotificationStatement):
+            statement = DropNotification()
             return statement.execute(result, self.notifications)
 
         # This is a `SELECT`
