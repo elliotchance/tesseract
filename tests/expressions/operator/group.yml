@@ -3,3 +3,18 @@ tests:
     sql: SELECT 3 + 2 * 2
     result:
     - {"col1": 7}
+
+  multiply_before_subtract:
+    sql: SELECT 3 - 2 * 2
+    result:
+    - {"col1": -1}
+
+  divide_before_add:
+    sql: SELECT 3 + 2 / 2
+    result:
+    - {"col1": 4}
+
+  divide_before_subtract:
+    sql: SELECT 3 - 2 / 2
+    result:
+    - {"col1": 2}
