@@ -86,11 +86,20 @@ class Server:
             # Read the incoming request.
             data = client_socket.recv(1024)
 
+            # When data is blank it means the client has disconnected.
+            if data == '':
+                break
+
             # Decode the JSON.
             try:
                 request = json.loads(data)
+                print "SQL: %s" % request['sql']
             except ValueError:
-                print data
+                print "Bad request: %s" % data
+
+                # The JSON could not be decoded, return an error.
+                client_socket.send('{"success":false,"error":"Not valid JSON"}')
+                continue
 
             # Process the request.
             result = self.execute(request['sql'])

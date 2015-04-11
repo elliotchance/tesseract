@@ -28,7 +28,7 @@ true:
 ```sql
 CREATE NOTIFICATION bobs
 ON people
-WHERE first_name = 'Bob'
+WHERE first_name = 'Bob';
 ```
 
 Notes
@@ -36,3 +36,11 @@ Notes
 
 Multiple notifications can be fired for a single insert but is limited to one
 notification per `NOTIFICATION` defined.
+
+Notification use the Redis PUB/SUB model, so when the actual notification is
+fired it is sent as a publish through Redis. Your notification name is the
+channel that the message will be published to.
+
+This means that software does not need to know anything about the tesseract
+server if they only intent to subscribe. Published notifications are the
+complete JSON record.
