@@ -1,10 +1,25 @@
+# Refer to http://www.postgresql.org/docs/7.2/static/sql-precedence.html
+
 tests:
+  # unary minus
   unary_minus_before_power:
     sql: SELECT - 3 ^ 2
     as: SELECT -3 ^ 2
     result:
     - {"col1": 9}
 
+  # power
+  power_before_multiply:
+    sql: SELECT 3 * 2 ^ 2
+    result:
+    - {"col1": 12}
+
+  power_before_divide:
+    sql: SELECT 3 / 2 ^ 2
+    result:
+    - {"col1": 0.75}
+
+  # multiply
   multiply_before_add:
     sql: SELECT 3 + 2 * 2
     result:

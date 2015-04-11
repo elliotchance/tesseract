@@ -20,9 +20,10 @@ tokens = lexer.tokens
 
 # Set precedence for operators.
 precedence = (
-    ('left', 'CARET'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
+    ('left', 'CARET'),
+
     ('left', 'AND', 'OR', 'NOT'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
