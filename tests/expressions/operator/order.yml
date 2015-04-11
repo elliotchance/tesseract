@@ -54,3 +54,44 @@ tests:
     sql: SELECT 3 - 3 % 2
     result:
     - {"col1": 2}
+
+  # less greater
+  plus_before_less:
+    sql: SELECT 3 < 2 + 3
+    result:
+    - {"col1": true}
+
+  plus_before_greater:
+    sql: SELECT 3 > 2 + 3
+    result:
+    - {"col1": false}
+
+  plus_before_less_equal:
+    sql: SELECT 3 <= 2 + 3
+    result:
+    - {"col1": true}
+
+  plus_before_greater_equal:
+    sql: SELECT 3 >= 2 + 3
+    result:
+    - {"col1": false}
+
+  subtract_before_less:
+    sql: SELECT 3 < 2 - 3
+    result:
+    - {"col1": false}
+
+  subtract_before_greater:
+    sql: SELECT 3 > 2 - 3
+    result:
+    - {"col1": true}
+
+  subtract_before_less_equal:
+    sql: SELECT 3 <= 2 - 3
+    result:
+    - {"col1": false}
+
+  plus_before_greater_equal:
+    sql: SELECT 3 >= 2 - 3
+    result:
+    - {"col1": true}
