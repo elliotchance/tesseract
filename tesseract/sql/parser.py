@@ -411,12 +411,18 @@ def p_function_call(p):
 def p_in_expression(p):
     """
         in_expression : expression IN PARAM_OPEN expression_list PARAM_CLOSE
+                      | expression NOT IN PARAM_OPEN expression_list PARAM_CLOSE
     """
 
     # Notice that the 'operator/equal' dependency must come before 'operator/in'
     add_requirement(p, 'operator/equal')
-    add_requirement(p, 'operator/in')
-    p[0] = InExpression(p[1], Value(p[4]))
+
+    if p[2] == 'IN':
+        add_requirement(p, 'operator/in')
+        p[0] = InExpression(p[1], Value(p[4]), False)
+    else:
+        add_requirement(p, 'operator/not_in')
+        p[0] = InExpression(p[1], Value(p[5]), True)
 
 
 # is_expression

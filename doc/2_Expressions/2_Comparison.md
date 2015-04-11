@@ -154,3 +154,18 @@ Each of the combinations can be used with `NOT` like:
     
 The case of the type (`boolean`) is not important and there is no specific
 convention on case.
+
+
+Sets
+----
+
+To test the existence of a value in a set:
+
+    a IN (b1, b2, ...)
+
+Will return `true` if `a` exists in one of the `b` values. There must be at
+least one `b` value. Comparison of each element follows the same rules as the
+`=` operator.
+
+If `a` is `null` or any of the `b` values are `null` then the result is `null`.
+This is to conform is the SQL standard in dealing with `null` values.

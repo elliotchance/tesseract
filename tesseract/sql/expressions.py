@@ -305,9 +305,13 @@ class ModuloExpression(BinaryExpression):
 
 
 class InExpression(BinaryExpression):
-    def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'IN', right, ':operator_in')
+    def __init__(self, left, right, is_not):
+        function = ':operator_not_in' if is_not else ':operator_in'
+        operator = 'NOT IN' if is_not else 'IN'
+        BinaryExpression.__init__(self, left, operator, right, function)
+
+        self.is_not = is_not
 
     def __str__(self):
         items = [str(item) for item in self.right.value]
-        return '%s IN (%s)' % (str(self.left), ', '.join(items))
+        return '%s %s (%s)' % (str(self.left), self.operator, ', '.join(items))
