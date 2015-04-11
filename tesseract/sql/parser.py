@@ -29,6 +29,7 @@ precedence = (
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
     ('left', 'LIKE'),
     ('right', 'IS'),
+    ('left', 'BETWEEN'),
 )
 
 
@@ -342,6 +343,7 @@ def p_expression(p):
                    | like_expression
                    | is_expression
                    | in_expression
+                   | between_expression
                    | value
                    | TIMES
     """
@@ -404,6 +406,17 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# between_expression
+# ------------------
+def p_between_expression(p):
+    """
+        between_expression : expression BETWEEN expression AND expression
+    """
+
+    add_requirement(p, 'operator/between')
+    p[0] = BetweenExpression(p[1], Value([p[3], p[5]]))
 
 
 # in_expression

@@ -156,12 +156,13 @@ The case of the type (`boolean`) is not important and there is no specific
 convention on case.
 
 
-Sets
-----
+Set Membership
+--------------
 
 To test the existence of a value in a set:
 
     a IN (b1, b2, ...)
+    a NOT IN (b1, b2, ...)
 
 Will return `true` if `a` exists in one of the `b` values. There must be at
 least one `b` value. Comparison of each element follows the same rules as the
@@ -169,3 +170,20 @@ least one `b` value. Comparison of each element follows the same rules as the
 
 If `a` is `null` or any of the `b` values are `null` then the result is `null`.
 This is to conform is the SQL standard in dealing with `null` values.
+
+
+Containment
+-----------
+
+To test if a value sits between two other values (inclusive):
+
+    a BETWEEN b AND c
+    a NOT BETWEEN b AND c
+
+Is exactly equivalent to:
+
+    a >= b AND a <= c
+    a < b OR a > c
+
+If at least one of `a`, `b` or `c` is `null` then the result will always be
+`null`.

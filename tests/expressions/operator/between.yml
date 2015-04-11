@@ -1,0 +1,20 @@
+tests:
+  a_null:
+    sql: SELECT null BETWEEN 3 AND 7
+    result:
+    - {"col1": null}
+
+  b_null:
+    sql: SELECT 5 BETWEEN null AND 7
+    result:
+    - {"col1": null}
+
+  c_null:
+    sql: SELECT 5 BETWEEN 3 AND null
+    result:
+    - {"col1": null}
+
+  less_than:
+    sql: SELECT 2 BETWEEN 3 AND 7
+    result:
+    - {"col1": false}
