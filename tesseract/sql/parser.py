@@ -76,7 +76,7 @@ def p_create_notification_statement(p):
 # ----------------
 def p_delete_statement(p):
     """
-        delete_statement : DELETE FROM IDENTIFIER
+        delete_statement : DELETE FROM IDENTIFIER optional_where_clause
                          | DELETE FROM
                          | DELETE
     """
@@ -89,9 +89,9 @@ def p_delete_statement(p):
     elif len(p) == 3:
         raise RuntimeError("Expected table name after FROM.")
 
-    #     DELETE FROM IDENTIFIER
+    #     DELETE FROM IDENTIFIER optional_where_clause
     # A valid `DELETE` statement
-    p[0] = DeleteStatement(p[3])
+    p[0] = DeleteStatement(p[3], p[4])
 
 
 # empty
