@@ -30,10 +30,14 @@ class SelectStatement(Statement):
 
     def __str__(self):
         r = "SELECT %s" % self.columns
+
         if self.table_name != SelectStatement.NO_TABLE:
             r += " FROM %s" % self.table_name
+
         if self.where:
             r += ' WHERE %s' % self.where
+
         if self.order:
             r += ' %s' % self.order
+
         return r

@@ -9,7 +9,10 @@ import tesseract.sql.lexer as lexer
 # ======
 
 # Load in the tokens from lexer.
+from tesseract.sql.statements.create_notification import \
+    CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
@@ -33,10 +36,40 @@ def p_statement(p):
         statement : delete_statement
                   | insert_statement
                   | select_statement
+                  | create_notification_statement
+                  | drop_notification_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# drop_notification_statement
+# ---------------------------
+def p_drop_notification_statement(p):
+    """
+        drop_notification_statement : DROP NOTIFICATION IDENTIFIER
+    """
+
+    p[0] = DropNotificationStatement(p[3])
+
+
+# create_notification_statement
+# -----------------------------
+def p_create_notification_statement(p):
+    """
+        create_notification_statement : CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
+                                      | CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER WHERE expression
+    """
+
+    #     CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
+    if len(p) == 6:
+        p[0] = CreateNotificationStatement(p[3], p[5])
+
+    #     CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER WHERE expression
+    else:
+        p[0] = CreateNotificationStatement(p[3], p[5], p[7])
+
 
 
 # delete_statement

@@ -149,14 +149,52 @@ data:
   - {"foo": 125}
   - {"foo": 124}
   - {"foo": 123}
+```
 
+
+Verifying Notifications
+-----------------------
+
+When under test all notifications throughout the entire test case will be
+recorded. They can be asserted after all the SQL is executed. To test for a
+single notification:
+
+```yml
 tests:
-  where:
-    data: table1
-    repeat: 10
-    sql: SELECT * FROM table1 ORDER BY foo
-    result:
-    - {"foo": 123}
-    - {"foo": 124}
-    - {"foo": 125}
+  notification_will_be_fired_for_insert:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      to: foo
+      with: {"a": "b"}
+```
+
+If you need to assert more than one notification:
+
+```yml
+tests:
+  multiple_notifications_can_be_fired_from_a_single_select:
+    sql:
+    - CREATE NOTIFICATION foo1 ON some_table WHERE a = "b"
+    - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      -
+        to: foo1
+        with: {"a": "b"}
+      -
+        to: foo2
+        with: {"a": "b"}
+```
+
+Or validate that no notifications have been fired:
+
+```yml
+tests:
+  notification_will_respect_where_clause:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification: []
 ```

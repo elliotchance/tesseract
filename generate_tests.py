@@ -47,12 +47,17 @@ def process_file(file):
     out.write("from unittest import TestCase\n")
     out.write("from tesseract.server import Server\n")
     out.write("import tesseract.sql.parser as parser\n")
+    out.write("import json\n")
     out.write("import random\n\n")
 
     out.write("class Test%s(TestCase):\n" % safe_name.replace('_', ' ').title().replace(' ', ''))
 
+    out.write("    def publish(self, name, value):\n")
+    out.write("        self.notifications.append({'to': name, 'with': json.loads(value)})\n")
+
     out.write("    def setUp(self):\n")
     out.write("        TestCase.setUp(self)\n")
+    out.write("        self.notifications = []\n")
     out.write("        self.table_name = ''.join(\n")
     out.write("            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)\n")
     out.write("        )\n\n")
@@ -82,6 +87,9 @@ def process_file(file):
         out.write("        for repeat in range(0, %d):\n" % test['repeat'])
         out.write("            warnings = []\n")
         out.write("            server = Server()\n")
+
+        # Setup to receive notifications
+        out.write("            server.publish = self.publish\n")
 
         # Load any data sets if needed.
         if 'data' in test:
@@ -144,6 +152,15 @@ def process_file(file):
 
             out.write("            self.assertEqual(warnings, %s)\n" % \
                       json.dumps(test['warning']))
+
+        # Check notifications.
+        if 'notification' in test:
+            if not isinstance(test['notification'], list):
+                test['notification'] = [ test['notification'] ]
+            out.write("        self.assertEqual(len(self.notifications), %s)\n" % \
+                      len(test['notification']))
+            for n in test['notification']:
+                out.write("        self.assertTrue(%s in self.notifications)\n" % json.dumps(n))
 
         out.write("\n")
 

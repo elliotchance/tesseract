@@ -1,22 +1,32 @@
 import json
 import os
+import random
 import socket
 from tesseract.engine.stage.expression import ExpressionStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
+from tesseract.engine.statements.create_notification import CreateNotification
+from tesseract.engine.statements.delete import Delete
+from tesseract.engine.statements.drop_notification import DropNotification
+from tesseract.engine.statements.insert import Insert
+from tesseract.engine.statements.select import Select
+from tesseract.server_result import ServerResult
 from tesseract.sql.expressions import Expression
 import tesseract.sql.parser as parser
 import redis
+from tesseract.sql.statements.create_notification import \
+    CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
 
-try:
+try: # pragma: no cover
     # Python 2.x
     from thread import start_new_thread
-except:
+except: # pragma: no cover
     # Python 3.x
     import threading
 
@@ -36,6 +46,8 @@ class Server:
         # Attempt to connect.
         self.redis = redis.StrictRedis(host=redis_host, port=6379, db=0)
         self.redis.set('tesseract_server', 1)
+
+        self.notifications = {}
 
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
@@ -68,13 +80,26 @@ class Server:
                 # Python 3.x
                 threading.Thread(target=self.handle_client, args=(client_socket)).start()
 
+
     def handle_client(self, client_socket):
         while True:
             # Read the incoming request.
             data = client_socket.recv(1024)
 
+            # When data is blank it means the client has disconnected.
+            if data == '':
+                break
+
             # Decode the JSON.
-            request = json.loads(data)
+            try:
+                request = json.loads(data)
+                print("SQL: %s" % request['sql'])
+            except ValueError:
+                print("Bad request: %s" % data)
+
+                # The JSON could not be decoded, return an error.
+                client_socket.send('{"success":false,"error":"Not valid JSON"}')
+                continue
 
             # Process the request.
             result = self.execute(request['sql'])
@@ -103,109 +128,29 @@ class Server:
 
         # If the statement is a `DELETE`
         if isinstance(result.statement, DeleteStatement):
-            self.redis.delete(result.statement.table_name)
-            return ServerResult(True)
+            statement = Delete()
+            return statement.execute(result, self.redis)
 
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
-            self.redis.rpush(result.statement.table_name,
-                             Expression.to_sql(result.statement.fields))
-            return ServerResult(True)
+            statement = Insert()
+            return statement.execute(result, self.redis, self.notifications,
+                                     self.publish, self.execute)
+
+        # If the statement is a `CREATE NOTIFICATION`
+        if isinstance(result.statement, CreateNotificationStatement):
+            statement = CreateNotification()
+            return statement.execute(result, self.notifications)
+
+        # If the statement is a `DROP NOTIFICATION`
+        if isinstance(result.statement, DropNotificationStatement):
+            statement = DropNotification()
+            return statement.execute(result, self.notifications)
 
         # This is a `SELECT`
-        return self.execute_select(result)
+        statement = Select()
+        return statement.execute(result, self.redis, self.warnings)
 
 
-    def load_lua_dependency(self, operator):
-        here = os.path.dirname(os.path.realpath(__file__))
-        with open(here + '/lua/%s.lua' % operator) as lua_script:
-            return ''.join(lua_script.read())
-
-
-    def compile_select(self, result):
-        expression = result.statement
-        assert isinstance(expression, SelectStatement)
-
-        offset = 2
-        args = []
-
-        stages = StageManager()
-
-        # Compile WHERE stage.
-        if expression.where:
-            stages.add(WhereStage, (expression.where))
-
-        # Compile the ORDER BY clause.
-        if expression.order:
-            stages.add(OrderStage, (expression.order))
-
-        # Lua dependencies. It is important we load the base before anything
-        # else otherwise Lua will throw an error about base stuff missing.
-        lua = self.load_lua_dependency('base')
-        for requirement in result.lua_requirements:
-            lua += self.load_lua_dependency(requirement)
-
-        # Generate the full Lua program.
-        lua += """
--- First thing is to convert all the incoming values from JSON to native.
--- Skipping the first two arguments that are not JSON and will always exist.
-local args = {}
-for i = 3, #ARGV do
-    args[i] = cjson.decode(ARGV[i])
-end
-"""
-
-        # Compile the `SELECT` columns
-        if expression.columns != '*':
-            stages.add(ExpressionStage, (expression.columns))
-
-        lua += stages.compile_lua(offset, expression.table_name)
-
-        # Extract the values for the expression.
-        return (lua, args)
-
-
-    def execute_select(self, result):
-        """
-        :type select: SelectExpression
-        """
-        select = result.statement
-        lua, args = self.compile_select(result)
-        try:
-            run = self.redis.eval(lua, 0, select.table_name, *args)
-
-            records = []
-
-            # The value returns will be the name of the key that can be scanned
-            # for results.
-            for record in self.redis.lrange(run, 0, -1):
-                records.append(json.loads(record.decode()))
-
-            return ServerResult(True, records, warnings=self.warnings)
-        except Exception as e:
-            # The actual exception message from Lua contains stuff we don't need
-            # to report on like the SHA1 of the program, the line number of the
-            # error, etc. So we need to trim down to what the actual usable
-            # message is.
-            message = str(e)
-            message = message[message.rfind(':') + 1:].strip()
-
-            return ServerResult(False, error=message)
-
-
-class ServerResult:
-    def __init__(self, success, data=None, error=None, warnings=None):
-        self.success = success
-        self.data = data
-        self.error = error
-        self.warnings = warnings
-
-
-    def __str__(self):
-        obj = {
-            "success": self.success,
-            "data": self.data,
-            "error": self.error,
-            "warnings": self.warnings,
-        }
-        return json.dumps(obj)
+    def publish(self, name, value):
+        self.redis.publish(name, value)
