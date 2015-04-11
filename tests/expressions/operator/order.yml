@@ -24,10 +24,20 @@ tests:
     result:
     - {"col1": 0.75}
 
+  power_before_divide_group:
+    sql: SELECT (3 / 2) ^ 2
+    result:
+    - {"col1": 2.25}
+
   power_before_modulo:
     sql: SELECT 3 % 2 ^ 2
     result:
     - {"col1": 3}
+
+  power_before_modulo_group:
+    sql: SELECT (3 % 2) ^ 2
+    result:
+    - {"col1": 1}
 
   # multiply divide modulo
   multiply_before_add:
@@ -35,32 +45,64 @@ tests:
     result:
     - {"col1": 7}
 
+  multiply_before_add_group:
+    sql: SELECT (3 + 2) * 2
+    result:
+    - {"col1": 10}
+
   multiply_before_subtract:
     sql: SELECT 3 - 2 * 2
     result:
     - {"col1": -1}
+
+  multiply_before_subtract_group:
+    sql: SELECT (3 - 2) * 2
+    result:
+    - {"col1": 2}
 
   divide_before_add:
     sql: SELECT 3 + 2 / 2
     result:
     - {"col1": 4}
 
+  divide_before_add_group:
+    sql: SELECT (3 + 2) / 2
+    result:
+    - {"col1": 2.5}
+
   divide_before_subtract:
     sql: SELECT 3 - 2 / 2
     result:
     - {"col1": 2}
+
+  divide_before_subtract_group:
+    sql: SELECT (3 - 2) / 2
+    result:
+    - {"col1": 0.5}
 
   modulo_before_add:
     sql: SELECT 3 + 3 % 2
     result:
     - {"col1": 4}
 
+  modulo_before_add_group:
+    sql: SELECT (3 + 3) % 2
+    result:
+    - {"col1": 0}
+
   modulo_before_subtract:
     sql: SELECT 3 - 3 % 2
     result:
     - {"col1": 2}
 
+  modulo_before_subtract_group:
+    sql: SELECT (3 - 3) % 2
+    result:
+    - {"col1": 0}
+
   # less greater
+  # These do not need group tests because if they were executed in the wrong
+  # order it would result in an error.
   plus_before_less:
     sql: SELECT 3 < 2 + 3
     result:
@@ -102,12 +144,16 @@ tests:
     - {"col1": true}
 
   # equal
+  # These do not need group tests because if they were executed in the wrong
+  # order it would result in an error.
   is_before_equal:
     sql: SELECT true = 3 IS number
     result:
     - {"col1": true}
 
   # not
+  # These do not need group tests because if they were executed in the wrong
+  # order it would result in an error.
   equal_before_not:
     sql: SELECT NOT 3 = 3
     result:
@@ -115,12 +161,19 @@ tests:
 
   # and
   not_before_and:
+    comment: |
+      This does not need a group test becuase it can only be parsed one way.
     sql: SELECT true AND NOT false
     result:
     - {"col1": true}
 
   # or
   and_before_or:
-    sql: SELECT false OR true AND false
+    sql: SELECT true OR true AND false
+    result:
+    - {"col1": true}
+
+  and_before_or_group:
+    sql: SELECT (true OR true) AND false
     result:
     - {"col1": false}
