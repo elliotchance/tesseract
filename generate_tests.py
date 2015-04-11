@@ -157,8 +157,10 @@ def process_file(file):
         if 'notification' in test:
             if not isinstance(test['notification'], list):
                 test['notification'] = [ test['notification'] ]
-            out.write("        self.assertEqual(sorted(self.notifications), sorted(%s))\n" % \
-                      json.dumps(test['notification']))
+            out.write("        self.assertEqual(len(self.notifications), %s)\n" % \
+                      len(test['notification']))
+            for n in test['notification']:
+                out.write("        self.assertTrue(%s in self.notifications)\n" % json.dumps(n))
 
         out.write("\n")
 
