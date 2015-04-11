@@ -332,3 +332,14 @@ class BetweenExpression(BinaryExpression):
             str(self.right.value[0]),
             str(self.right.value[1])
         )
+
+
+class GroupExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return '(%s)' % str(self.value)
+
+    def compile_lua(self, offset):
+        return self.value.compile_lua(offset)

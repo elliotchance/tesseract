@@ -346,6 +346,7 @@ def p_expression(p):
                    | is_expression
                    | in_expression
                    | between_expression
+                   | group_expression
                    | value
                    | TIMES
     """
@@ -394,6 +395,16 @@ def p_comparison_expression(p):
         #     expression NOT_EQUAL expression
         add_requirement(p, 'operator/not_equal')
         p[0] = NotEqualExpression(p[1], p[3])
+
+
+# group_expression
+# ----------------
+def p_group_expression(p):
+    """
+        group_expression : PARAM_OPEN expression PARAM_CLOSE
+    """
+
+    p[0] = GroupExpression(p[2])
 
 
 # function_call

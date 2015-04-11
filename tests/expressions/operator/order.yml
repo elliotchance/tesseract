@@ -3,16 +3,21 @@
 tests:
   # unary minus
   unary_minus_before_power:
-    sql: SELECT - 3 ^ 2
-    as: SELECT -3 ^ 2
+    sql: SELECT 10 ^ - 2
+    as: SELECT 10 ^ -2
     result:
-    - {"col1": 9}
+    - {"col1": 0.01}
 
   # power
   power_before_multiply:
     sql: SELECT 3 * 2 ^ 2
     result:
     - {"col1": 12}
+
+  power_before_multiply_group:
+    sql: SELECT (3 * 2) ^ 2
+    result:
+    - {"col1": 36}
 
   power_before_divide:
     sql: SELECT 3 / 2 ^ 2
