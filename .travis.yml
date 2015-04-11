@@ -15,8 +15,8 @@ install:
   - "pip install -r requirements-dev.txt"
   - "pip install scrutinizer-ocular"
 
-  # Start the server in the background. We don't acutally use this for tests but we
-  # need to generate the LALR tables.
+  # Start the server in the background. We don't acutally use this for tests but
+  # we need to generate the LALR tables.
   - "bin/tesseract &"
 
   # Generate tests from YAML.

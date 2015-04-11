@@ -1,0 +1,5 @@
+tests:
+  multiply_before_add:
+    sql: SELECT 3 + 2 * 2
+    result:
+    - {"col1": 7}
