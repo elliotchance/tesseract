@@ -292,3 +292,8 @@ class NotExpression(Expression):
         lua = 'operator_not(%s)' % lua_arg
 
         return (lua, offset, new_args)
+
+
+class PowerExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '^', right, ':operator_power')

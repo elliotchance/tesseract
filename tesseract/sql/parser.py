@@ -20,6 +20,7 @@ tokens = lexer.tokens
 
 # Set precedence for operators.
 precedence = (
+    ('left', 'CARET'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
     ('left', 'AND', 'OR', 'NOT'),
@@ -471,6 +472,7 @@ def p_arithmetic_expression(p):
                               | expression MINUS expression
                               | expression TIMES expression
                               | expression DIVIDE expression
+                              | expression CARET expression
     """
 
     #     expression PLUS expression
@@ -487,6 +489,11 @@ def p_arithmetic_expression(p):
     elif p[2].upper() == '/':
         add_requirement(p, 'operator/divide')
         p[0] = DivideExpression(p[1], p[3])
+
+    #     expression CARET expression
+    elif p[2].upper() == '^':
+        add_requirement(p, 'operator/power')
+        p[0] = PowerExpression(p[1], p[3])
 
     #     expression MINUS expression
     else:

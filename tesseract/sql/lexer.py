@@ -29,6 +29,7 @@ sql_keywords = (
 
 # Operators.
 operators = (
+    'CARET',
     'COLON',
     'COMMA',
     'CURLY_CLOSE',
@@ -63,6 +64,7 @@ expression_types = (
 tokens = operators + expression_types + sql_keywords
 
 # Regular expressions for each of the tokens go here.
+t_CARET = r'\^'
 t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
