@@ -110,6 +110,7 @@ tests:
     result:
     - {"col1": false}
 
+  # Bad types.
   incompatible_types:
     sql: SELECT false = 3.5
     error: No such operator boolean = number.

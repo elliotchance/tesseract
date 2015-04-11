@@ -34,6 +34,10 @@ tests:
     result:
     - {"col1": false}
 
-  incompatible_types:
+  incompatible_left:
     sql: SELECT false OR 3.5
     error: No such operator boolean OR number.
+
+  incompatible_right:
+    sql: SELECT 3.5 OR false
+    error: No such operator number OR boolean.

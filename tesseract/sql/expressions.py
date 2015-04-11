@@ -318,9 +318,12 @@ class InExpression(BinaryExpression):
 
 
 class BetweenExpression(BinaryExpression):
-    def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'BETWEEN', right,
-                                  ':operator_between')
+    def __init__(self, left, right, is_not):
+        function = ':operator_not_between' if is_not else ':operator_between'
+        operator = 'NOT BETWEEN' if is_not else 'BETWEEN'
+        BinaryExpression.__init__(self, left, operator, right, function)
+
+        self.is_not = is_not
 
     def __str__(self):
         return '%s %s %s AND %s' % (
