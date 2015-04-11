@@ -91,7 +91,31 @@ tests:
     result:
     - {"col1": false}
 
-  plus_before_greater_equal:
+  subtract_before_greater_equal:
     sql: SELECT 3 >= 2 - 3
     result:
     - {"col1": true}
+
+  # equal
+  is_before_equal:
+    sql: SELECT true = 3 IS number
+    result:
+    - {"col1": true}
+
+  # not
+  equal_before_not:
+    sql: SELECT NOT 3 = 3
+    result:
+    - {"col1": false}
+
+  # and
+  not_before_and:
+    sql: SELECT true AND NOT false
+    result:
+    - {"col1": true}
+
+  # or
+  and_before_or:
+    sql: SELECT false OR true AND false
+    result:
+    - {"col1": false}
