@@ -7,3 +7,10 @@ tests:
   drop_notification_that_doesnt_exist:
     sql: DROP NOTIFICATION foo
     error: No such notification 'foo'.
+
+  notification_is_removed:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - DROP NOTIFICATION foo
+    - 'INSERT INTO some_other_table {"a": "b"}'
+    notification: []
