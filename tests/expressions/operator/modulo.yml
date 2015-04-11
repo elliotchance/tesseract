@@ -1,0 +1,24 @@
+tests:
+  both_null:
+    sql: SELECT null % null
+    result:
+    - {"col1": null}
+
+  left_null:
+    sql: SELECT null % 3.5
+    result:
+    - {"col1": null}
+
+  right_null:
+    sql: SELECT 3.5 % null
+    result:
+    - {"col1": null}
+
+  both_numbers:
+    sql: SELECT 7 % 3
+    result:
+    - {"col1": 1}
+
+  incompatible_types:
+    sql: SELECT false % 3.5
+    error: No such operator boolean % number.

@@ -297,3 +297,8 @@ class NotExpression(Expression):
 class PowerExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '^', right, ':operator_power')
+
+
+class ModuloExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '%', right, ':operator_modulo')
