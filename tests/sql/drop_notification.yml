@@ -1,3 +1,9 @@
 tests:
   drop_notification:
+    sql:
+    - CREATE NOTIFICATION foo ON my_table
+    - DROP NOTIFICATION foo
+
+  drop_notification_that_doesnt_exist:
     sql: DROP NOTIFICATION foo
+    error: No such notification 'foo'.
