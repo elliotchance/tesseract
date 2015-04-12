@@ -1,0 +1,8 @@
+data:
+  mytable:
+  - {"foo": 1}
+  - {"foo": 2}
+
+tests:
+  parser_without_where:
+    sql: UPDATE mytable SET foo = 3

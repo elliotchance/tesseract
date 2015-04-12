@@ -13,6 +13,8 @@ from tesseract.sql.statements.select import SelectStatement
 # ======
 
 # Load in the tokens from lexer.
+from tesseract.sql.statements.update import UpdateStatement
+
 tokens = lexer.tokens
 
 # Set precedence for operators.
@@ -41,10 +43,21 @@ def p_statement(p):
                   | select_statement
                   | create_notification_statement
                   | drop_notification_statement
+                  | update_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# update_statement
+# ----------------
+def p_update_statement(p):
+    """
+        update_statement : UPDATE IDENTIFIER SET expression
+    """
+
+    p[0] = UpdateStatement(p[2], p[4])
 
 
 # drop_notification_statement

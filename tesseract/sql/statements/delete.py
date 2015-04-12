@@ -9,7 +9,7 @@ class DeleteStatement(Statement):
 
     def __init__(self, table_name, where=None):
         assert isinstance(table_name, Identifier)
-        assert where is None or isinstance(table_name, Expression)
+        assert where is None or isinstance(where, Expression)
 
         self.table_name = table_name
         self.where = where
