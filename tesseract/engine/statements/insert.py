@@ -8,7 +8,7 @@ class Insert:
         data = Expression.to_sql(result.statement.fields)
         redis.rpush(result.statement.table_name, data)
 
-        for notification in notifications.itervalues():
+        for notification in notifications.values():
             # Ignore the notification if this does not apply to this table.
             if str(notification.table_name) != str(result.statement.table_name):
                 continue

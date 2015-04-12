@@ -93,9 +93,9 @@ class Server:
             # Decode the JSON.
             try:
                 request = json.loads(data)
-                print "SQL: %s" % request['sql']
+                print("SQL: %s" % request['sql'])
             except ValueError:
-                print "Bad request: %s" % data
+                print("Bad request: %s" % data)
 
                 # The JSON could not be decoded, return an error.
                 client_socket.send('{"success":false,"error":"Not valid JSON"}')
