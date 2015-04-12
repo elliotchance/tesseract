@@ -1,14 +1,7 @@
-from ply.lex import LexToken
 import ply.yacc as yacc
 from tesseract.sql.clause.order_by import OrderByClause
-from tesseract.sql.statements import *
 from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
-
-# Parser
-# ======
-
-# Load in the tokens from lexer.
 from tesseract.sql.statements.create_notification import \
     CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
@@ -16,6 +9,10 @@ from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
+# Parser
+# ======
+
+# Load in the tokens from lexer.
 tokens = lexer.tokens
 
 # Set precedence for operators.
