@@ -1,6 +1,6 @@
 import json
 import os
-from tesseract.server_result import ServerResult
+from tesseract.server.protocol import Protocol
 
 
 class Statement:
@@ -23,16 +23,16 @@ class Statement:
             for record in redis.hvals(run):
                 records.append(json.loads(record.decode()))
 
-            return ServerResult(True, records, warnings=warnings)
+            return Protocol.successful_response(records, warnings)
         except Exception as e:
             # The actual exception message from Lua contains stuff we don't need
-            # to report on like the SHA1 of the program, thqe line number of the
+            # to report on like the SHA1 of the program, the line number of the
             # error, etc. So we need to trim down to what the actual usable
             # message is.
             message = str(e)
             message = message[message.rfind(':') + 1:].strip()
 
-            return ServerResult(False, error=message)
+            return Protocol.failed_response(message)
 
 
     def load_lua_dependency(self, operator):

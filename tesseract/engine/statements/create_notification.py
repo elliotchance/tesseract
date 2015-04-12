@@ -1,15 +1,13 @@
-from tesseract.server_result import ServerResult
+from tesseract.server.protocol import Protocol
 
 
 class CreateNotification:
     def execute(self, result, notifications):
-        #assert isinstance(server, Server)
-
         notification_name = str(result.statement.notification_name)
         if notification_name in notifications:
             message = "Notification '%s' already exists." % notification_name
-            return ServerResult(False, error=message)
+            return Protocol.failed_response(message)
 
         notifications[notification_name] = result.statement
 
-        return ServerResult(True)
+        return Protocol.successful_response()

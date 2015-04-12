@@ -20,7 +20,6 @@ tests:
     sql:
     - DELETE FROM mytable
     - SELECT * FROM mytable
-    result: []
 
   parser_with_where:
     sql: DELETE FROM mytable WHERE a = 1

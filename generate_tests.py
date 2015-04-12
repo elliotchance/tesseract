@@ -16,7 +16,8 @@ def escape(string):
     # If the SQL is only one line it can be enclosed in simple quotes.
     enclose = "'"
 
-    # However, if the SQL is multiline then we need to use triple single quotes.
+    # However, if the SQL is multi-line then we need to use triple single
+    # quotes.
     if string.count('\n') or string.count('\r'):
         enclose = "'''"
 
@@ -29,14 +30,6 @@ def escape(string):
         sql = '%s %% (%s)' % (sql, ', '.join(values))
 
     return sql
-
-def get_iterator(tests_file, name):
-    try:
-        # Python 2.x
-        return iter(sorted(tests_file[name].iteritems()))
-    except:
-        # Python 3.x
-        return tests_file[name].items()
 
 def process_file(file):
     total = 0
@@ -63,7 +56,7 @@ def process_file(file):
     out.write("        )\n\n")
 
     if 'data' in tests_file:
-        for name, table in get_iterator(tests_file, 'data'):
+        for name, table in tests_file['data'].items():
             out.write("    def load_%s(self, server, randomize):\n" % name)
             out.write("        server.execute('DELETE FROM %s')\n" % name)
             out.write("        records = [\n")
@@ -76,7 +69,7 @@ def process_file(file):
             out.write("            server.execute(sql)\n")
             out.write("\n")
 
-    for name, test in get_iterator(tests_file, 'tests'):
+    for name, test in tests_file['tests'].items():
         total += 1
         out.write("    def test_%s(self):\n" % name)
 
@@ -112,35 +105,32 @@ def process_file(file):
             test['sql'] = [ test['sql'] ]
 
         # Execute each SQL statement and make sure that it passed.
-        try:
-            # Python 2.x
-            for_range = xrange(0, len(test['sql']))
-        except:
-            # Python 3.x
-            for_range = range(0, len(test['sql']))
-
-        for i in for_range:
+        for i in range(0, len(test['sql'])):
             sql = test['sql'][i]
             out.write("            sql = %s\n" % escape(sql))
             out.write("            result = server.execute(sql)\n")
+            out.write("            if 'error' not in result:\n")
+            out.write("                result['error'] = None\n")
+            out.write("            if 'data' not in result:\n")
+            out.write("                result['data'] = None\n")
 
             # Every statement must pass except for the last one if this is an
             # error test
             if not ('error' in test and i == len(test['sql']) - 1):
-                out.write("            self.assertTrue(result.success, msg=result.error)\n")
+                out.write("            self.assertTrue(result['success'], msg=result['error'])\n")
 
             # Catch all the warnings along the way
-            out.write("            if isinstance(result.warnings, list):\n")
-            out.write("                warnings.extend(result.warnings)\n")
+            out.write("            if 'warnings' in result and isinstance(result['warnings'], list):\n")
+            out.write("                warnings.extend(result['warnings'])\n")
 
         # An error must be asserted after the last SQL statement
         if 'error' in test:
-            out.write("            self.assertFalse(result.success, msg=result.error)\n")
-            out.write("            self.assertEquals(result.error, %s)\n" % escape(test['error']))
+            out.write("            self.assertFalse(result['success'], msg=result['error'])\n")
+            out.write("            self.assertEquals(result['error'], %s)\n" % escape(test['error']))
 
         # Test the output of the last SQL statement
         if 'result' in test:
-            out.write("            self.assertEqual(result.data, %s)\n" % \
+            out.write("            self.assertEqual(result['data'], %s)\n" % \
                       test['result'])
 
         # If there are warnings we need to assert those at the end.

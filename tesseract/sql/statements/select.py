@@ -12,12 +12,6 @@ class SelectStatement(Statement):
     NO_TABLE = Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None, order=None):
-        """
-            :param table_name: Identifier
-            :param columns: Expression
-            :param where: None|Expression
-            :param order: None|OrderByClause
-        """
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, Expression) or columns == '*'
         assert where is None or isinstance(where, Expression)

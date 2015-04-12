@@ -1,7 +1,7 @@
 from tesseract.engine.stage.delete import DeleteStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.statements import Statement
-from tesseract.server_result import ServerResult
+from tesseract.server.protocol import Protocol
 from tesseract.sql.statements.delete import DeleteStatement
 
 
@@ -17,7 +17,8 @@ class Delete(Statement):
             # Remove the row counter.
             row_id_key = '%s_rowid' % result.statement.table_name
             redis.delete(row_id_key)
-            return ServerResult(True)
+
+            return Protocol.successful_response()
 
         stages = StageManager()
         stages.add(DeleteStage, (result.statement.where))

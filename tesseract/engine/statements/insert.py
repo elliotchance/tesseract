@@ -1,5 +1,5 @@
 import random
-from tesseract.server_result import ServerResult
+from tesseract.server.protocol import Protocol
 from tesseract.sql.expressions import Expression
 
 
@@ -32,9 +32,9 @@ class Insert:
                 )
                 select_result = execute(select_sql)
 
-                assert select_result.success
+                assert select_result['success']
 
-                if len(select_result.data):
+                if 'data' in select_result and len(select_result['data']):
                     publish(notification_name, data)
 
                 # Always cleanup.
@@ -60,4 +60,4 @@ class Insert:
         self.publish_notifications(redis, notifications, publish, execute,
                                    data, result)
 
-        return ServerResult(True)
+        return Protocol.successful_response()
