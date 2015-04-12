@@ -1,14 +1,7 @@
-from ply.lex import LexToken
 import ply.yacc as yacc
 from tesseract.sql.clause.order_by import OrderByClause
-from tesseract.sql.statements import *
 from tesseract.sql.expressions import *
 import tesseract.sql.lexer as lexer
-
-# Parser
-# ======
-
-# Load in the tokens from lexer.
 from tesseract.sql.statements.create_notification import \
     CreateNotificationStatement
 from tesseract.sql.statements.delete import DeleteStatement
@@ -16,16 +9,26 @@ from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
 
+# Parser
+# ======
+
+# Load in the tokens from lexer.
 tokens = lexer.tokens
 
-# Set precedence for operators. We do not need these yet.
+# Set precedence for operators.
 precedence = (
-    ('left', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE'),
-    ('left', 'AND', 'OR'),
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('right', 'NOT'),
     ('left', 'EQUAL', 'NOT_EQUAL'),
     ('left', 'GREATER', 'LESS', 'GREATER_EQUAL', 'LESS_EQUAL'),
     ('left', 'LIKE'),
+    ('right', 'BETWEEN'),
+    ('right', 'IN'),
     ('right', 'IS'),
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'DIVIDE', 'MODULO'),
+    ('left', 'CARET'),
 )
 
 
@@ -76,7 +79,7 @@ def p_create_notification_statement(p):
 # ----------------
 def p_delete_statement(p):
     """
-        delete_statement : DELETE FROM IDENTIFIER
+        delete_statement : DELETE FROM IDENTIFIER optional_where_clause
                          | DELETE FROM
                          | DELETE
     """
@@ -89,9 +92,9 @@ def p_delete_statement(p):
     elif len(p) == 3:
         raise RuntimeError("Expected table name after FROM.")
 
-    #     DELETE FROM IDENTIFIER
+    #     DELETE FROM IDENTIFIER optional_where_clause
     # A valid `DELETE` statement
-    p[0] = DeleteStatement(p[3])
+    p[0] = DeleteStatement(p[3], p[4])
 
 
 # empty
@@ -338,6 +341,9 @@ def p_expression(p):
                    | function_call
                    | like_expression
                    | is_expression
+                   | in_expression
+                   | between_expression
+                   | group_expression
                    | value
                    | TIMES
     """
@@ -388,6 +394,16 @@ def p_comparison_expression(p):
         p[0] = NotEqualExpression(p[1], p[3])
 
 
+# group_expression
+# ----------------
+def p_group_expression(p):
+    """
+        group_expression : PARAM_OPEN expression PARAM_CLOSE
+    """
+
+    p[0] = GroupExpression(p[2])
+
+
 # function_call
 # -------------
 def p_function_call(p):
@@ -400,6 +416,41 @@ def p_function_call(p):
 
     add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+
+# between_expression
+# ------------------
+def p_between_expression(p):
+    """
+        between_expression : expression BETWEEN expression AND expression
+                           | expression NOT BETWEEN expression AND expression
+    """
+
+    if p[2] == 'BETWEEN':
+        add_requirement(p, 'operator/between')
+        p[0] = BetweenExpression(p[1], Value([p[3], p[5]]), False)
+    else:
+        add_requirement(p, 'operator/not_between')
+        p[0] = BetweenExpression(p[1], Value([p[4], p[6]]), True)
+
+
+# in_expression
+# -------------
+def p_in_expression(p):
+    """
+        in_expression : expression IN PARAM_OPEN expression_list PARAM_CLOSE
+                      | expression NOT IN PARAM_OPEN expression_list PARAM_CLOSE
+    """
+
+    # Notice that the 'operator/equal' dependency must come before 'operator/in'
+    add_requirement(p, 'operator/equal')
+
+    if p[2] == 'IN':
+        add_requirement(p, 'operator/in')
+        p[0] = InExpression(p[1], Value(p[4]), False)
+    else:
+        add_requirement(p, 'operator/not_in')
+        p[0] = InExpression(p[1], Value(p[5]), True)
 
 
 # is_expression
@@ -443,10 +494,16 @@ def p_logic_expression(p):
     """
         logic_expression : expression AND expression
                          | expression OR expression
+                         | NOT expression
     """
 
+    #     NOT expression
+    if p[1] == 'NOT':
+        add_requirement(p, 'operator/not')
+        p[0] = NotExpression(p[2])
+
     #     expression AND expression
-    if p[2] == 'AND':
+    elif p[2] == 'AND':
         add_requirement(p, 'operator/and')
         p[0] = AndExpression(p[1], p[3])
 
@@ -464,6 +521,8 @@ def p_arithmetic_expression(p):
                               | expression MINUS expression
                               | expression TIMES expression
                               | expression DIVIDE expression
+                              | expression CARET expression
+                              | expression MODULO expression
     """
 
     #     expression PLUS expression
@@ -480,6 +539,16 @@ def p_arithmetic_expression(p):
     elif p[2].upper() == '/':
         add_requirement(p, 'operator/divide')
         p[0] = DivideExpression(p[1], p[3])
+
+    #     expression CARET expression
+    elif p[2].upper() == '^':
+        add_requirement(p, 'operator/power')
+        p[0] = PowerExpression(p[1], p[3])
+
+    #     expression MODULO expression
+    elif p[2].upper() == '%':
+        add_requirement(p, 'operator/modulo')
+        p[0] = ModuloExpression(p[1], p[3])
 
     #     expression MINUS expression
     else:
@@ -508,7 +577,10 @@ def p_error(p):
 
 
 def add_requirement(p, function_name):
-    p.parser.lua_requirements.add(function_name)
+    # Check if it already exists.
+    if function_name not in p.parser.lua_requirements:
+        # Add new unique operator.
+        p.parser.lua_requirements.append(function_name)
 
 
 def parse(data):
@@ -516,7 +588,10 @@ def parse(data):
     parser = yacc.yacc()
     parser.statement = None
     parser.warnings = []
-    parser.lua_requirements = set()
+
+    # It might make sense to use a set() for unique operators but we need to
+    # retain the order in which they are required.
+    parser.lua_requirements = []
 
     # Run the parser.
     parser.parse(data)

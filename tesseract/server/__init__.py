@@ -1,18 +1,11 @@
 import json
-import os
-import random
 import socket
-from tesseract.engine.stage.expression import ExpressionStage
-from tesseract.engine.stage.manager import StageManager
-from tesseract.engine.stage.order import OrderStage
-from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.create_notification import CreateNotification
 from tesseract.engine.statements.delete import Delete
 from tesseract.engine.statements.drop_notification import DropNotification
 from tesseract.engine.statements.insert import Insert
 from tesseract.engine.statements.select import Select
-from tesseract.server_result import ServerResult
-from tesseract.sql.expressions import Expression
+from tesseract.server.protocol import Protocol
 import tesseract.sql.parser as parser
 import redis
 from tesseract.sql.statements.create_notification import \
@@ -124,7 +117,7 @@ class Server:
         # We could not parse the SQL, so return the error message in the
         # response.
         except RuntimeError as e:
-            return ServerResult(False, None, str(e))
+            return Protocol.failed_response(str(e))
 
         # If the statement is a `DELETE`
         if isinstance(result.statement, DeleteStatement):

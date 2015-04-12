@@ -1,0 +1,52 @@
+tests:
+  a_null:
+    sql: SELECT null BETWEEN 3 AND 7
+    result:
+    - {"col1": null}
+
+  b_null:
+    sql: SELECT 5 BETWEEN null AND 7
+    result:
+    - {"col1": null}
+
+  c_null:
+    sql: SELECT 5 BETWEEN 3 AND null
+    result:
+    - {"col1": null}
+
+  less_than:
+    sql: SELECT 2 BETWEEN 3 AND 7
+    result:
+    - {"col1": false}
+
+  bottom:
+    sql: SELECT 3 BETWEEN 3 AND 7
+    result:
+    - {"col1": true}
+
+  middle:
+    sql: SELECT 5 BETWEEN 3 AND 7
+    result:
+    - {"col1": true}
+
+  top:
+    sql: SELECT 7 BETWEEN 3 AND 7
+    result:
+    - {"col1": true}
+
+  greater_than:
+    sql: SELECT 8 BETWEEN 3 AND 7
+    result:
+    - {"col1": false}
+
+  incompatible_a:
+    sql: SELECT "foo" BETWEEN 3 AND 7
+    error: No such operator string BETWEEN number AND number.
+
+  incompatible_b:
+    sql: SELECT 123 BETWEEN "foo" AND 7
+    error: No such operator number BETWEEN string AND number.
+
+  incompatible_c:
+    sql: SELECT 123 BETWEEN 3 AND "foo"
+    error: No such operator number BETWEEN number AND string.

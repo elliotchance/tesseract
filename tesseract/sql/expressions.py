@@ -276,3 +276,70 @@ class IsExpression(BinaryExpression):
 
     def __str__(self):
         return '%s %s %s' % (str(self.left), self.operator, self.right.value)
+
+
+class NotExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return 'NOT %s' % str(self.value)
+
+    def compile_lua(self, offset):
+        # Compile the argument.
+        lua_arg, offset, new_args = self.value.compile_lua(offset)
+
+        lua = 'operator_not(%s)' % lua_arg
+
+        return (lua, offset, new_args)
+
+
+class PowerExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '^', right, ':operator_power')
+
+
+class ModuloExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '%', right, ':operator_modulo')
+
+
+class InExpression(BinaryExpression):
+    def __init__(self, left, right, is_not):
+        function = ':operator_not_in' if is_not else ':operator_in'
+        operator = 'NOT IN' if is_not else 'IN'
+        BinaryExpression.__init__(self, left, operator, right, function)
+
+        self.is_not = is_not
+
+    def __str__(self):
+        items = [str(item) for item in self.right.value]
+        return '%s %s (%s)' % (str(self.left), self.operator, ', '.join(items))
+
+
+class BetweenExpression(BinaryExpression):
+    def __init__(self, left, right, is_not):
+        function = ':operator_not_between' if is_not else ':operator_between'
+        operator = 'NOT BETWEEN' if is_not else 'BETWEEN'
+        BinaryExpression.__init__(self, left, operator, right, function)
+
+        self.is_not = is_not
+
+    def __str__(self):
+        return '%s %s %s AND %s' % (
+            str(self.left),
+            self.operator,
+            str(self.right.value[0]),
+            str(self.right.value[1])
+        )
+
+
+class GroupExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return '(%s)' % str(self.value)
+
+    def compile_lua(self, offset):
+        return self.value.compile_lua(offset)

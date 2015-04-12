@@ -23,12 +23,12 @@ class ExpressionStage:
 
         # Iterate the page.
         lua.extend([
-            "local records = redis.call('LRANGE', '%s', '0', '-1')" % self.input_page,
-            "for i, data in ipairs(records) do",
+            "local records = hgetall('%s')" % self.input_page,
+            "for rowid, data in pairs(records) do",
             "    local row = cjson.decode(data)",
             "    local tuple = {}",
             "    tuple['%s'] = %s" % (name, expression),
-            "    redis.call('RPUSH', 'expression', cjson.encode(tuple))",
+            "    redis.call('HSET', 'expression', tostring(rowid), cjson.encode(tuple))",
             "end",
         ])
 

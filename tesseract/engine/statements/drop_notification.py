@@ -1,4 +1,4 @@
-from tesseract.server_result import ServerResult
+from tesseract.server.protocol import Protocol
 
 
 class DropNotification:
@@ -8,9 +8,9 @@ class DropNotification:
         # A notification must exist.
         if notification_name not in notifications:
             error = "No such notification '%s'." % notification_name
-            return ServerResult(False, error=error)
+            return Protocol.failed_response(error)
 
         # Remove the notification.
         notifications.pop(notification_name, None)
 
-        return ServerResult(True)
+        return Protocol.successful_response()

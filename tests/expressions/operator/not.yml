@@ -1,0 +1,19 @@
+tests:
+  not_null:
+    sql: SELECT NOT null
+    result:
+    - {"col1": null}
+
+  not_true:
+    sql: SELECT NOT true
+    result:
+    - {"col1": false}
+
+  not_false:
+    sql: SELECT NOT false
+    result:
+    - {"col1": true}
+
+  incompatible_type:
+    sql: SELECT NOT 123
+    error: No such operator NOT number.

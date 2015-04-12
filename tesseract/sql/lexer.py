@@ -8,6 +8,7 @@ from tesseract.sql.expressions import Value, Identifier
 sql_keywords = (
     'AND',
     'ASC',
+    'BETWEEN',
     'BY',
     'CREATE',
     'DELETE',
@@ -15,6 +16,7 @@ sql_keywords = (
     'DROP',
     'FROM',
     'INSERT',
+    'IN',
     'INTO',
     'IS',
     'LIKE',
@@ -29,24 +31,26 @@ sql_keywords = (
 
 # Operators.
 operators = (
+    'CARET',
     'COLON',
     'COMMA',
     'CURLY_CLOSE',
     'CURLY_OPEN',
+    'DIVIDE',
     'EQUAL',
-    'NOT_EQUAL',
     'GREATER',
     'GREATER_EQUAL',
     'LESS',
     'LESS_EQUAL',
-    'PLUS',
     'MINUS',
-    'TIMES',
-    'DIVIDE',
-    'SQUARE_CLOSE',
-    'SQUARE_OPEN',
+    'MODULO',
+    'NOT_EQUAL',
     'PARAM_CLOSE',
     'PARAM_OPEN',
+    'PLUS',
+    'SQUARE_CLOSE',
+    'SQUARE_OPEN',
+    'TIMES',
 )
 
 # Values and identifiers.
@@ -63,24 +67,26 @@ expression_types = (
 tokens = operators + expression_types + sql_keywords
 
 # Regular expressions for each of the tokens go here.
+t_CARET = r'\^'
 t_COLON = ':'
 t_COMMA = ','
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
+t_DIVIDE = r'\/'
 t_EQUAL = '='
-t_NOT_EQUAL = '(<>)|(!=)'
 t_GREATER = '>'
 t_GREATER_EQUAL = '>='
 t_LESS = '<'
 t_LESS_EQUAL = '<='
-t_PLUS = r'\+'
 t_MINUS = r'\-'
-t_TIMES = r'\*'
-t_DIVIDE = r'\/'
-t_SQUARE_CLOSE = r'\]'
-t_SQUARE_OPEN = r'\['
+t_MODULO = '%'
+t_NOT_EQUAL = '(<>)|(!=)'
 t_PARAM_CLOSE = r'\)'
 t_PARAM_OPEN = r'\('
+t_PLUS = r'\+'
+t_SQUARE_CLOSE = r'\]'
+t_SQUARE_OPEN = r'\['
+t_TIMES = r'\*'
 
 def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.

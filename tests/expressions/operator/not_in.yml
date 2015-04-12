@@ -1,0 +1,53 @@
+tests:
+  left_is_null:
+    comment: When the test value is `null` the result must be `null`.
+    sql: SELECT null NOT IN (1, 2, 3)
+    result:
+    - {"col1": null}
+
+  right_contains_null:
+    comment: |
+      If any of the values in the set we are testing against contains `null`
+      then the result is `null`.
+    sql: SELECT 3 NOT IN (1, null, 3)
+    result:
+    - {"col1": null}
+
+  right_contains_null_after_match:
+    comment: |
+      In this case the `null` appears after the match has been made but it must
+      check all the elements for a single `null` to truly determine if the
+      result is `null`.
+    sql: SELECT 1 NOT IN (1, null, 3)
+    result:
+    - {"col1": null}
+
+  boolean_in_set:
+    sql: SELECT true NOT IN (true, 2.5, "foo")
+    result:
+    - {"col1": false}
+
+  boolean_not_in_set:
+    sql: SELECT true NOT IN (false, 2.5, "foo")
+    result:
+    - {"col1": true}
+
+  number_in_set:
+    sql: SELECT 2.5 NOT IN (true, 2.5, "foo")
+    result:
+    - {"col1": false}
+
+  number_not_in_set:
+    sql: SELECT 2.5 NOT IN (true, 3.5, "foo")
+    result:
+    - {"col1": true}
+
+  string_in_set:
+    sql: SELECT "foo" NOT IN (true, 2.5, "foo")
+    result:
+    - {"col1": false}
+
+  string_not_in_set:
+    sql: SELECT "foo" NOT IN (true, 2.5, "bar")
+    result:
+    - {"col1": true}

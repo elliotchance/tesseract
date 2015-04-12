@@ -27,14 +27,14 @@ class OrderStage:
         )
 
         lua.extend([
-            "local records = redis.call('LRANGE', '%s', '0', '-1')" % self.input_page,
+            "local records = hgetall('%s')" % self.input_page,
 
             # This is for making values unique.
             "local duplicate_number = 1",
             "local duplicate_string = 1",
 
             # Iterate the page and unroll the data into the three categories.
-            "for i, data in ipairs(records) do",
+            "for rowid, data in pairs(records) do",
 
             # Decode the record.
             "    local row = cjson.decode(data)",
@@ -91,6 +91,11 @@ class OrderStage:
             "redis.call('SORT', 'order_string'%s, 'ALPHA', 'STORE', 'order_string_sorted')" % desc,
         ])
 
+        # Sort the values.
+        lua.extend([
+            "local rowid = 0",
+        ])
+
         # Now use the sorted data to construct the result.
         reconstruct = [
             # Start with booleans.
@@ -98,7 +103,8 @@ class OrderStage:
                 "local records = redis.call('LRANGE', 'order_boolean_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
                 "    local record = redis.call('HGET', 'order_boolean_hash', data)",
-                "    redis.call('RPUSH', 'order_result', record)",
+                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    rowid = rowid + 1",
                 "end"
             ],
 
@@ -107,7 +113,8 @@ class OrderStage:
                 "local records = redis.call('LRANGE', 'order_number_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
                 "    local record = redis.call('HGET', 'order_number_hash', data)",
-                "    redis.call('RPUSH', 'order_result', record)",
+                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    rowid = rowid + 1",
                 "end"
             ],
 
@@ -116,7 +123,8 @@ class OrderStage:
                 "local records = redis.call('LRANGE', 'order_string_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
                 "    local record = redis.call('HGET', 'order_string_hash', data)",
-                "    redis.call('RPUSH', 'order_result', record)",
+                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    rowid = rowid + 1",
                 "end"
             ],
 
@@ -125,7 +133,8 @@ class OrderStage:
             [
                 "local records = redis.call('LRANGE', 'order_null', '0', '-1')",
                 "for i, data in ipairs(records) do",
-                "    redis.call('RPUSH', 'order_result', data)",
+                "    redis.call('HSET', 'order_result', tostring(rowid), data)",
+                "    rowid = rowid + 1",
                 "end"
             ]
         ]

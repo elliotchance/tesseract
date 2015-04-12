@@ -1,3 +1,8 @@
+data:
+  mytable:
+  - {"foo": 1}
+  - {"foo": 2}
+
 tests:
   fail_1:
     sql: DELETE
@@ -7,9 +12,22 @@ tests:
     sql: DELETE FROM
     error: Expected table name after FROM.
 
+  parser_without_where:
+    sql: DELETE FROM mytable
+
   delete_without_where:
+    data: mytable
     sql:
-    - 'INSERT INTO mytable {"foo": "bar"}'
     - DELETE FROM mytable
     - SELECT * FROM mytable
-    result: []
+
+  parser_with_where:
+    sql: DELETE FROM mytable WHERE a = 1
+
+  delete_with_where:
+    data: mytable
+    sql:
+    - DELETE FROM mytable WHERE foo = 1
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 2}
