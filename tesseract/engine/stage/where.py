@@ -31,9 +31,12 @@ class WhereStage:
             # Test if the WHERE clause allows this record to be added to the
             # result.
             "    if %s then" % where_clause,
-            "        redis.call('HSET', 'where', rowid, data)",
+            "        %s" % self.action_on_match(),
             "    end",
             "end",
         ])
 
         return ('where', '\n'.join(lua), self.offset)
+
+    def action_on_match(self):
+        return "redis.call('HSET', 'where', rowid, data)"
