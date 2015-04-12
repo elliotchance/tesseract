@@ -6,7 +6,7 @@ for i = 3, #ARGV do
 end
 
 -- Get one page - at the moment this is the whole table.
-local records = redis.call('LRANGE', ARGV[1], '0', '-1')
+local records = redis.call('HVALS', ARGV[1])
 
 -- Iterate each record in the page.
 local matches = {}

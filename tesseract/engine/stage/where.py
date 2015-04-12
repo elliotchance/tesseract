@@ -21,8 +21,8 @@ class WhereStage:
 
         # Iterate the page.
         lua.extend([
-            "local records = redis.call('LRANGE', '%s', '0', '-1')" % self.input_page,
-            "for i, data in ipairs(records) do",
+            "local records = hgetall('%s')" % self.input_page,
+            "for rowid, data in pairs(records) do",
 
             # Each row is stored as a JSON string and needs to be decoded before
             # we can use it.
@@ -31,7 +31,7 @@ class WhereStage:
             # Test if the WHERE clause allows this record to be added to the
             # result.
             "    if %s then" % where_clause,
-            "        redis.call('RPUSH', 'where', data)",
+            "        redis.call('HSET', 'where', rowid, data)",
             "    end",
             "end",
         ])

@@ -16,3 +16,19 @@ end
 local function no_such_type(type)
     error(string.format("No such type '%s'.", type))
 end
+
+-- Gets all fields from a hash as a dictionary.
+-- https://gist.github.com/klovadis/5170446
+local function hgetall(key)
+  local bulk = redis.call('HGETALL', key)
+	local result = {}
+	local nextkey
+	for i, v in ipairs(bulk) do
+		if i % 2 == 1 then
+			nextkey = v
+		else
+			result[nextkey] = v
+		end
+	end
+	return result
+end
