@@ -7,13 +7,14 @@ Syntax
 ------
 
     DELETE FROM <table_name>
+    [ WHERE <where_clause> ]
 
 **_table_name_**
 
-The table name to remove the objects from.
+The table name to remove the objects from. If the table does not exist then the
+statement will have no effect.
 
-Description
------------
+**_where_clause_**
 
-**Note:** At the moment there is no way to remove selective records so all the
-records will be deleted.
+An expression that determines which records should be removed. If the `WHERE`
+clause is omitted all records will be deleted.
