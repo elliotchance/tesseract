@@ -21,7 +21,7 @@ class Delete(Statement):
             return Protocol.successful_response()
 
         stages = StageManager()
-        stages.add(DeleteStage, (result.statement.where))
+        stages.add(DeleteStage, (result.statement.where,))
         lua = stages.compile_lua(2, result.statement.table_name)
 
         return self.run(redis, result.statement.table_name, [], lua, [], result)

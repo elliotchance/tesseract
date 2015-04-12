@@ -27,11 +27,11 @@ class Select(Statement):
 
         # Compile WHERE stage.
         if expression.where:
-            stages.add(WhereStage, (expression.where))
+            stages.add(WhereStage, (expression.where,))
 
         # Compile the ORDER BY clause.
         if expression.order:
-            stages.add(OrderStage, (expression.order))
+            stages.add(OrderStage, (expression.order,))
 
         # Generate the full Lua program.
         lua = """
@@ -45,7 +45,7 @@ end
 
         # Compile the `SELECT` columns
         if expression.columns != '*':
-            stages.add(ExpressionStage, (expression.columns))
+            stages.add(ExpressionStage, (expression.columns,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 

@@ -145,7 +145,7 @@ class Server:
         # If the statement is an `UPDATE`
         if isinstance(result.statement, UpdateStatement):
             statement = Update()
-            return statement.execute(result)
+            return statement.execute(result, self.redis)
 
         # This is a `SELECT`
         statement = Select()

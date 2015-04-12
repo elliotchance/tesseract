@@ -54,10 +54,10 @@ def p_statement(p):
 # ----------------
 def p_update_statement(p):
     """
-        update_statement : UPDATE IDENTIFIER SET expression
+        update_statement : UPDATE IDENTIFIER SET IDENTIFIER EQUAL value
     """
 
-    p[0] = UpdateStatement(p[2], p[4])
+    p[0] = UpdateStatement(p[2], p[4], p[6])
 
 
 # drop_notification_statement
