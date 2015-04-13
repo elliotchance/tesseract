@@ -98,7 +98,7 @@ class Server:
             result = self.execute(request['sql'])
 
             # Send the response.
-            client_socket.send(str(result))
+            client_socket.send(json.dumps(result))
 
 
     def execute(self, sql):
