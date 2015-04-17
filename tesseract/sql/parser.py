@@ -50,14 +50,33 @@ def p_statement(p):
     p.parser.statement = p[1]
 
 
+# update_set_list
+# ---------------
+def p_update_set_list(p):
+    """
+        update_set_list : IDENTIFIER EQUAL value
+                        | update_set_list COMMA IDENTIFIER EQUAL value
+    """
+
+    # We use an array like [key, value] instead of an object because we need to
+    # maintain the order in which the assignments happen - and be able to render
+    # them back to SQL in the same order.
+    
+    if len(p) == 4:
+        p[0] = [ [ str(p[1]), p[3] ] ]
+    else:
+        p[1].append([ str(p[3]), p[5] ])
+        p[0] = p[1]
+
+
 # update_statement
 # ----------------
 def p_update_statement(p):
     """
-        update_statement : UPDATE IDENTIFIER SET IDENTIFIER EQUAL value optional_where_clause
+        update_statement : UPDATE IDENTIFIER SET update_set_list optional_where_clause
     """
 
-    p[0] = UpdateStatement(p[2], p[4], p[6], p[7])
+    p[0] = UpdateStatement(p[2], p[4], p[5])
 
 
 # drop_notification_statement

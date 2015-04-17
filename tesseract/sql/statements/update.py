@@ -7,23 +7,22 @@ class UpdateStatement(Statement):
     Represents an `UPDATE` statement.
     """
 
-    def __init__(self, table_name, column, expression, where):
+    def __init__(self, table_name, columns, where):
         assert isinstance(table_name, Identifier)
-        assert isinstance(column, Identifier)
-        assert isinstance(expression, Value)
+        assert isinstance(columns, list)
         assert where is None or isinstance(where, Expression)
 
         self.table_name = table_name
-        self.column = column
-        self.expression = expression
+        self.columns = columns
         self.where = where
 
     def __str__(self):
-        sql = "UPDATE %s SET %s = %s" % (
-            self.table_name,
-            self.column,
-            self.expression
-        )
+        sql = "UPDATE %s SET " % self.table_name
+
+        columns = []
+        for column in self.columns:
+            columns.append("%s = %s" % (column[0], column[1]))
+        sql += ', '.join(columns)
 
         if self.where:
             sql += ' WHERE %s' % self.where

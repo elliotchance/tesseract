@@ -6,10 +6,11 @@ from tesseract.sql.statements.update import UpdateStatement
 
 class Update(Statement):
     def execute(self, result, redis):
-        assert isinstance(result.statement, UpdateStatement)
+        statement = result.statement
+        assert isinstance(statement, UpdateStatement)
 
         stages = StageManager()
-        stages.add(UpdateStage, (result.statement.column, result.statement.expression, result.statement.where))
-        lua = stages.compile_lua(2, result.statement.table_name)
+        stages.add(UpdateStage, (statement.columns, statement.where))
+        lua = stages.compile_lua(2, statement.table_name)
 
-        return self.run(redis, result.statement.table_name, [], lua, [], result)
+        return self.run(redis, statement.table_name, [], lua, [], result)

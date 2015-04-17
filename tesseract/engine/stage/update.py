@@ -2,15 +2,24 @@ from tesseract.engine.stage.where import WhereStage
 
 
 class UpdateStage(WhereStage):
-    def __init__(self, input_page, offset, column, value, where):
+    def __init__(self, input_page, offset, columns, where):
         WhereStage.__init__(self, input_page, offset, where)
-        self.column = column
-        self.value = value
+        
+        self.columns = columns
 
     def action_on_match(self):
-        lua = (
-            "row['%s'] = %s" % (self.column, self.value.compile_lua(0)[0]),
-            "data = cjson.encode(row)",
+        lua = []
+
+        for column in self.columns:
+            lua.append(
+                "row['%s'] = %s" % (column[0], column[1].compile_lua(0)[0]),
+            )
+
+        lua.extend((
+            "data = cjson.encode(row)"
             "redis.call('HSET', '%s', rowid, data)" % self.input_page,
-        )
+        ))
+
+        print(lua)
+
         return '\n'.join(lua)

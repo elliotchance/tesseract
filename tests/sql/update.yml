@@ -4,6 +4,7 @@ data:
   - {"foo": 2, "bar": "b"}
 
 tests:
+  # Parser tests
   parser_without_where:
     sql: UPDATE mytable SET foo = 3
 
@@ -27,3 +28,6 @@ tests:
     result:
     - {"foo": 3, "bar": "a"}
     - {"foo": 2, "bar": "b"}
+
+  parser_update_multiple_columns:
+    sql: UPDATE mytable SET a = 1, b = 2, c = 3
