@@ -20,6 +20,7 @@ tests:
   parser_with_where:
     sql: UPDATE mytable SET foo = 3 WHERE foo = bar
 
+  # Update tests
   update_with_where:
     data: mytable
     sql:
