@@ -40,3 +40,12 @@ tests:
     result:
     - {"foo": 3, "bar": "a", "baz": "z"}
     - {"foo": 3, "bar": "b", "baz": "z"}
+
+  update_expression:
+    data: mytable
+    sql:
+    - UPDATE mytable SET bar = foo * 5
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 1, "bar": 5}
+    - {"foo": 2, "bar": 10}

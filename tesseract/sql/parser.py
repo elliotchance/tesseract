@@ -54,8 +54,8 @@ def p_statement(p):
 # ---------------
 def p_update_set_list(p):
     """
-        update_set_list : IDENTIFIER EQUAL value
-                        | update_set_list COMMA IDENTIFIER EQUAL value
+        update_set_list : IDENTIFIER EQUAL expression
+                        | update_set_list COMMA IDENTIFIER EQUAL expression
     """
 
     # We use an array like [key, value] instead of an object because we need to
