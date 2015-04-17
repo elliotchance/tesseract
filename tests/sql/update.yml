@@ -31,3 +31,12 @@ tests:
 
   parser_update_multiple_columns:
     sql: UPDATE mytable SET a = 1, b = 2, c = 3
+
+  update_multiple_columns:
+    data: mytable
+    sql:
+    - UPDATE mytable SET foo = 3, baz = "z"
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 3, "bar": "a", "baz": "z"}
+    - {"foo": 3, "bar": "b", "baz": "z"}
