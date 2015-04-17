@@ -1,0 +1,52 @@
+data:
+  mytable:
+  - {"foo": 1, "bar": "a"}
+  - {"foo": 2, "bar": "b"}
+
+tests:
+  # Parser tests
+  parser_without_where:
+    sql: UPDATE mytable SET foo = 3
+
+  update_without_where:
+    data: mytable
+    sql:
+    - UPDATE mytable SET foo = 3
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 3, "bar": "a"}
+    - {"foo": 3, "bar": "b"}
+
+  parser_with_where:
+    sql: UPDATE mytable SET foo = 3 WHERE foo = bar
+
+  # Update tests
+  update_with_where:
+    data: mytable
+    sql:
+    - UPDATE mytable SET foo = 3 WHERE foo = 1
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 3, "bar": "a"}
+    - {"foo": 2, "bar": "b"}
+
+  parser_update_multiple_columns:
+    sql: UPDATE mytable SET a = 1, b = 2, c = 3
+
+  update_multiple_columns:
+    data: mytable
+    sql:
+    - UPDATE mytable SET foo = 3, baz = "z"
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 3, "bar": "a", "baz": "z"}
+    - {"foo": 3, "bar": "b", "baz": "z"}
+
+  update_expression:
+    data: mytable
+    sql:
+    - UPDATE mytable SET bar = foo * 5
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 1, "bar": 5}
+    - {"foo": 2, "bar": 10}

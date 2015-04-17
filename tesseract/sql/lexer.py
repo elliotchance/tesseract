@@ -15,8 +15,8 @@ sql_keywords = (
     'DESC',
     'DROP',
     'FROM',
-    'INSERT',
     'IN',
+    'INSERT',
     'INTO',
     'IS',
     'LIKE',
@@ -26,6 +26,8 @@ sql_keywords = (
     'OR',
     'ORDER',
     'SELECT',
+    'SET',
+    'UPDATE',
     'WHERE',
 )
 

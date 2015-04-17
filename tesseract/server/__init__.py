@@ -5,6 +5,7 @@ from tesseract.engine.statements.delete import Delete
 from tesseract.engine.statements.drop_notification import DropNotification
 from tesseract.engine.statements.insert import Insert
 from tesseract.engine.statements.select import Select
+from tesseract.engine.statements.update import Update
 from tesseract.server.protocol import Protocol
 import tesseract.sql.parser as parser
 import redis
@@ -14,6 +15,7 @@ from tesseract.sql.statements.delete import DeleteStatement
 from tesseract.sql.statements.drop_notification import DropNotificationStatement
 from tesseract.sql.statements.insert import InsertStatement
 from tesseract.sql.statements.select import SelectStatement
+from tesseract.sql.statements.update import UpdateStatement
 
 
 try: # pragma: no cover
@@ -139,6 +141,11 @@ class Server:
         if isinstance(result.statement, DropNotificationStatement):
             statement = DropNotification()
             return statement.execute(result, self.notifications)
+
+        # If the statement is an `UPDATE`
+        if isinstance(result.statement, UpdateStatement):
+            statement = Update()
+            return statement.execute(result, self.redis)
 
         # This is a `SELECT`
         statement = Select()

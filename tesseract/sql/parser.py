@@ -13,6 +13,8 @@ from tesseract.sql.statements.select import SelectStatement
 # ======
 
 # Load in the tokens from lexer.
+from tesseract.sql.statements.update import UpdateStatement
+
 tokens = lexer.tokens
 
 # Set precedence for operators.
@@ -41,10 +43,40 @@ def p_statement(p):
                   | select_statement
                   | create_notification_statement
                   | drop_notification_statement
+                  | update_statement
     """
 
     # Which ever statement matches can be passed straight through.
     p.parser.statement = p[1]
+
+
+# update_set_list
+# ---------------
+def p_update_set_list(p):
+    """
+        update_set_list : IDENTIFIER EQUAL expression
+                        | update_set_list COMMA IDENTIFIER EQUAL expression
+    """
+
+    # We use an array like [key, value] instead of an object because we need to
+    # maintain the order in which the assignments happen - and be able to render
+    # them back to SQL in the same order.
+    
+    if len(p) == 4:
+        p[0] = [ [ str(p[1]), p[3] ] ]
+    else:
+        p[1].append([ str(p[3]), p[5] ])
+        p[0] = p[1]
+
+
+# update_statement
+# ----------------
+def p_update_statement(p):
+    """
+        update_statement : UPDATE IDENTIFIER SET update_set_list optional_where_clause
+    """
+
+    p[0] = UpdateStatement(p[2], p[4], p[5])
 
 
 # drop_notification_statement
