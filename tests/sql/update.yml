@@ -15,3 +15,6 @@ tests:
     result:
     - {"foo": 3, "bar": "a"}
     - {"foo": 3, "bar": "b"}
+
+  parser_with_where:
+    sql: UPDATE mytable SET foo = 3 WHERE foo = bar
