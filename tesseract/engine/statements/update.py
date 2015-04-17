@@ -9,7 +9,7 @@ class Update(Statement):
         assert isinstance(result.statement, UpdateStatement)
 
         stages = StageManager()
-        stages.add(UpdateStage, (result.statement.column, result.statement.expression))
+        stages.add(UpdateStage, (result.statement.column, result.statement.expression, result.statement.where))
         lua = stages.compile_lua(2, result.statement.table_name)
 
         return self.run(redis, result.statement.table_name, [], lua, [], result)

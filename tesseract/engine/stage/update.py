@@ -2,8 +2,8 @@ from tesseract.engine.stage.where import WhereStage
 
 
 class UpdateStage(WhereStage):
-    def __init__(self, input_page, offset, column, value):
-        WhereStage.__init__(self, input_page, offset, None)
+    def __init__(self, input_page, offset, column, value, where):
+        WhereStage.__init__(self, input_page, offset, where)
         self.column = column
         self.value = value
 

@@ -18,3 +18,12 @@ tests:
 
   parser_with_where:
     sql: UPDATE mytable SET foo = 3 WHERE foo = bar
+
+  update_with_where:
+    data: mytable
+    sql:
+    - UPDATE mytable SET foo = 3 WHERE foo = 1
+    - SELECT * FROM mytable
+    result:
+    - {"foo": 3, "bar": "a"}
+    - {"foo": 2, "bar": "b"}
