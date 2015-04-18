@@ -36,6 +36,7 @@ operators = (
     'CARET',
     'COLON',
     'COMMA',
+    'CONCAT',
     'CURLY_CLOSE',
     'CURLY_OPEN',
     'DIVIDE',
@@ -72,6 +73,7 @@ tokens = operators + expression_types + sql_keywords
 t_CARET = r'\^'
 t_COLON = ':'
 t_COMMA = ','
+t_CONCAT = r'\|\|'
 t_CURLY_CLOSE = '}'
 t_CURLY_OPEN = '{'
 t_DIVIDE = r'\/'

@@ -1,7 +1,8 @@
+from tesseract.engine.stage.stage import Stage
 from tesseract.sql.clause.order_by import OrderByClause
 
 
-class OrderStage:
+class OrderStage(Stage):
     """
     This OrderStage represents the sorting of a set.
 

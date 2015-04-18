@@ -1,8 +1,13 @@
-from tesseract.sql.expressions import Identifier
+from tesseract.engine.stage.stage import Stage
+from tesseract.sql.expressions import Identifier, Expression
 
 
-class ExpressionStage:
+class ExpressionStage(Stage):
     def __init__(self, input_page, offset, columns):
+        assert isinstance(input_page, str)
+        assert isinstance(offset, int)
+        assert isinstance(columns, Expression)
+
         self.input_page = input_page
         self.columns = columns
         self.offset = offset
@@ -11,9 +16,7 @@ class ExpressionStage:
         lua = []
 
         # Clean out buffer.
-        lua.append(
-            "redis.call('DEL', 'expression')"
-        )
+        lua.append("redis.call('DEL', 'expression')")
 
         name = "col1"
         if isinstance(self.columns, Identifier):

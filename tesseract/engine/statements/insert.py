@@ -1,44 +1,49 @@
 import random
+from tesseract.engine.statements.statement import Statement
 from tesseract.server.protocol import Protocol
 from tesseract.sql.expressions import Expression
 
 
-class Insert:
-    def publish_notifications(self, redis, notifications, publish, execute,
-                              data, result):
+class Insert(Statement):
+    def __publish_notification(self, data, execute, notification, publish,
+                               redis):
+        notification_name = str(notification.notification_name)
+        if notification.where is None:
+            publish(notification_name, data)
+        else:
+            # Generate a random table name.
+            test_table = ''.join(
+                random.choice('abcdefghijklmnopqrstuvwxyz')
+                for i in range(8)
+            )
+
+            # Insert the record into this random table.
+            redis.hset(test_table, 0, data)
+
+            # Perform a select to test if the notification matches.
+            select_sql = 'SELECT * FROM %s WHERE %s' % (
+                test_table,
+                str(notification.where)
+            )
+            select_result = execute(select_sql)
+
+            assert select_result['success']
+
+            if 'data' in select_result and len(select_result['data']):
+                publish(notification_name, data)
+
+            # Always cleanup.
+            redis.delete(test_table)
+
+    def __publish_notifications(self, redis, notifications, publish, execute,
+                                data, result):
         for notification in notifications.values():
             # Ignore the notification if this does not apply to this table.
             if str(notification.table_name) != str(result.statement.table_name):
                 continue
 
-            notification_name = str(notification.notification_name)
-
-            if notification.where is None:
-                publish(notification_name, data)
-            else:
-                # Generate a random table name.
-                test_table = ''.join(
-                    random.choice('abcdefghijklmnopqrstuvwxyz')
-                    for i in range(8)
-                )
-
-                # Insert the record into this random table.
-                redis.hset(test_table, 0, data)
-
-                # Perform a select to test if the notification matches.
-                select_sql = 'SELECT * FROM %s WHERE %s' % (
-                    test_table,
-                    str(notification.where)
-                )
-                select_result = execute(select_sql)
-
-                assert select_result['success']
-
-                if 'data' in select_result and len(select_result['data']):
-                    publish(notification_name, data)
-
-                # Always cleanup.
-                redis.delete(test_table)
+            self.__publish_notification(data, execute, notification, publish,
+                                        redis)
 
     def execute(self, result, redis, notifications, publish, execute):
         # Make sure we have a incrementer for generating row IDs, but only set
@@ -57,7 +62,7 @@ class Insert:
         was_set = redis.hsetnx(result.statement.table_name, row_id, data)
         assert was_set == 1
 
-        self.publish_notifications(redis, notifications, publish, execute,
-                                   data, result)
+        self.__publish_notifications(redis, notifications, publish, execute,
+                                     data, result)
 
         return Protocol.successful_response()

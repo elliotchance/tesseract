@@ -1,15 +1,37 @@
 import json
 import os
+from ply.yacc import LRParser
+from redis import StrictRedis
 from tesseract.server.protocol import Protocol
+from tesseract.sql.expressions import Identifier
 
 
-class Statement:
+class Statement(object):
+    def __lua_error(self, e):
+        """The actual exception message from Lua contains stuff we don't need
+        to report on like the SHA1 of the program, the line number of the error,
+        etc. So we need to trim down to what the actual usable message is.
+
+        """
+        assert isinstance(e, Exception)
+
+        message = str(e)
+        message = message[message.rfind(':') + 1:].strip()
+
+        return Protocol.failed_response(message)
+
     def run(self, redis, table_name, warnings, lua, args, result):
+        assert isinstance(redis, StrictRedis)
+        assert isinstance(table_name, Identifier)
+        assert isinstance(warnings, list)
+        assert isinstance(lua, str)
+        assert isinstance(args, list)
+
         # Lua dependencies. It is important we load the base before anything
         # else otherwise Lua will throw an error about base stuff missing.
-        base_lua = self.load_lua_dependency('base')
+        base_lua = self.__load_lua_dependency('base')
         for requirement in result.lua_requirements:
-            base_lua += self.load_lua_dependency(requirement)
+            base_lua += self.__load_lua_dependency(requirement)
 
         lua = base_lua + lua
 
@@ -25,17 +47,10 @@ class Statement:
 
             return Protocol.successful_response(records, warnings)
         except Exception as e:
-            # The actual exception message from Lua contains stuff we don't need
-            # to report on like the SHA1 of the program, the line number of the
-            # error, etc. So we need to trim down to what the actual usable
-            # message is.
-            message = str(e)
-            message = message[message.rfind(':') + 1:].strip()
-
-            return Protocol.failed_response(message)
+            return self.__lua_error(e)
 
 
-    def load_lua_dependency(self, operator):
+    def __load_lua_dependency(self, operator):
         here = os.path.dirname(os.path.realpath(__file__))
         with open(here + '/../../lua/%s.lua' % operator) as lua_script:
             return ''.join(lua_script.read())
