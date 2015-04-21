@@ -91,7 +91,6 @@ class OrderStage:
             "redis.call('SORT', 'order_string'%s, 'ALPHA', 'STORE', 'order_string_sorted')" % desc,
         ])
 
-        # Sort the values.
         lua.extend([
             "local rowid = 0",
         ])

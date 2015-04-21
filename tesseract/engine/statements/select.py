@@ -1,4 +1,5 @@
 from tesseract.engine.stage.expression import ExpressionStage
+from tesseract.engine.stage.group import GroupStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
@@ -32,6 +33,10 @@ class Select(Statement):
         # Compile the ORDER BY clause.
         if expression.order:
             stages.add(OrderStage, (expression.order,))
+
+        # Compile the GROUP BY clause.
+        if expression.group:
+            stages.add(GroupStage, (expression.group,))
 
         # Generate the full Lua program.
         lua = """

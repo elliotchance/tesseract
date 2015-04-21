@@ -19,17 +19,17 @@ tests:
   parser_group_by:
     sql: SELECT foo FROM table1 GROUP BY foo
 
-#  group_by_mixed:
-#    data-randomized: table1
-#    repeat: 10
-#    sql: SELECT foo FROM table1 GROUP BY foo
-#    result:
-#    - {"foo": false}
-#    - {"foo": true}
-#    - {"foo": 40}
-#    - {"foo": 50}
-#    - {"foo": 100}
-#    - {"foo": "50"}
-#    - {"foo": "abc"}
-#    - {"foo": "zzz"}
-#    - {"foo": null}
+  group_by_mixed:
+    data-randomized: table1
+    repeat: 10
+    sql: SELECT foo FROM table1 GROUP BY foo
+    result-unordered:
+    - {"foo": false}
+    - {"foo": true}
+    - {"foo": 40}
+    - {"foo": 50}
+    - {"foo": 100}
+    - {"foo": "50"}
+    - {"foo": "abc"}
+    - {"foo": "zzz"}
+    - {"foo": null}
