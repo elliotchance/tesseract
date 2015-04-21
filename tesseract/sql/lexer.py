@@ -1,10 +1,11 @@
 import ply.lex as lex
-from tesseract.sql.expressions import Value, Identifier
 
 # Lexer
 # =====
 
 # SQL keywords.
+from tesseract.sql.ast import Value, Identifier
+
 sql_keywords = (
     'AND',
     'ASC',
@@ -15,6 +16,7 @@ sql_keywords = (
     'DESC',
     'DROP',
     'FROM',
+    'GROUP',
     'IN',
     'INSERT',
     'INTO',

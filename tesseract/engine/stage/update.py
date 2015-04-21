@@ -20,6 +20,4 @@ class UpdateStage(WhereStage):
             "redis.call('HSET', '%s', rowid, data)" % self.input_page,
         ))
 
-        print(lua)
-
         return '\n'.join(lua)

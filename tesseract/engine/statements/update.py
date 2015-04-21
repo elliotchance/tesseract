@@ -1,7 +1,7 @@
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.update import UpdateStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.statements.update import UpdateStatement
+from tesseract.sql.ast import UpdateStatement
 
 
 class Update(Statement):

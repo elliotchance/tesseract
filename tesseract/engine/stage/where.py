@@ -1,4 +1,4 @@
-from tesseract.sql.expressions import Value
+from tesseract.sql.ast import Value
 
 
 class WhereStage:

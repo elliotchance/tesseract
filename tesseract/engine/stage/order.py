@@ -1,4 +1,4 @@
-from tesseract.sql.clause.order_by import OrderByClause
+from tesseract.sql.ast import OrderByClause
 
 
 class OrderStage:

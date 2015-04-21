@@ -1,4 +1,4 @@
-from tesseract.sql.expressions import Identifier
+from tesseract.sql.ast import Identifier
 
 
 class ExpressionStage:

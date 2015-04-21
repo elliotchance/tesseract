@@ -3,7 +3,7 @@ from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.statements.select import SelectStatement
+from tesseract.sql.ast import SelectStatement
 
 
 class Select(Statement):
