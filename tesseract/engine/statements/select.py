@@ -13,8 +13,8 @@ class Select(Statement):
         :type select: SelectExpression
         """
         select = result.statement
-        lua, args = self.compile_select(result)
-        return self.run(redis, select.table_name, warnings, lua, args, result)
+        lua, args, manager = self.compile_select(result)
+        return self.run(redis, select.table_name, warnings, lua, args, result, manager)
 
 
     def compile_select(self, result):
@@ -30,13 +30,13 @@ class Select(Statement):
         if expression.where:
             stages.add(WhereStage, (expression.where,))
 
-        # Compile the ORDER BY clause.
-        if expression.order:
-            stages.add(OrderStage, (expression.order,))
-
         # Compile the GROUP BY clause.
         if expression.group:
             stages.add(GroupStage, (expression.group,))
+
+        # Compile the ORDER BY clause.
+        if expression.order:
+            stages.add(OrderStage, (expression.order,))
 
         # Generate the full Lua program.
         lua = """
@@ -55,4 +55,4 @@ end
         lua += stages.compile_lua(offset, expression.table_name)
 
         # Extract the values for the expression.
-        return (lua, args)
+        return (lua, args, stages)

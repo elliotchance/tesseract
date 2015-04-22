@@ -1,10 +1,13 @@
 import json
 import os
+from tesseract.engine.stage.manager import StageManager
 from tesseract.server.protocol import Protocol
 
 
 class Statement:
-    def run(self, redis, table_name, warnings, lua, args, result):
+    def run(self, redis, table_name, warnings, lua, args, result, manager=None):
+        assert manager is None or isinstance(manager, StageManager)
+
         # Lua dependencies. It is important we load the base before anything
         # else otherwise Lua will throw an error about base stuff missing.
         base_lua = self.load_lua_dependency('base')
@@ -16,12 +19,20 @@ class Statement:
         try:
             run = redis.eval(lua, 0, table_name, *args)
 
-            records = []
+            if not manager or manager.maintain_order == False:
+                records = []
 
-            # The value returns will be the name of the key that can be scanned
-            # for results.
-            for record in redis.hvals(run):
-                records.append(json.loads(record.decode()))
+                # The value returns will be the name of the key that can be
+                # scanned for results.
+                for record in redis.hvals(run):
+                    records.append(json.loads(record.decode()))
+            else:
+                records = [None] * redis.hlen(run)
+
+                # The value returns will be the name of the key that can be
+                # scanned for results.
+                for rowid, record in redis.hgetall(run).items():
+                    records[int(rowid)] = json.loads(record.decode())
 
             return Protocol.successful_response(records, warnings)
         except Exception as e:

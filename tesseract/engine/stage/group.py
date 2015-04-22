@@ -37,11 +37,6 @@ class GroupStage(object):
             "end",
         ])
 
-        # Sort the unique values.
-        #lua.extend([
-        #    "redis.call('SORT', 'group')",
-        #])
-
         # All the hash value will now be unique, we just need to put them into
         # an output list.
         lua.extend([
