@@ -1,3 +1,5 @@
 local function function_count(value)
-    redis.call('HINCRBY', 'count', cjson.encode(value), '1')
+    if value ~= cjson.null then
+        redis.call('HINCRBY', 'count', 'col1', '1')
+    end
 end

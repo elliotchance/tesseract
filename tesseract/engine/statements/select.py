@@ -10,9 +10,12 @@ from tesseract.sql.ast import SelectStatement, FunctionCall
 class Select(Statement):
     def execute(self, result, redis, warnings):
         redis.delete('count')
+        redis.delete('aftergroup')
+
         select = result.statement
         lua, args, manager = self.compile_select(result)
-        return self.run(redis, select.table_name, warnings, lua, args, result, manager)
+        return self.run(redis, select.table_name, warnings, lua, args, result,
+                        manager)
 
 
     def compile_select(self, result):
@@ -50,7 +53,8 @@ end
         if str(expression.columns) != '*':
             stages.add(ExpressionStage, (expression.columns,))
 
-        if isinstance(expression.columns, FunctionCall) and expression.columns.is_aggregate():
+        if isinstance(expression.columns,
+                      FunctionCall) and expression.columns.is_aggregate():
             stages.add(AfterGroupStage, ())
 
         lua += stages.compile_lua(offset, expression.table_name)

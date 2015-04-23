@@ -252,14 +252,10 @@ class FunctionCall(Expression):
     def compile_lua(self, offset):
         assert isinstance(offset, int)
 
-        if self.is_aggregate():
-            lua = 'function_%s("count")' % self.function_name
-            new_args = []
-        else:
-            # Compile the argument.
-            lua_arg, offset, new_args = self.argument.compile_lua(offset)
+        # Compile the argument.
+        lua_arg, offset, new_args = self.argument.compile_lua(offset)
 
-            lua = 'function_%s(%s)' % (self.function_name, lua_arg)
+        lua = 'function_%s(%s)' % (self.function_name, lua_arg)
 
         return (lua, offset, new_args)
 
