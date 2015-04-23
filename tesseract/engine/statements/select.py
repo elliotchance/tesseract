@@ -1,17 +1,15 @@
 from tesseract.engine.stage.expression import ExpressionStage
-from tesseract.engine.stage.group import GroupStage
+from tesseract.engine.stage.group import GroupStage, AfterGroupStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.ast import SelectStatement
+from tesseract.sql.ast import SelectStatement, FunctionCall
 
 
 class Select(Statement):
     def execute(self, result, redis, warnings):
-        """
-        :type select: SelectExpression
-        """
+        redis.delete('count')
         select = result.statement
         lua, args, manager = self.compile_select(result)
         return self.run(redis, select.table_name, warnings, lua, args, result, manager)
@@ -49,8 +47,11 @@ end
 """
 
         # Compile the `SELECT` columns
-        if expression.columns != '*':
+        if str(expression.columns) != '*':
             stages.add(ExpressionStage, (expression.columns,))
+
+        if isinstance(expression.columns, FunctionCall) and expression.columns.is_aggregate():
+            stages.add(AfterGroupStage, ())
 
         lua += stages.compile_lua(offset, expression.table_name)
 

@@ -7,9 +7,10 @@ Syntax
 ------
 
     SELECT <column_definitions>
-    FROM <table_name>
-    WHERE <condition>
-    ORDER BY <order_field>
+    [ FROM <table_name> ]
+    [ WHERE <condition> ]
+    [ GROUP BY <group_field> ]
+    [ ORDER BY <order_field> ]
 
 **_column_definitions_**
 
@@ -22,9 +23,17 @@ The table name to fetch the objects from. If the table does not exist (i.e. has
 no records) then no records will be returned since tables only come into
 existence when they have objects added to them.
 
+You may omit the table just to parse expressions that do no need a table like:
+
+    SELECT 3 + 4
+
 **_condition_**
 
 A filter expression.
+
+**_group_field_**
+
+Rows will be collapsed into groups of distinct values of this field.
 
 **_order_field_**
 

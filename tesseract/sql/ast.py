@@ -35,6 +35,14 @@ class Expression:
         pass
 
 
+class Asterisk(Expression):
+    def __str__(self):
+        return '*'
+
+    def compile_lua(self, offset):
+        return ('nil', offset, [])
+
+
 class Value(Expression):
     def __init__(self, value):
         self.value = value
@@ -244,15 +252,22 @@ class FunctionCall(Expression):
     def compile_lua(self, offset):
         assert isinstance(offset, int)
 
-        # Compile the argument.
-        lua_arg, offset, new_args = self.argument.compile_lua(offset)
+        if self.is_aggregate():
+            lua = 'function_%s("count")' % self.function_name
+            new_args = []
+        else:
+            # Compile the argument.
+            lua_arg, offset, new_args = self.argument.compile_lua(offset)
 
-        lua = 'function_%s(%s)' % (self.function_name, lua_arg)
+            lua = 'function_%s(%s)' % (self.function_name, lua_arg)
 
         return (lua, offset, new_args)
 
     def __str__(self):
         return '%s(%s)' % (self.function_name, str(self.argument))
+
+    def is_aggregate(self):
+        return self.function_name == 'count'
 
 
 class LikeExpression(BinaryExpression):

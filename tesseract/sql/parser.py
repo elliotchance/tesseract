@@ -194,8 +194,13 @@ def p_function_call(p):
     # Function names are not case sensitive.
     function_name = str(p[1]).lower()
 
-    add_requirement(p, 'function/%s' % function_name)
     p[0] = FunctionCall(function_name, p[3])
+
+    if p[0].is_aggregate():
+        type = 'aggregate'
+    else:
+        type = 'function'
+    add_requirement(p, '%s/%s' % (type, function_name))
 
 
 def p_empty(p):
@@ -220,7 +225,10 @@ def p_expression(p):
                    | TIMES
     """
 
-    p[0] = p[1]
+    if p[1] == '*':
+        p[0] = Asterisk()
+    else:
+        p[0] = p[1]
 
 
 def p_expression_list(p):

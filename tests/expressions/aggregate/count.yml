@@ -1,0 +1,11 @@
+data:
+  people:
+  - {"value": 123}
+  - {"value": 456}
+
+tests:
+  count_all:
+    data: people
+    sql: SELECT count(*) FROM people
+    result:
+    - {"col1": 2}

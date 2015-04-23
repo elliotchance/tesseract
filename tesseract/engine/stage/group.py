@@ -51,3 +51,27 @@ class GroupStage(object):
         ])
 
         return ('group_result', '\n'.join(lua), self.offset)
+
+
+class AfterGroupStage(object):
+    def __init__(self, input_page, offset):
+        assert isinstance(input_page, str)
+        assert isinstance(offset, int)
+
+        self.input_page = input_page
+        self.offset = offset
+
+    def compile_lua(self):
+        lua = []
+
+        lua.extend([
+            "local records = hgetall('%s')" % 'count',
+            "for rowid, data in pairs(records) do",
+            "    local row = {}",
+            "    row['col1'] = cjson.decode(data)",
+            "    local value = cjson.encode(row)",
+            "    redis.call('HSET', 'aftergroup', tostring(rowid), value)",
+            "end",
+        ])
+
+        return ('aftergroup', '\n'.join(lua), self.offset)
