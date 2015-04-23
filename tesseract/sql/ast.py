@@ -34,6 +34,9 @@ class Expression:
         # available on `Expression`
         pass
 
+    def is_aggregate(self):
+        return False
+
 
 class Asterisk(Expression):
     def __str__(self):
@@ -180,6 +183,9 @@ class BinaryExpression(Expression):
 
         return (lua, offset, args1)
 
+    def is_aggregate(self):
+        return self.left.is_aggregate() or self.right.is_aggregate()
+
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
@@ -306,6 +312,9 @@ class NotExpression(Expression):
 
         return (lua, offset, new_args)
 
+    def is_aggregate(self):
+        return self.value.is_aggregate()
+
 
 class PowerExpression(BinaryExpression):
     def __init__(self, left, right):
@@ -364,6 +373,9 @@ class GroupExpression(Expression):
         assert isinstance(offset, int)
 
         return self.value.compile_lua(offset)
+
+    def is_aggregate(self):
+        return self.value.is_aggregate()
 
 
 # Statements
@@ -459,7 +471,7 @@ class SelectStatement(Statement):
 
     def __init__(self, table_name, columns, where=None, order=None, group=None):
         assert isinstance(table_name, Identifier)
-        assert isinstance(columns, Expression) or columns == '*'
+        assert isinstance(columns, list)
         assert where is None or isinstance(where, Expression)
         assert order is None or isinstance(order, OrderByClause)
         assert group is None or isinstance(group, Identifier)
@@ -471,7 +483,7 @@ class SelectStatement(Statement):
         self.group = group
 
     def __str__(self):
-        r = "SELECT %s" % self.columns
+        r = "SELECT %s" % ', '.join([str(col) for col in self.columns])
 
         if self.table_name != SelectStatement.NO_TABLE:
             r += " FROM %s" % self.table_name
@@ -486,6 +498,12 @@ class SelectStatement(Statement):
             r += ' %s' % self.order
 
         return r
+
+    def contains_aggregate(self):
+        for col in self.columns:
+            if isinstance(col, FunctionCall) and col.is_aggregate():
+                return True
+        return False
 
 
 class UpdateStatement(Statement):

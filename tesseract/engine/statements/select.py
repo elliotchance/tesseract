@@ -51,11 +51,10 @@ end
 """
 
         # Compile the `SELECT` columns
-        if str(expression.columns) != '*':
+        if all([str(col) != '*' for col in expression.columns]):
             stages.add(ExpressionStage, (expression.columns,))
 
-        if isinstance(expression.columns,
-                      FunctionCall) and expression.columns.is_aggregate():
+        if expression.contains_aggregate():
             stages.add(AfterGroupStage, ())
 
         lua += stages.compile_lua(offset, expression.table_name)

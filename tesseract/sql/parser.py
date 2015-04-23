@@ -488,7 +488,7 @@ def p_optional_where_clause(p):
 
 def p_select_statement(p):
     """
-        select_statement : SELECT expression optional_from_clause optional_where_clause optional_group_clause optional_order_clause
+        select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause
                          | SELECT
     """
 

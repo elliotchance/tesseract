@@ -15,19 +15,30 @@ class ExpressionStage:
             "redis.call('DEL', 'expression')"
         )
 
-        name = "col1"
-        if isinstance(self.columns, Identifier):
-            name = str(self.columns)
-
-        expression, offset, new_args = self.columns.compile_lua(self.offset)
-
         # Iterate the page.
         lua.extend([
             "local records = hgetall('%s')" % self.input_page,
             "for rowid, data in pairs(records) do",
             "    local row = cjson.decode(data)",
             "    local tuple = {}",
-            "    tuple['%s'] = %s" % (name, expression),
+        ])
+
+        index = 1
+        offset = self.offset
+        args = []
+        for col in self.columns:
+            name = "col%d" % index
+            if isinstance(col, Identifier):
+                name = str(col)
+
+            expression, offset, new_args = col.compile_lua(offset)
+            args.extend(new_args)
+
+            lua.append("    tuple['%s'] = %s" % (name, expression))
+
+            index += 1
+
+        lua.extend([
             "    redis.call('HSET', 'expression', tostring(rowid), cjson.encode(tuple))",
             "end",
         ])
