@@ -3,15 +3,22 @@ data:
   - {"value": 123}
   - {"value": 456}
   - {"value": null}
+  - {"other": 123}
 
 tests:
   count_all:
     data: people
     sql: SELECT count(*) FROM people
     result:
-    - {"col1": 3}
+    - {"col1": 4}
 
   count_non_null:
+    data: people
+    sql: SELECT count(value) FROM people
+    result:
+    - {"col1": 2}
+
+  count_non_exists:
     data: people
     sql: SELECT count(value) FROM people
     result:

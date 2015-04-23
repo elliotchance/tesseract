@@ -40,7 +40,7 @@ class Asterisk(Expression):
         return '*'
 
     def compile_lua(self, offset):
-        return ('nil', offset, [])
+        return ('true', offset, [])
 
 
 class Value(Expression):
