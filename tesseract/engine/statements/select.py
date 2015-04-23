@@ -11,6 +11,7 @@ class Select(Statement):
     def execute(self, result, redis, warnings):
         redis.delete('count')
         redis.delete('aftergroup')
+        redis.hsetnx('count', 'col1', '0')
 
         select = result.statement
         lua, args, manager = self.compile_select(result)

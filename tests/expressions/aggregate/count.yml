@@ -5,6 +5,8 @@ data:
   - {"value": null}
   - {"other": 123}
 
+  empty: []
+
 tests:
   count_all:
     data: people
@@ -23,3 +25,9 @@ tests:
     sql: SELECT count(value) FROM people
     result:
     - {"col1": 2}
+
+  count_all_empty:
+    data: empty
+    sql: SELECT count(*) FROM empty
+    result:
+    - {"col1": 0}
