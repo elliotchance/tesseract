@@ -246,6 +246,9 @@ class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '/', right, ':operator_divide')
 
+class ConcatExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '||', right, ':operator_concat')
 
 class FunctionCall(Expression):
     def __init__(self, function_name, argument):

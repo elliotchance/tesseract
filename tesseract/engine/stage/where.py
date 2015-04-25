@@ -1,8 +1,13 @@
-from tesseract.sql.ast import Value
+from tesseract.sql.ast import Value, Expression
+from tesseract.engine.stage.stage import Stage
 
 
-class WhereStage:
+class WhereStage(Stage):
     def __init__(self, input_page, offset, where):
+        assert isinstance(input_page, str)
+        assert isinstance(offset, int)
+        assert where is None or isinstance(where, Expression)
+
         self.input_page = input_page
         self.where = where
         self.offset = offset
@@ -15,9 +20,7 @@ class WhereStage:
         where_clause, self.offset, new_args = where_expression.compile_lua(self.offset)
 
         # Clean output buffer.
-        lua.append(
-            "redis.call('DEL', 'where')"
-        )
+        lua.append("redis.call('DEL', 'where')")
 
         # Iterate the page.
         lua.extend([
