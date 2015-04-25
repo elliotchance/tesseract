@@ -343,3 +343,8 @@ class GroupExpression(Expression):
 
     def compile_lua(self, offset):
         return self.value.compile_lua(offset)
+
+
+class ConcatExpression(BinaryExpression):
+    def __init__(self, left, right):
+        BinaryExpression.__init__(self, left, '||', right, ':operator_concat')

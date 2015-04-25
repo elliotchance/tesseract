@@ -555,6 +555,7 @@ def p_arithmetic_expression(p):
                               | expression DIVIDE expression
                               | expression CARET expression
                               | expression MODULO expression
+                              | expression CONCAT expression
     """
 
     #     expression PLUS expression
@@ -581,6 +582,11 @@ def p_arithmetic_expression(p):
     elif p[2].upper() == '%':
         add_requirement(p, 'operator/modulo')
         p[0] = ModuloExpression(p[1], p[3])
+
+    #     expression CONCAT expression
+    elif p[2].upper() == '||':
+        add_requirement(p, 'operator/concat')
+        p[0] = ConcatExpression(p[1], p[3])
 
     #     expression MINUS expression
     else:

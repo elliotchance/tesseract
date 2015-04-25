@@ -1,0 +1,38 @@
+tests:
+  both_null:
+    sql: SELECT null || null
+    result:
+    - {"col1": ""}
+
+  left_null:
+    sql: SELECT null || "foo"
+    result:
+    - {"col1": "foo"}
+
+  right_null:
+    sql: SELECT "foo" || null
+    result:
+    - {"col1": "foo"}
+
+  both_strings:
+    sql: SELECT "foo" || "bar"
+    result:
+    - {"col1": "foobar"}
+
+  both_numbers:
+    sql: SELECT 3.5 || 7.1
+    result:
+    - {"col1": "3.57.1"}
+
+  both_boolean:
+    sql: SELECT true || false
+    result:
+    - {"col1": "truefalse"}
+
+  incompatible_left:
+    sql: SELECT [] || "foo"
+    error: No such operator table || string.
+
+  incompatible_right:
+    sql: SELECT "foo" || []
+    error: No such operator string || table.
