@@ -9,33 +9,40 @@ def get_title(string, default_number):
         return string.replace('_', ' ').split(' ', 1)
 
     # We must use the default number.
-    return [str(default_number), string.replace('_', ' ')];
+    return [str(default_number), string.replace('_', ' ')]
 
 def index_folder(path, prefix, indent):
     out = ''
     number = 1
+    mapping = {}
     for file in sorted(os.listdir(path)):
+        if file == 'html':
+            continue
+
         file_path = '%s/%s' % (path, file)
         if os.path.isdir(file_path):
             parts = get_title(file, number)
             title = '. '.join(parts)
             out += '%s%s%s<br />\n' % ('&nbsp;' * indent, prefix, title)
-            out += index_folder(file_path, prefix + '%s.' % parts[0], indent + 4)
+            folder, new_mappings = index_folder(file_path, prefix + '%s.' % parts[0], indent + 4)
+            out += folder
+            mapping.update(new_mappings)
             number += 1
         elif file.endswith('.md'):
             parts = get_title(file[:-3], number)
             title = '. '.join(parts)
-            out += '%s<a href="%s.html">%s%s</a><br />\n' % ('&nbsp;' * indent, file[:-3], prefix, title)
+            mapping[file_path] = (prefix + title).replace('.', '_').replace(' ', '_') + '.html'
+            out += '%s<a href="%s">%s%s</a><br />\n' % ('&nbsp;' * indent, mapping[file_path], prefix, title)
             number += 1
-    return out
+    return out, mapping
 
-def process_folder(path, depth):
+def process_folder(path, depth, mapping):
     for file in os.listdir(path):
         file_path = '%s/%s' % (path, file)
         if os.path.isdir(file_path):
-            process_folder(file_path, depth + 1)
+            process_folder(file_path, depth + 1, mapping)
         elif file.endswith('.md'):
-            print(file_path)
+            print('%s -> %s' % (file_path, mapping[file_path]))
             output = StringIO.StringIO()
             markdown.markdownFromFile(
                 input=file_path,
@@ -47,8 +54,8 @@ def process_folder(path, depth):
                     'markdown.extensions.fenced_code'
                 ]
             )
-            with open('%shtml' % file_path[:-2], 'w') as html:
-                style_css = ("../" * depth) + "style.css"
+            with open('doc/html/%s' % mapping[file_path], 'w') as html:
+                style_css = "../style.css"
                 html.write("""
 <link rel="stylesheet" type="text/css" href="%s">
 <table width="100%%" cellpadding="5" cellspacing="0">
@@ -59,5 +66,5 @@ def process_folder(path, depth):
 </table>
                 """ % (style_css, index, output.getvalue()))
 
-index = index_folder('doc', '', 0)
-process_folder('doc', 0)
+index, mappings = index_folder('doc', '', 0)
+process_folder('doc', 0, mappings)
