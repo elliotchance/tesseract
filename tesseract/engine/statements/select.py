@@ -1,6 +1,6 @@
 from redis import StrictRedis
 from tesseract.engine.stage.expression import ExpressionStage
-from tesseract.engine.stage.group import GroupStage, AfterGroupStage
+from tesseract.engine.stage.group import GroupStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
@@ -16,7 +16,6 @@ class Select(Statement):
 
         redis.delete('count')
         redis.delete('aftergroup')
-        redis.hsetnx('count', 'col1', '0')
 
         select = result.statement
         lua, args, manager = self.compile_select(result)
@@ -38,8 +37,8 @@ class Select(Statement):
             stages.add(WhereStage, (expression.where,))
 
         # Compile the GROUP BY clause.
-        if expression.group:
-            stages.add(GroupStage, (expression.group,))
+        if expression.group or expression.contains_aggregate():
+            stages.add(GroupStage, (expression.group, expression.columns))
 
         # Compile the ORDER BY clause.
         if expression.order:
@@ -56,11 +55,8 @@ end
 """
 
         # Compile the `SELECT` columns
-        if all([str(col) != '*' for col in expression.columns]):
+        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
-
-        if expression.contains_aggregate():
-            stages.add(AfterGroupStage, ())
 
         lua += stages.compile_lua(offset, expression.table_name)
 

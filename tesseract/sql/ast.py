@@ -264,7 +264,10 @@ class FunctionCall(Expression):
         # Compile the argument.
         lua_arg, offset, new_args = self.argument.compile_lua(offset)
 
-        lua = 'function_%s(%s)' % (self.function_name, lua_arg)
+        if self.is_aggregate():
+            lua = 'function_%s(group, %s)' % (self.function_name, lua_arg)
+        else:
+            lua = 'function_%s(%s)' % (self.function_name, lua_arg)
 
         return (lua, offset, new_args)
 

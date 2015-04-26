@@ -37,7 +37,10 @@ class ExpressionStage(Stage):
             expression, offset, new_args = col.compile_lua(offset)
             args.extend(new_args)
 
-            lua.append("    tuple['%s'] = %s" % (name, expression))
+            if col.is_aggregate():
+                lua.append("    tuple['%s'] = row['count(*)'] * 1" % name)
+            else:
+                lua.append("    tuple['%s'] = %s" % (name, expression))
 
             index += 1
 

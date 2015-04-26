@@ -7,6 +7,14 @@ data:
 
   empty: []
 
+  groups:
+  - {"value": 10}
+  - {"value": 20}
+  - {"value": 10}
+  - {"value": 30}
+  - {"value": 30}
+  - {"value": 10}
+
 tests:
   count_all:
     data: people
@@ -31,3 +39,11 @@ tests:
     sql: SELECT count(*) FROM empty
     result:
     - {"col1": 0}
+
+  count_groups:
+    data: groups
+    sql: SELECT value, count(*) FROM groups GROUP BY value
+    result-unordered:
+    - {"value": 10, "col2": 3}
+    - {"value": 20, "col2": 1}
+    - {"value": 30, "col2": 2}
