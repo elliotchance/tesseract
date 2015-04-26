@@ -275,7 +275,7 @@ class FunctionCall(Expression):
         return '%s(%s)' % (self.function_name, str(self.argument))
 
     def is_aggregate(self):
-        return self.function_name in ('avg', 'count', 'sum')
+        return self.function_name in ('avg', 'count', 'min', 'sum')
 
 
 class LikeExpression(BinaryExpression):

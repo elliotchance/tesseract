@@ -1,4 +1,4 @@
-from tesseract.sql.ast import Identifier, Expression, FunctionCall
+from tesseract.sql.ast import Identifier, Expression
 
 
 class GroupStage(object):
@@ -152,7 +152,14 @@ class GroupStage(object):
         ])
 
         for col in self.columns:
-            self.lua.append("    row['%s'] = 0" % str(col))
+            if not col.is_aggregate():
+                continue
+            
+            default_value = 0
+            if col.function_name == 'min':
+                default_value = 'cjson.null'
+
+            self.lua.append("    row['%s'] = %s" % (str(col), default_value))
 
         self.lua.extend([
             "  redis.call('HSET', 'group_result', tostring(rowid), cjson.encode(row))",
@@ -226,7 +233,5 @@ class GroupStage(object):
         self.__group_records()
         self.__extract_expressions()
         self.__ensure_single_row()
-
-        #print '\n'.join(self.lua)
 
         return ('group_result', '\n'.join(self.lua), self.offset)

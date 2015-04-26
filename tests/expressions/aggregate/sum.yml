@@ -26,6 +26,9 @@ data:
 
   empty: []
 
+  bad_values:
+  - {"a": [123]}
+
 tests:
   # No grouping.
 
@@ -137,3 +140,10 @@ tests:
     sql: SELECT sum(a), sum(a) FROM table1
     result:
     - {"col1": 702, "col2": 702}
+
+  # Bad values
+
+  bad_values:
+    data: bad_values
+    sql: SELECT avg(a) FROM bad_values
+    error: ERR value is not an integer or out of range
