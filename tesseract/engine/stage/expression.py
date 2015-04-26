@@ -38,7 +38,9 @@ class ExpressionStage(Stage):
             args.extend(new_args)
 
             if col.is_aggregate():
-                lua.append("    tuple['%s'] = row['count(*)'] * 1" % name)
+                lua.append("    local temp = row['count(*)']")
+                lua.append("    if temp == false then temp = 0 end")
+                lua.append("    tuple['%s'] = temp * 1" % name)
             else:
                 lua.append("    tuple['%s'] = %s" % (name, expression))
 

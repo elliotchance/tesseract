@@ -12,3 +12,11 @@ tests:
     sql: SELECT sum(a) FROM people
     result:
     - {"col1": 702}
+
+  sum_groups:
+    data: people
+    sql: SELECT a, sum(a) FROM people GROUP BY a
+    result:
+    - {"a": 456, "col2": 456}
+    - {"a": 123, "col2": 246}
+    - {"a": null, "col2": 0}
