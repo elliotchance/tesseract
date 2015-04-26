@@ -1,7 +1,7 @@
 data:
   people:
   - {"a": 123}
-  - {"a": 456}
+  - {"a": 456, "b": 100}
   - {"a": null}
   - {"b": 123}
   - {"a": 123}
@@ -13,10 +13,18 @@ tests:
     result:
     - {"col1": 702}
 
-  sum_groups:
+  sum_groups_a:
     data: people
     sql: SELECT a, sum(a) FROM people GROUP BY a
     result:
     - {"a": 456, "col2": 456}
     - {"a": 123, "col2": 246}
     - {"a": null, "col2": 0}
+
+  sum_groups_b:
+    data: people
+    sql: SELECT a, sum(b) FROM people GROUP BY a
+    result:
+    - {"a": 456, "col2": 100}
+    - {"a": 123, "col2": 0}
+    - {"a": null, "col2": 123}
