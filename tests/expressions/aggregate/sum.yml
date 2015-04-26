@@ -9,7 +9,10 @@ data:
   - {"a": null}
   - {"a": 2}
 
+  empty: []
+
 tests:
+  # No grouping.
   sum_all_without_nulls:
     comment: |
       This is the most basic sum of all records (there are no nulls) so we
@@ -29,20 +32,27 @@ tests:
   sum_all_containing_missing:
     comment: |
       Missing values are equal to null values, and the result should wor the
-      same way
+      same way.
     data: table1
     sql: SELECT sum(c) FROM table2
     result:
     - {"col1": null}
 
-  #sum_groups_a:
-  #  data: table1
-  #  sql: SELECT a, sum(a) FROM people WHERE a IS NOT null GROUP BY a
-  #  result:
-  #  - {"a": 456, "col2": 456}
-  #  - {"a": 123, "col2": 246}
-  #  - {"a": null, "col2": 0}
-#
+  sum_all_zero_rows:
+    comment: Zero rows must yield one result row containing 0.
+    data: empty
+    sql: SELECT sum(a) FROM empty
+    result:
+    - {"col1": 0}
+
+  # GROUP BY
+  sum_groups_without_nulls:
+    data: table1
+    sql: SELECT a, sum(a) FROM table1 GROUP BY a
+    result:
+    - {"a": 456, "col2": 456}
+    - {"a": 123, "col2": 246}
+
   #sum_groups_b:
   #  data: table1
   #  sql: SELECT a, sum(b) FROM people WHERE b IS NOT null GROUP BY a
