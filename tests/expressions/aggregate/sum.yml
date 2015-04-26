@@ -28,6 +28,7 @@ data:
 
 tests:
   # No grouping.
+
   sum_all_without_nulls:
     comment: |
       This is the most basic sum of all records (there are no nulls) so we
@@ -61,6 +62,7 @@ tests:
     - {"col1": 0}
 
   # GROUP BY
+
   sum_groups_1:
     comment: |
       First scenario when the groups and the values do not contain any nulls.
@@ -102,6 +104,7 @@ tests:
     - {"a": null, "col2": 5}
 
   # Expressions
+
   sum_all_expression:
     comment: |
       Sum up all the values with an expression but with no nulls to worry about.
@@ -118,3 +121,12 @@ tests:
     sql: SELECT sum(a + 10) FROM table2
     result:
     - {"col1": null}
+
+  # Multiple
+
+  multiple_sum:
+    comment: Multiple aggregate expressions.
+    data: table1
+    sql: SELECT sum(a), sum(a + 10) FROM table1
+    result:
+    - {"col1": 702, "col2": 732}

@@ -1,4 +1,4 @@
-from tesseract.sql.ast import Identifier, Expression, FunctionCall
+from tesseract.sql.ast import Identifier, Expression
 
 
 class GroupStage(object):
@@ -15,16 +15,17 @@ class GroupStage(object):
 
     def __group_value(self):
         if self.field is None:
-            return "    local group = 'true'"
-        return "    local group = cjson.encode(row['%s'])" % self.field
+            return "    local unique_group = 'true'"
+        return "    local unique_group = cjson.encode(row['%s'])" % self.field
 
     def __lua_args(self):
-        lua = ''
+        lua = []
         for col in self.columns:
             assert isinstance(col, Expression)
+            lua.append('local group = unique_group .. ":%s"' % str(col))
             if col.is_aggregate():
-                lua += col.compile_lua(0)[0]
-        return lua
+                lua.append(col.compile_lua(0)[0])
+        return '\n'.join(lua)
 
     def compile_lua(self):
         lua = []
@@ -47,7 +48,7 @@ class GroupStage(object):
             self.__group_value(),
 
             # Add that value to the hash.
-            "    redis.call('HSET', 'group', group, 1)",
+            "    redis.call('HSET', 'group', unique_group, 1)",
 
             self.__lua_args(),
 
@@ -65,7 +66,8 @@ class GroupStage(object):
         ])
 
         for col in self.columns:
-            lua.append("    row['count(*)'] = redis.call('HGET', 'count', tostring(data))")
+            if col.is_aggregate():
+                lua.append("    row['%s'] = redis.call('HGET', 'agg', tostring(data) .. ':%s')" % (str(col), str(col)))
 
         lua.extend([
             "    redis.call('HSET', 'group_result', tostring(rowid), cjson.encode(row))",
@@ -78,7 +80,12 @@ class GroupStage(object):
         lua.extend([
             "if rowid == 0 then",
             "    local row = {}",
-            "    row['count(*)'] = 0",
+        ])
+
+        for col in self.columns:
+            lua.append("    row['%s'] = 0" % str(col)),
+
+        lua.extend([
             "    redis.call('HSET', 'group_result', tostring(rowid), cjson.encode(row))",
             "end"
         ])

@@ -38,7 +38,7 @@ class ExpressionStage(Stage):
             args.extend(new_args)
 
             if col.is_aggregate():
-                lua.append("    local temp = row['count(*)']")
+                lua.append("    local temp = row['%s']" % str(col))
                 lua.append("    if temp == 'null' then")
                 lua.append("        tuple['%s'] = cjson.null" % name)
                 lua.append("    elseif temp == false then")

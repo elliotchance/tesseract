@@ -14,8 +14,7 @@ class Select(Statement):
         assert isinstance(redis, StrictRedis)
         assert isinstance(warnings, list)
 
-        redis.delete('count')
-        redis.delete('aftergroup')
+        redis.delete('agg')
 
         select = result.statement
         lua, args, manager = self.compile_select(result)
