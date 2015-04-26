@@ -38,102 +38,102 @@ tests:
     result:
     - {"col1": 234}
 
-#  sum_all_containing_nulls:
-#    comment: If there is one null then the result must be null.
-#    data: table2
-#    sql: SELECT sum(a) FROM table2
-#    result:
-#    - {"col1": null}
-#
-#  sum_all_containing_missing:
-#    comment: |
-#      Missing values are equal to null values, and the result should wor the
-#      same way.
-#    data: table1
-#    sql: SELECT sum(c) FROM table2
-#    result:
-#    - {"col1": null}
-#
-#  sum_all_zero_rows:
-#    comment: Zero rows must yield one result row containing 0.
-#    data: empty
-#    sql: SELECT sum(a) FROM empty
-#    result:
-#    - {"col1": 0}
-#
-#  # GROUP BY
-#
-#  sum_groups_1:
-#    comment: |
-#      First scenario when the groups and the values do not contain any nulls.
-#    data: table1
-#    sql: SELECT a, sum(a) FROM table1 GROUP BY a
-#    result:
-#    - {"a": 456, "col2": 456}
-#    - {"a": 123, "col2": 246}
-#
-#  sum_groups_2:
-#    comment: |
-#      Second scenario when the groups do not contain nulls, but some of the
-#      values have nulls.
-#    data: table3
-#    sql: SELECT a, sum(b) FROM table3 GROUP BY a
-#    result:
-#    - {"a": 456, "col2": 7}
-#    - {"a": 123, "col2": null}
-#
-#  sum_groups_3:
-#    comment: |
-#      Third scenario when the groups have null values but the values are all
-#      non-null.
-#    data: table4
-#    sql: SELECT a, sum(b) FROM table4 GROUP BY a
-#    result:
-#    - {"a": null, "col2": 10}
-#    - {"a": 123, "col2": 5}
-#
-#  sum_groups_4:
-#    comment: |
-#      The final scenario when the groups have null values and the values
-#      contain null values.
-#    data: table5
-#    sql: SELECT a, sum(b) FROM table5 GROUP BY a
-#    result:
-#    - {"a": 456, "col2": 7}
-#    - {"a": 123, "col2": null}
-#    - {"a": null, "col2": 5}
-#
-#  # Expressions
-#
-#  sum_all_expression:
-#    comment: |
-#      Sum up all the values with an expression but with no nulls to worry about.
-#    data: table1
-#    sql: SELECT sum(a + 10) FROM table1
-#    result:
-#    - {"col1": 732}
-#
-#  sum_all_expression_nulls:
-#    comment: |
-#      Sum up all the values with an expression and make sure the null comes
-#      through the result.
-#    data: table2
-#    sql: SELECT sum(a + 10) FROM table2
-#    result:
-#    - {"col1": null}
-#
-#  # Multiple
-#
-#  multiple_sum:
-#    comment: Multiple aggregate expressions.
-#    data: table1
-#    sql: SELECT sum(a), sum(a + 10) FROM table1
-#    result:
-#    - {"col1": 702, "col2": 732}
-#
-#  multiple_duplicate:
-#    comment: Multiple aggregate that calculate the same thing.
-#    data: table1
-#    sql: SELECT sum(a), sum(a) FROM table1
-#    result:
-#    - {"col1": 702, "col2": 702}
+  avg_all_containing_nulls:
+    comment: If there is one null then the result must be null.
+    data: table2
+    sql: SELECT avg(a) FROM table2
+    result:
+    - {"col1": null}
+
+  avg_all_containing_missing:
+    comment: |
+      Missing values are equal to null values, and the result should work the
+      same way.
+    data: table1
+    sql: SELECT avg(c) FROM table2
+    result:
+    - {"col1": null}
+
+  avg_all_zero_rows:
+    comment: Zero rows must yield one result row containing 0.
+    data: empty
+    sql: SELECT avg(a) FROM empty
+    result:
+    - {"col1": 0}
+
+  # GROUP BY
+
+  avg_groups_1:
+    comment: |
+      First scenario when the groups and the values do not contain any nulls.
+    data: table1
+    sql: SELECT a, avg(a) FROM table1 GROUP BY a
+    result:
+    - {"a": 456, "col2": 456}
+    - {"a": 123, "col2": 123}
+
+  avg_groups_2:
+    comment: |
+      Second scenario when the groups do not contain nulls, but some of the
+      values have nulls.
+    data: table3
+    sql: SELECT a, avg(b) FROM table3 GROUP BY a
+    result:
+    - {"a": 456, "col2": 7}
+    - {"a": 123, "col2": null}
+
+  avg_groups_3:
+    comment: |
+      Third scenario when the groups have null values but the values are all
+      non-null.
+    data: table4
+    sql: SELECT a, avg(b) FROM table4 GROUP BY a
+    result:
+    - {"a": null, "col2": 5}
+    - {"a": 123, "col2": 5}
+
+  avg_groups_4:
+    comment: |
+      The final scenario when the groups have null values and the values
+      contain null values.
+    data: table5
+    sql: SELECT a, avg(b) FROM table5 GROUP BY a
+    result:
+    - {"a": 456, "col2": 7}
+    - {"a": 123, "col2": null}
+    - {"a": null, "col2": 5}
+
+  # Expressions
+
+  avg_all_expression:
+    comment: |
+      Sum up all the values with an expression but with no nulls to worry about.
+    data: table1
+    sql: SELECT avg(a + 10) FROM table1
+    result:
+    - {"col1": 244}
+
+  avg_all_expression_nulls:
+    comment: |
+      Sum up all the values with an expression and make sure the null comes
+      through the result.
+    data: table2
+    sql: SELECT avg(a + 10) FROM table2
+    result:
+    - {"col1": null}
+
+  # Multiple
+
+  multiple_avg:
+    comment: Multiple aggregate expressions.
+    data: table1
+    sql: SELECT avg(a), avg(a + 10) FROM table1
+    result:
+    - {"col1": 234, "col2": 244}
+
+  multiple_duplicate:
+    comment: Multiple aggregate that calculate the same thing.
+    data: table1
+    sql: SELECT avg(a), avg(a) FROM table1
+    result:
+    - {"col1": 234, "col2": 234}

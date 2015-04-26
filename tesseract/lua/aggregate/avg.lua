@@ -8,5 +8,10 @@ local function function_avg(group, value)
 end
 
 local function function_avg_post(unique_group, group)
-    return redis.call('HGET', 'agg', group) / redis.call('HGET', 'group', unique_group)
+    local total = tonumber(redis.call('HGET', 'agg', group))
+    local count = tonumber(redis.call('HGET', 'group', unique_group))
+    if total == nil then
+        return cjson.null
+    end
+    return total / count
 end

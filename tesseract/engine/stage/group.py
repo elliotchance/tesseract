@@ -196,6 +196,7 @@ class GroupStage(object):
         After all the records have been iterated and each of the expressions
         have been calculating their result along the way. Now we need to fetch
         back those results and put them into a result page.
+
         """
         lua = [
             "local row = {}",
@@ -225,5 +226,7 @@ class GroupStage(object):
         self.__group_records()
         self.__extract_expressions()
         self.__ensure_single_row()
+
+        #print '\n'.join(self.lua)
 
         return ('group_result', '\n'.join(self.lua), self.offset)
