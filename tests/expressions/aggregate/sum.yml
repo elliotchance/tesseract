@@ -9,6 +9,11 @@ data:
   - {"a": null}
   - {"a": 2}
 
+  table3:
+  - {"a": 123, "b": 5}
+  - {"a": 456, "b": 7}
+  - {"a": 123, "b": null}
+
   empty: []
 
 tests:
@@ -46,12 +51,24 @@ tests:
     - {"col1": 0}
 
   # GROUP BY
-  sum_groups_without_nulls:
+  sum_groups_1:
+    comment: |
+      First scenario when the groups and the values do not contain any nulls.
     data: table1
     sql: SELECT a, sum(a) FROM table1 GROUP BY a
     result:
     - {"a": 456, "col2": 456}
     - {"a": 123, "col2": 246}
+
+  sum_groups_2:
+    comment: |
+      Second scenario when the groups do not contain nulls, but some of the
+      values have nulls.
+    data: table3
+    sql: SELECT a, sum(b) FROM table3 GROUP BY a
+    result:
+    - {"a": 456, "col2": 7}
+    - {"a": 123, "col2": null}
 
   #sum_groups_b:
   #  data: table1
