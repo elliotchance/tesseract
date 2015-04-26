@@ -1,4 +1,4 @@
-from tesseract.sql.ast import Identifier, Expression
+from tesseract.sql.ast import Identifier, Expression, FunctionCall
 
 
 class GroupStage(object):
@@ -137,7 +137,7 @@ class GroupStage(object):
 
         self.iterate_page(self.input_page, [
             self.__unique_group_value(),
-            "redis.call('HSET', 'group', unique_group, 1)",
+            "redis.call('HINCRBY', 'group', unique_group, 1)",
             self.__lua_args(),
         ])
 
@@ -207,7 +207,11 @@ class GroupStage(object):
                 continue
 
             key = self.__group_name('tostring(data)', col)
-            line = "row['%s'] = redis.call('HGET', 'agg', %s)" % (str(col), key)
+            line = "row['%s'] = function_%s_post(tostring(data), %s)" % (
+                str(col),
+                col.function_name,
+                key
+            )
             lua.append(line)
 
         lua.extend([

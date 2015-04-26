@@ -3,3 +3,7 @@ local function function_count(group, value)
         redis.call('HINCRBY', 'agg', group, '1')
     end
 end
+
+local function function_count_post(unique_group, group)
+    return redis.call('HGET', 'agg', group)
+end
