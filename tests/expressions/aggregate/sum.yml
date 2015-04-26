@@ -130,3 +130,10 @@ tests:
     sql: SELECT sum(a), sum(a + 10) FROM table1
     result:
     - {"col1": 702, "col2": 732}
+
+  multiple_duplicate:
+    comment: Multiple aggregate that calculate the same thing.
+    data: table1
+    sql: SELECT sum(a), sum(a) FROM table1
+    result:
+    - {"col1": 702, "col2": 702}
