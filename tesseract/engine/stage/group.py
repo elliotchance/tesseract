@@ -154,9 +154,9 @@ class GroupStage(object):
         for col in self.columns:
             if not col.is_aggregate():
                 continue
-            
+
             default_value = 0
-            if col.function_name == 'min':
+            if col.function_name in ('min', 'max'):
                 default_value = 'cjson.null'
 
             self.lua.append("    row['%s'] = %s" % (str(col), default_value))

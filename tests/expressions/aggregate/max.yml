@@ -32,75 +32,75 @@ data:
 tests:
   # No grouping.
 
-  min_all_without_nulls:
+  max_all_without_nulls:
     comment: |
-      This is the most basic minimum of all records (there are no nulls) so we
+      This is the most basic maximum of all records (there are no nulls) so we
       should always get a result and that result is not null.
     data: table1
-    sql: SELECT min(a) FROM table1
+    sql: SELECT max(a) FROM table1
     result:
-    - {"col1": 123}
+    - {"col1": 456}
 
-  min_all_containing_nulls:
+  max_all_containing_nulls:
     comment: If there is one null then the result must be null.
     data: table2
-    sql: SELECT min(a) FROM table2
+    sql: SELECT max(a) FROM table2
     result:
     - {"col1": null}
 
-  min_all_containing_missing:
+  max_all_containing_missing:
     comment: |
       Missing values are equal to null values, and the result should wor the
       same way.
     data: table2
-    sql: SELECT min(c) FROM table2
+    sql: SELECT max(c) FROM table2
     result:
     - {"col1": null}
 
-  min_all_zero_rows:
+  max_all_zero_rows:
     comment: Zero rows must yield one result row containing null.
     data: empty
-    sql: SELECT min(a) FROM empty
+    sql: SELECT max(a) FROM empty
     result:
     - {"col1": null}
 
   # GROUP BY
 
-  min_groups_1:
+  max_groups_1:
     comment: |
       First scenario when the groups and the values do not contain any nulls.
     data: table1
-    sql: SELECT a, min(a) FROM table1 GROUP BY a
+    sql: SELECT a, max(a) FROM table1 GROUP BY a
     result:
     - {"a": 456, "col2": 456}
     - {"a": 123, "col2": 123}
 
-  min_groups_2:
+  max_groups_2:
     comment: |
       Second scenario when the groups do not contain nulls, but some of the
       values have nulls.
     data: table3
-    sql: SELECT a, min(b) FROM table3 GROUP BY a
+    sql: SELECT a, max(b) FROM table3 GROUP BY a
     result:
     - {"a": 456, "col2": 7}
     - {"a": 123, "col2": null}
 
-  min_groups_3:
+  max_groups_3:
     comment: |
       Third scenario when the groups have null values but the values are all
       non-null.
     data: table4
-    sql: SELECT a, min(b) FROM table4 GROUP BY a
+    sql: SELECT a, max(b) FROM table4 GROUP BY a
     result:
-    - {"a": null, "col2": 3}
+    - {"a": null, "col2": 7}
     - {"a": 123, "col2": 5}
 
-  min_groups_4:
+  max_groups_4:
     comment: |
       The final scenario when the groups have null values and the values
       contain null values.
     data: table5
-    sql: SELECT a, min(b) FROM table5 GROUP BY a
+    sql: SELECT a, max(b) FROM table5 GROUP BY a
     result:
     - {"a": 456, "col2": 7}
     - {"a": 123, "col2": null}
@@ -108,42 +108,42 @@ tests:
 
   # Expressions
 
-  min_all_expression:
+  max_all_expression:
     comment: |
       Sum up all the values with an expression but with no nulls to worry about.
     data: table1
-    sql: SELECT min(a + 10) FROM table1
+    sql: SELECT max(a + 10) FROM table1
     result:
-    - {"col1": 133}
+    - {"col1": 466}
 
-  min_all_expression_nulls:
+  max_all_expression_nulls:
     comment: |
-      Sum up all the values with an expression and make sure the null comes
+      Maximum of all the values with an expression and make sure the null comes
       through the result.
     data: table2
-    sql: SELECT min(a + 10) FROM table2
+    sql: SELECT max(a + 10) FROM table2
     result:
     - {"col1": null}
 
   # Multiple
 
-  multiple_min:
+  multiple_max:
     comment: Multiple aggregate expressions.
     data: table1
-    sql: SELECT min(a), min(a + 10) FROM table1
+    sql: SELECT max(a), max(a + 10) FROM table1
     result:
-    - {"col1": 123, "col2": 133}
+    - {"col1": 456, "col2": 466}
 
   multiple_duplicate:
     comment: Multiple aggregates that calculate the same thing.
     data: table1
-    sql: SELECT min(a), min(a) FROM table1
+    sql: SELECT max(a), max(a) FROM table1
     result:
-    - {"col1": 123, "col2": 123}
+    - {"col1": 456, "col2": 456}
 
   # Bad values
 
   bad_values:
     data: bad_values
-    sql: SELECT min(a) FROM bad_values
-    error: min() can only be used with null or numbers.
+    sql: SELECT max(a) FROM bad_values
+    error: max() can only be used with null or numbers.

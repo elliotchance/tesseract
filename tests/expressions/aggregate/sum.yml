@@ -52,7 +52,7 @@ tests:
     comment: |
       Missing values are equal to null values, and the result should wor the
       same way.
-    data: table1
+    data: table2
     sql: SELECT sum(c) FROM table2
     result:
     - {"col1": null}
@@ -145,5 +145,5 @@ tests:
 
   bad_values:
     data: bad_values
-    sql: SELECT avg(a) FROM bad_values
-    error: ERR value is not an integer or out of range
+    sql: SELECT sum(a) FROM bad_values
+    error: sum() can only be used with null or numbers.

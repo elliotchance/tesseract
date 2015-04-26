@@ -52,7 +52,7 @@ tests:
     comment: |
       Missing values are equal to null values, and the result should work the
       same way.
-    data: table1
+    data: table2
     sql: SELECT avg(c) FROM table2
     result:
     - {"col1": null}
@@ -146,4 +146,4 @@ tests:
   bad_values:
     data: bad_values
     sql: SELECT avg(a) FROM bad_values
-    error: ERR value is not an integer or out of range
+    error: avg() can only be used with null or numbers.
