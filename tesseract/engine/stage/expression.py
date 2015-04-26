@@ -39,8 +39,13 @@ class ExpressionStage(Stage):
 
             if col.is_aggregate():
                 lua.append("    local temp = row['count(*)']")
-                lua.append("    if temp == false then temp = 0 end")
-                lua.append("    tuple['%s'] = temp * 1" % name)
+                lua.append("    if temp == 'null' then")
+                lua.append("        tuple['%s'] = cjson.null" % name)
+                lua.append("    elseif temp == false then")
+                lua.append("        tuple['%s'] = 0" % name)
+                lua.append("    else")
+                lua.append("        tuple['%s'] = temp * 1" % name)
+                lua.append("    end")
             else:
                 lua.append("    tuple['%s'] = %s" % (name, expression))
 

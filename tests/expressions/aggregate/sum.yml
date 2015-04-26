@@ -1,41 +1,58 @@
 data:
-  people:
+  table1:
   - {"a": 123}
-  - {"a": 456, "b": 100}
-  - {"a": null}
-  - {"b": 123}
+  - {"a": 456}
   - {"a": 123}
 
   table2:
-  - {"a": 100}
-  - {"a": 200}
-  - {"a": 300}
+  - {"a": 1}
+  - {"a": null}
+  - {"a": 2}
 
 tests:
-  sum_all:
-    data: people
-    sql: SELECT sum(a) FROM people
+  sum_all_without_nulls:
+    comment: |
+      This is the most basic sum of all records (there are no nulls) so we
+      should always get a result and that result is not null.
+    data: table1
+    sql: SELECT sum(a) FROM table1
     result:
     - {"col1": 702}
 
-  sum_groups_a:
-    data: people
-    sql: SELECT a, sum(a) FROM people GROUP BY a
-    result:
-    - {"a": 456, "col2": 456}
-    - {"a": 123, "col2": 246}
-    - {"a": null, "col2": 0}
-
-  sum_groups_b:
-    data: people
-    sql: SELECT a, sum(b) FROM people GROUP BY a
-    result:
-    - {"a": 456, "col2": 100}
-    - {"a": 123, "col2": 0}
-    - {"a": null, "col2": 123}
-
-  sum_all_expression:
+  sum_all_containing_nulls:
+    comment: If there is one null then the result must be null.
     data: table2
-    sql: SELECT sum(a + 10) FROM table2
+    sql: SELECT sum(a) FROM table2
     result:
-    - {"col1": 630}
+    - {"col1": null}
+
+  sum_all_containing_missing:
+    comment: |
+      Missing values are equal to null values, and the result should wor the
+      same way
+    data: table1
+    sql: SELECT sum(c) FROM table2
+    result:
+    - {"col1": null}
+
+  #sum_groups_a:
+  #  data: table1
+  #  sql: SELECT a, sum(a) FROM people WHERE a IS NOT null GROUP BY a
+  #  result:
+  #  - {"a": 456, "col2": 456}
+  #  - {"a": 123, "col2": 246}
+  #  - {"a": null, "col2": 0}
+#
+  #sum_groups_b:
+  #  data: table1
+  #  sql: SELECT a, sum(b) FROM people WHERE b IS NOT null GROUP BY a
+  #  result:
+  #  - {"a": 456, "col2": 100}
+  #  - {"a": 123, "col2": 0}
+  #  - {"a": null, "col2": 123}
+#
+  #sum_all_expression:
+  #  data: table1
+  #  sql: SELECT sum(a + 10) FROM table2 WHERE a IS NOT null
+  #  result:
+  #  - {"col1": 630}
