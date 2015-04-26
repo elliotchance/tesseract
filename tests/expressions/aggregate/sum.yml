@@ -1,0 +1,14 @@
+data:
+  people:
+  - {"a": 123}
+  - {"a": 456}
+  - {"a": null}
+  - {"b": 123}
+  - {"a": 123}
+
+tests:
+  sum_all:
+    data: people
+    sql: SELECT sum(a) FROM people
+    result:
+    - {"col1": 702}
