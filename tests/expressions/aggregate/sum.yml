@@ -14,6 +14,16 @@ data:
   - {"a": 456, "b": 7}
   - {"a": 123, "b": null}
 
+  table4:
+  - {"a": 123, "b": 5}
+  - {"a": null, "b": 7}
+  - {"a": null, "b": 3}
+
+  table5:
+  - {"a": null, "b": 5}
+  - {"a": 456, "b": 7}
+  - {"a": 123, "b": null}
+
   empty: []
 
 tests:
@@ -70,16 +80,41 @@ tests:
     - {"a": 456, "col2": 7}
     - {"a": 123, "col2": null}
 
-  #sum_groups_b:
-  #  data: table1
-  #  sql: SELECT a, sum(b) FROM people WHERE b IS NOT null GROUP BY a
-  #  result:
-  #  - {"a": 456, "col2": 100}
-  #  - {"a": 123, "col2": 0}
-  #  - {"a": null, "col2": 123}
-#
-  #sum_all_expression:
-  #  data: table1
-  #  sql: SELECT sum(a + 10) FROM table2 WHERE a IS NOT null
-  #  result:
-  #  - {"col1": 630}
+  sum_groups_3:
+    comment: |
+      Third scenario when the groups have null values but the values are all
+      non-null.
+    data: table4
+    sql: SELECT a, sum(b) FROM table4 GROUP BY a
+    result:
+    - {"a": null, "col2": 10}
+    - {"a": 123, "col2": 5}
+
+  sum_groups_4:
+    comment: |
+      The final scenario when the groups have null values and the values
+      contain null values.
+    data: table5
+    sql: SELECT a, sum(b) FROM table5 GROUP BY a
+    result:
+    - {"a": 456, "col2": 7}
+    - {"a": 123, "col2": null}
+    - {"a": null, "col2": 5}
+
+  # Expressions
+  sum_all_expression:
+    comment: |
+      Sum up all the values with an expression but with no nulls to worry about.
+    data: table1
+    sql: SELECT sum(a + 10) FROM table1
+    result:
+    - {"col1": 732}
+
+  sum_all_expression_nulls:
+    comment: |
+      Sum up all the values with an expression and make sure the null comes
+      through the result.
+    data: table2
+    sql: SELECT sum(a + 10) FROM table2
+    result:
+    - {"col1": null}
