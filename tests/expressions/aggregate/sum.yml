@@ -6,6 +6,11 @@ data:
   - {"b": 123}
   - {"a": 123}
 
+  table2:
+  - {"a": 100}
+  - {"a": 200}
+  - {"a": 300}
+
 tests:
   sum_all:
     data: people
@@ -28,3 +33,9 @@ tests:
     - {"a": 456, "col2": 100}
     - {"a": 123, "col2": 0}
     - {"a": null, "col2": 123}
+
+  sum_all_expression:
+    data: table2
+    sql: SELECT sum(a + 10) FROM table2
+    result:
+    - {"col1": 630}
