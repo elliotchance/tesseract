@@ -1,5 +1,4 @@
-Server Protocol
-===============
+% Server Protocol
 
 The server protocol used by tesseract is pure JSON. This makes it very easy for
 any language or system to interact with - even `telnet` if you don't mind typing
@@ -7,7 +6,7 @@ the JSON.
 
 
 Connect
--------
+=======
 
 There is currently no authentication required for connecting. So simply knowing
 the host and port is sufficient for making a connection.
@@ -16,7 +15,7 @@ It is a plain TCP connection that normally runs on port 3679.
 
 
 Request
--------
+=======
 
 The request is a JSON object:
 
@@ -28,7 +27,7 @@ The request is a JSON object:
 
 
 Response
---------
+========
 
 If the response is successful:
 

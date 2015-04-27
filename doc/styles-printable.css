@@ -1,0 +1,70 @@
+/* Pandoc generates a #header div at the top for the main title.
+   No particular styling here for that right now.
+*/
+
+code {
+    background-color: #f6f6f6;
+}
+
+pre {
+    padding: 6px 2px 6px 6px;
+    background-color: #f6f6f6;
+    border: 1px solid #e8e8e8;
+}
+
+caption {
+    font-style: italic;
+    font-size: small;
+    color: #555;
+}
+
+a:link {
+    color: #3A4089;
+}
+
+a:visited {
+    color: #875098;
+}
+
+table {
+    background-color: #f6f6f6;
+    border: 2px solid #d8d8d8;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+th {
+    background-color: #d8d8d8;
+    padding-right: 4px;
+}
+
+tr, td, th {
+    border: 2px solid #d8d8d8;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+dt {
+    font-weight: bold;
+}
+
+blockquote {
+    color: #3a3a3a;
+    background-color: #edf0fa;
+    border: 1px solid #dde0ea;
+    padding: 2px 16px 2px 16px;
+}
+
+blockquote code, blockquote pre {
+    background-color: #dae2f4;
+    border-style: none;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: sans-serif;
+}
+
+h3, h5 {
+    font-style: italic;
+}

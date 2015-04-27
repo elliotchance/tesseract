@@ -1,5 +1,4 @@
-Data Types
-==========
+% Data Types
 
 There are six distinct data types in tesseract:
 

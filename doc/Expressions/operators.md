@@ -1,7 +1,55 @@
-Comparison Expressions
-======================
+% Operators
 
-[TOC]
+Arithmetic
+==========
+
+
+Addition:
+
+    a + b
+
+Subtraction:
+
+    a - b
+
+Multiplication:
+
+    a * b
+
+Division:
+
+    a / b
+
+Modulo (remainder):
+
+    a % b
+
+Power:
+
+    a ^ b
+
+`a` and `b` must be `null` or `number`.
+
+    
+Concatenation
+=============
+
+    a || b
+    
+Will concatenate the string representations of both sides. For example `3 || 5`
+is `35`. Special values will be converted as follows:
+
+Value    | String Representation
+-------- | ---------------------
+`null`   | `""`
+`true`   | `"true"`
+`false`  | `"false"`
+
+You cannot concatenate arrays or objects on either or both sides.
+
+
+Comparison
+==========
 
 
 Equality
@@ -80,7 +128,7 @@ When comparing strings it follows the same rules as how Lua compares strings.
 
 
 Logical
--------
+=======
 
 For all logical operations `a` and `b` are only allowed to be `null` or
 `boolean`.
@@ -109,7 +157,7 @@ OR      | `true`  | `false`
 
 
 Regular Expressions
--------------------
+===================
 
     value LIKE regex
     value NOT LIKE regex
@@ -123,7 +171,9 @@ Character | Description
 `.`       | Match any single character.
 `%`       | Match zero or more characters.
 
-### Examples
+
+Examples
+--------
 
 Test if a string starts with another string:
 
@@ -135,7 +185,7 @@ Test if a string ends with another string:
 
 
 Checking Types
---------------
+==============
 
 The following can be used to test the types of a value:
 
@@ -157,7 +207,7 @@ convention on case.
 
 
 Set Membership
---------------
+==============
 
 To test the existence of a value in a set:
 
@@ -173,7 +223,7 @@ This is to conform is the SQL standard in dealing with `null` values.
 
 
 Containment
------------
+===========
 
 To test if a value sits between two other values (inclusive):
 
@@ -187,3 +237,24 @@ Is exactly equivalent to:
 
 If at least one of `a`, `b` or `c` is `null` then the result will always be
 `null`.
+
+
+Operator Precedence
+===================
+
+Operator/Element | Associativity | Description
+---------------- | ------------- | --------------
+`-`              | right         | unary minus
+`^`              | left          | exponentiation
+`*` `/` `%`      | left          | multiplication, division, modulo
+`+` `-`          | left          | addition, subtraction
+`IS`             |               | test for `true`, `false`, `null`
+`IN`             |               | set membership
+
+BETWEEN         containment
+LIKE ILIKE         string pattern matching
+< >         less than, greater than
+=    right    equality, assignment
+NOT    right    logical negation
+AND    left    logical conjunction
+OR    left    logical disjunction

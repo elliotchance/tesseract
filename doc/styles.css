@@ -1,0 +1,157 @@
+body {
+    color: #222;
+    line-height: 140%;
+    font-size: small;
+    font-family: sans-serif;
+    background-color: #fff;
+}
+
+#main-outer-box {
+    /* Contains all other divs for the page. */
+}
+
+#my-header {
+    font-weight: bold;
+    font-size: x-large;
+    padding: 10px 10px 20px 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#my-header a {
+    text-decoration: none;
+}
+
+#trunk-box {
+    /* Contains nav-pane and content side-by-side. */
+}
+
+#header-nav-bar, #footer-nav-bar {
+    background-color: #eee;
+}
+
+#nav-pane, #header-nav-bar, #footer-nav-bar, #my-footer {
+    font-size: x-small;
+}
+
+/* The box on the left with links to docs and dirs in this dir. */
+#nav-pane {
+    float: left;
+    width: 280px;
+    padding: 10px;
+}
+
+/* Pandoc automatically puts a header div at the top of the page. */
+#header .author {display: none;}
+#header .date   {display: none;}
+
+#header .title {
+    font-size: 34px;
+}
+
+/* Pandoc's doc-specific ToC. */
+#TOC {
+    background-color: #e5efdf;
+    border: 1px solid #cedec4;
+}
+
+#center-box {
+    margin-left: 320px;
+    width: 800px;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+#header-nav-bar {
+    padding: 6px 6px 8px 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#footer-nav-bar {
+    padding: 6px 6px 10px 10px;
+    border-top: 1px solid #ddd;
+}
+
+#content {
+    padding: 20px;
+    background-color: #fff;
+}
+
+caption {
+    font-style: italic;
+    font-size: small;
+    color: #555;
+}
+
+a:link {
+    color: #3A4089;
+}
+
+a:visited {
+    color: #875098;
+}
+
+table {
+    background-color: #eee;
+    padding-left: 2px;
+    border: 2px solid #d4d4d4;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #d4d4d4;
+    padding-right: 4px;
+}
+
+tr, td, th {
+    border: 2px solid #d4d4d4;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+dt {
+    font-weight: bold;
+}
+
+code {
+    background-color: #eee;
+}
+
+pre {
+    line-height: 135%;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    padding-left: 6px;
+    padding-right: 2px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+blockquote {
+    background-color: #d8deea;
+    border: 1px solid #c6d1e7;
+    border-radius: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+blockquote code, blockquote pre {
+    background-color: #cad2e4;
+    border-style: none;
+}
+
+#my-footer {
+    clear: both;
+    padding: 10px;
+    font-style: italic;
+    border-top: 1px solid #ddd;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: sans-serif;
+}
+
+h3, h5 {
+    font-style: italic;
+}

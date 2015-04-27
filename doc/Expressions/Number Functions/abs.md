@@ -1,22 +1,15 @@
-Number Functions
-================
-
-[TOC]
-
-
-`ABS()` -- Absolute Value
--------------------------
+% `ABS()` -- Absolute Value
 
 Return the absolute value (positive value) of a number.
 
     abs(<value>)
     
-**_value_**
+value
+  : A `null` or `number`.
 
-A `null` or `number`.
 
-
-### Examples
+Examples
+========
 
     SELECT abs(null)
     
