@@ -1,0 +1,49 @@
+data:
+  people:
+  - {"value": 123}
+  - {"value": 456}
+  - {"value": null}
+  - {"other": 123}
+
+  empty: []
+
+  groups:
+  - {"value": 10}
+  - {"value": 20}
+  - {"value": 10}
+  - {"value": 30}
+  - {"value": 30}
+  - {"value": 10}
+
+tests:
+  count_all:
+    data: people
+    sql: SELECT count(*) FROM people
+    result:
+    - {"col1": 4}
+
+  count_non_null:
+    data: people
+    sql: SELECT count(value) FROM people
+    result:
+    - {"col1": 2}
+
+  count_non_exists:
+    data: people
+    sql: SELECT count(value) FROM people
+    result:
+    - {"col1": 2}
+
+  count_all_empty:
+    data: empty
+    sql: SELECT count(*) FROM empty
+    result:
+    - {"col1": 0}
+
+  count_groups:
+    data: groups
+    sql: SELECT value, count(*) FROM groups GROUP BY value
+    result-unordered:
+    - {"value": 10, "col2": 3}
+    - {"value": 20, "col2": 1}
+    - {"value": 30, "col2": 2}

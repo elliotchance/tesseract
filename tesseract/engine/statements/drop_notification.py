@@ -1,6 +1,6 @@
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.protocol import Protocol
-from tesseract.sql.statements.drop_notification import DropNotificationStatement
+from tesseract.sql.ast import DropNotificationStatement
 
 
 class DropNotification(Statement):

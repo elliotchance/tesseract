@@ -3,7 +3,7 @@ from tesseract.engine.stage.delete import DeleteStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.protocol import Protocol
-from tesseract.sql.statements.delete import DeleteStatement
+from tesseract.sql.ast import DeleteStatement
 
 
 class Delete(Statement):

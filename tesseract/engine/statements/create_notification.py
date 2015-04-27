@@ -1,7 +1,6 @@
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.protocol import Protocol
-from tesseract.sql.statements.create_notification import \
-    CreateNotificationStatement
+from tesseract.sql.ast import CreateNotificationStatement
 
 
 class CreateNotification(Statement):

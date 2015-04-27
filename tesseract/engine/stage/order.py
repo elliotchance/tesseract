@@ -1,5 +1,5 @@
+from tesseract.sql.ast import OrderByClause
 from tesseract.engine.stage.stage import Stage
-from tesseract.sql.clause.order_by import OrderByClause
 
 
 class OrderStage(Stage):
@@ -92,7 +92,6 @@ class OrderStage(Stage):
             "redis.call('SORT', 'order_string'%s, 'ALPHA', 'STORE', 'order_string_sorted')" % desc,
         ])
 
-        # Sort the values.
         lua.extend([
             "local rowid = 0",
         ])

@@ -25,6 +25,27 @@ In the example above we have created one test called `my_test` that will run the
 SQL statement and confirm that the server returns one row containing that exact
 data.
 
+### Result (`result`)
+
+Specify the expected output of the last `sql` statement. The data returned from
+the server must be exacly the same (including order) as the `result` items.
+
+### Result in Any Order (`result-unordered`)
+
+If the order in which the records isn't imporant or is unpredictable you can use
+`result-unordered` instead of `result`.
+
+```yml
+tests:
+  two_columns:
+    data: table1
+    sql: "SELECT foo, foo * 2 FROM table1"
+    result-unordered:
+    - {"foo": 123, "col2": 246}
+    - {"foo": 124, "col2": 248}
+    - {"foo": 125, "col2": 250}
+```
+
 ### Parser (`as`)
 
 All tests that contain a `sql` attribute will be run through the parser and the

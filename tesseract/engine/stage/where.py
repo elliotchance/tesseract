@@ -1,5 +1,5 @@
+from tesseract.sql.ast import Value, Expression
 from tesseract.engine.stage.stage import Stage
-from tesseract.sql.expressions import Value, Expression
 
 
 class WhereStage(Stage):

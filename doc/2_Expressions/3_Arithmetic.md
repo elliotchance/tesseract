@@ -18,6 +18,14 @@ Division:
 
     a / b
 
+Modulo (remainder):
+
+    a % b
+
+Power:
+
+    a ^ b
+
 `a` and `b` must be `null` or `number`.
 
     

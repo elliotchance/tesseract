@@ -1,10 +1,11 @@
 from redis import StrictRedis
 from tesseract.engine.stage.expression import ExpressionStage
+from tesseract.engine.stage.group import GroupStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.statements.select import SelectStatement
+from tesseract.sql.ast import SelectStatement
 
 
 class Select(Statement):
@@ -13,9 +14,12 @@ class Select(Statement):
         assert isinstance(redis, StrictRedis)
         assert isinstance(warnings, list)
 
+        redis.delete('agg')
+
         select = result.statement
-        lua, args = self.compile_select(result)
-        return self.run(redis, select.table_name, warnings, lua, args, result)
+        lua, args, manager = self.compile_select(result)
+        return self.run(redis, select.table_name, warnings, lua, args, result,
+                        manager)
 
 
     def compile_select(self, result):
@@ -30,6 +34,10 @@ class Select(Statement):
         # Compile WHERE stage.
         if expression.where:
             stages.add(WhereStage, (expression.where,))
+
+        # Compile the GROUP BY clause.
+        if expression.group or expression.contains_aggregate():
+            stages.add(GroupStage, (expression.group, expression.columns))
 
         # Compile the ORDER BY clause.
         if expression.order:
@@ -46,10 +54,10 @@ end
 """
 
         # Compile the `SELECT` columns
-        if expression.columns != '*':
+        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 
         # Extract the values for the expression.
-        return (lua, args)
+        return (lua, args, stages)

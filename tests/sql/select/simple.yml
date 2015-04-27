@@ -43,3 +43,16 @@ tests:
   select_from_table_that_doesnt_exist:
     sql: SELECT * FROM %table_name%
     result: []
+
+  two_expressions:
+    sql: "SELECT 1, 2"
+    result:
+    - {"col1": 1, "col2": 2}
+
+  two_columns:
+    data: table1
+    sql: "SELECT foo, foo * 2 FROM table1"
+    result-unordered:
+    - {"foo": 123, "col2": 246}
+    - {"foo": 124, "col2": 248}
+    - {"foo": 125, "col2": 250}

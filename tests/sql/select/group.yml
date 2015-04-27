@@ -1,0 +1,59 @@
+data:
+  table1:
+  - {"foo": null, "bar": 1}
+  - {"foo": 40, "bar": 2}
+  - {"foo": "abc", "bar": 3}
+  - {"foo": "50", "bar": 4}
+  - {"foo": 100, "bar": 5}
+  - {"foo": false, "bar": 13}
+  - {"foo": "zzz", "bar": 6}
+  - {"foo": null, "bar": 7}
+  - {"foo": 100, "bar": 8}
+  - {"foo": "abc", "bar": 9}
+  - {"foo": 50, "bar": 10}
+  - {"bar": 11}
+  - {"foo": true, "bar": 12}
+  - {"foo": false, "bar": 14}
+
+tests:
+  parser_group_by:
+    sql: SELECT foo FROM table1 GROUP BY foo
+
+  group_by_mixed:
+    data-randomized: table1
+    repeat: 10
+    sql: SELECT foo FROM table1 GROUP BY foo
+    result-unordered:
+    - {"foo": false}
+    - {"foo": true}
+    - {"foo": 40}
+    - {"foo": 50}
+    - {"foo": 100}
+    - {"foo": "50"}
+    - {"foo": "abc"}
+    - {"foo": "zzz"}
+    - {"foo": null}
+
+  order_after_group:
+    data-randomized: table1
+    repeat: 10
+    sql: SELECT foo FROM table1 GROUP BY foo ORDER BY foo DESC
+    result:
+    - {"foo": null}
+    - {"foo": "zzz"}
+    - {"foo": "abc"}
+    - {"foo": "50"}
+    - {"foo": 100}
+    - {"foo": 50}
+    - {"foo": 40}
+    - {"foo": true}
+    - {"foo": false}
+
+  group_with_where:
+    data-randomized: table1
+    repeat: 10
+    sql: SELECT foo FROM table1 WHERE foo IS number GROUP BY foo
+    result-unordered:
+    - {"foo": 40}
+    - {"foo": 50}
+    - {"foo": 100}

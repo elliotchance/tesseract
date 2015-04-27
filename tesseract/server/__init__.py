@@ -9,13 +9,7 @@ from tesseract.engine.statements.update import Update
 from tesseract.server.protocol import Protocol
 import tesseract.sql.parser as parser
 import redis
-from tesseract.sql.statements.create_notification import \
-    CreateNotificationStatement
-from tesseract.sql.statements.delete import DeleteStatement
-from tesseract.sql.statements.drop_notification import DropNotificationStatement
-from tesseract.sql.statements.insert import InsertStatement
-from tesseract.sql.statements.select import SelectStatement
-from tesseract.sql.statements.update import UpdateStatement
+from tesseract.sql.ast import *
 
 
 try: # pragma: no cover

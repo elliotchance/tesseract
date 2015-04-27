@@ -1,3 +1,6 @@
+from tesseract.engine.stage.order import OrderStage
+
+
 class StageManager(object):
     """The `StageManager` is used to create the plan for the SQL query. This
     query does not have to be a `SELECT`. Once all the stages have been added
@@ -16,10 +19,14 @@ class StageManager(object):
     """
     def __init__(self):
         self.stages = []
+        self.maintain_order = False
 
     def add(self, stage_class, args):
         assert isinstance(stage_class, object)
         assert isinstance(args, (list, tuple))
+
+        if stage_class == OrderStage:
+            self.maintain_order = True
 
         self.stages.append({
             "class": stage_class,
