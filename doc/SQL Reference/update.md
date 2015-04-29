@@ -5,9 +5,11 @@
 Syntax
 ======
 
-    UPDATE <table_name>
-    SET <column_expressions>
-    [ WHERE <condition> ]
+```sql
+UPDATE <table_name>
+SET <column_expressions>
+[ WHERE <condition> ]
+```
 
 table_name
   : The table that will have its object modified. If the table does not exist

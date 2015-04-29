@@ -5,12 +5,13 @@
 Syntax
 ======
 
-    SELECT <column_definitions>
-    [ FROM <table_name> ]
-    [ WHERE <condition> ]
-    [ GROUP BY <group_field> ]
-    [ ORDER BY <order_field> ]
-
+```sql
+SELECT <column_definitions>
+[ FROM <table_name> ]
+[ WHERE <condition> ]
+[ GROUP BY <group_field> ]
+[ ORDER BY <order_field> ]
+```
 
 column_definitions
   : This can be an asterisk (`*`) to represent that the entire object should be

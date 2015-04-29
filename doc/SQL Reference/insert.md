@@ -5,8 +5,10 @@
 Syntax
 ======
 
-    INSERT INTO <table_name>
-    <json_object>
+```sql
+INSERT INTO <table_name>
+<json_object>
+```
 
 table_name
   : The table name to insert the object into. This table will be created by

@@ -1,5 +1,6 @@
 % Operators
 
+
 Arithmetic
 ==========
 
@@ -30,23 +31,6 @@ Power:
 
 `a` and `b` must be `null` or `number`.
 
-    
-Concatenation
-=============
-
-    a || b
-    
-Will concatenate the string representations of both sides. For example `3 || 5`
-is `35`. Special values will be converted as follows:
-
-Value    | String Representation
--------- | ---------------------
-`null`   | `""`
-`true`   | `"true"`
-`false`  | `"false"`
-
-You cannot concatenate arrays or objects on either or both sides.
-
 
 Comparison
 ==========
@@ -73,28 +57,48 @@ For inequality:
 In the case of an `array` both arrays must be the same length and contain
 exactly the same element in the same order:
 
-    SELECT [1, 2] = [1, 2]
+```sql
+SELECT [1, 2] = [1, 2]
+```
 
-> `true`
+```json
+true
+```
 
-    SELECT [1, 2] = [1, "2"]
+```sql
+SELECT [1, 2] = [1, "2"]
+```
 
-> `false`
+```json
+false
+```
 
-    SELECT [1, 2] = [2, 1]
+```sql
+SELECT [1, 2] = [2, 1]
+```
 
-> `false`
+```json
+false
+```
 
 In the case of an `object` both objects must contain the same amount of keys and
 each key must exist in both objects with the exact same value.
 
-    SELECT {"foo": 123} = {"foo": 123}
+```sql
+SELECT {"foo": 123} = {"foo": 123}
+```
 
-> `true`
+```json
+true
+```
 
-    SELECT {"foo": 123} = {"foo": 123, "bar": null}
+```sql
+SELECT {"foo": 123} = {"foo": 123, "bar": null}
+```
 
-> `false`
+```json
+false
+```
 
 Inequality has all the same rules but in reverse.
 
@@ -126,6 +130,27 @@ Less than or equal to:
 
 When comparing strings it follows the same rules as how Lua compares strings.
 
+    
+Concatenation
+=============
+
+    a || b
+    
+Will concatenate the string representations of both sides. For example `3 || 5`
+is `35`. Special values will be converted as follows:
+
+--------  ---------------------
+Value     String Representation
+--------  ---------------------
+`null`    `""`
+
+`true`    `"true"`
+
+`false`   `"false"`
+--------  ---------------------
+
+You cannot concatenate arrays or objects on either or both sides.
+
 
 Logical
 =======
@@ -139,10 +164,13 @@ Logical AND:
 
 Results:
 
-AND     | `true`  | `false`
-------- | ------- | -------
-`true`  | `true`  | `false`
-`false` | `false` | `false`
+-------  -------  -------
+AND      `true`   `false`
+-------  -------  -------
+`true`   `true`   `false`
+
+`false`  `false`  `false`
+-------  -------  -------
 
 Logical OR:
 
@@ -150,10 +178,13 @@ Logical OR:
 
 Results:
 
-OR      | `true`  | `false`
-------- | ------- | -------
-`true`  | `true`  | `true`
-`false` | `true`  | `false`
+-------  -------  -------
+OR       `true`   `false`
+-------  -------  -------
+`true`   `true`   `true`
+
+`false`  `true`   `false`
+-------  -------  -------
 
 
 Regular Expressions
@@ -166,10 +197,13 @@ Regular Expressions
 
 `regex` uses the SQL rules for `LIKE` expressions.
 
-Character | Description
---------- | -----------
-`.`       | Match any single character.
-`%`       | Match zero or more characters.
+---------  ------------------------------
+Character  Description
+---------  ------------------------------
+`.`        Match any single character.
+
+`%`        Match zero or more characters.
+---------  ------------------------------
 
 
 Examples
@@ -177,11 +211,15 @@ Examples
 
 Test if a string starts with another string:
 
-    SELECT "Bob Smith" LIKE "Bob %"
+```sql
+SELECT "Bob Smith" LIKE "Bob %"
+```
 
 Test if a string ends with another string:
 
-    SELECT "Bob Smith" LIKE "% Smith"
+```sql
+SELECT "Bob Smith" LIKE "% Smith"
+```
 
 
 Checking Types
@@ -242,19 +280,32 @@ If at least one of `a`, `b` or `c` is `null` then the result will always be
 Operator Precedence
 ===================
 
-Operator/Element | Associativity | Description
----------------- | ------------- | --------------
-`-`              | right         | unary minus
-`^`              | left          | exponentiation
-`*` `/` `%`      | left          | multiplication, division, modulo
-`+` `-`          | left          | addition, subtraction
-`IS`             |               | test for `true`, `false`, `null`
-`IN`             |               | set membership
+----------------  --------------  --------------------------------
+Operator/Element  Associativity   Description
+----------------  --------------  --------------------------------
+`-`               right           unary minus
+ 
+`^`               left            exponentiation
+ 
+`*` `/` `%`       left            multiplication, division, modulo
+ 
+`+` `-`           left            addition, subtraction
+ 
+`IS`                              test for `true`, `false`, `null`
+ 
+`IN`                              set membership
+ 
+BETWEEN                           containment
+ 
+LIKE ILIKE                        string pattern  matching
 
-BETWEEN         containment
-LIKE ILIKE         string pattern matching
-< >         less than, greater than
-=    right    equality, assignment
-NOT    right    logical negation
-AND    left    logical conjunction
-OR    left    logical disjunction
+< >                               less than, greater than
+
+=                 right           equality, assignment
+
+NOT               right           logical negation
+
+AND               left            logical conjunction
+
+OR                left            logical disjunction
+----------------  --------------  --------------------------------

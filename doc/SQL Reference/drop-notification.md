@@ -5,7 +5,9 @@
 Syntax
 ======
 
-    DROP NOTIFICATION <notification_name>
+```sql
+DROP NOTIFICATION <notification_name>
+```
 
 notification_name
   : The name of the notification must already exist or an error it returned.

@@ -5,8 +5,10 @@
 Syntax
 ======
 
-    DELETE FROM <table_name>
-    [ WHERE <where_clause> ]
+```sql
+DELETE FROM <table_name>
+[ WHERE <where_clause> ]
+```
 
 table_name
   : The table name to remove the objects from. If the table does not exist then
