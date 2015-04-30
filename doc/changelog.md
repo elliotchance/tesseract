@@ -48,16 +48,23 @@ v1.0.0-alpha1 (Aurora)
 v1.0.0-alpha2 (Binary Star)
 ===========================
 
-**Improvements**
+**Major**
 
  #. `GROUP BY` single column for `SELECT`.
     [[#10](https://github.com/elliotchance/tesseract/pull/10)]
+
+ #. Added aggregate functions `AVG()`, `COUNT()`, `MAX()`, `MIN()` and `SUM()`.
+    [[#10](https://github.com/elliotchance/tesseract/pull/10)]
+    
+**Operators**
 
  #. Added string concatenation (`||`) operator.
     [[#9](https://github.com/elliotchance/tesseract/pull/9)]
 
  #. Added `ILIKE` and `NOT ILIKE` operators.
     [[#11](https://github.com/elliotchance/tesseract/pull/11)]
+
+**Improvements**
     
  #. Reformatted documentation to work with Rippledoc.
     [[#11](https://github.com/elliotchance/tesseract/pull/11)]

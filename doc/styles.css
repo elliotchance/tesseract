@@ -106,26 +106,10 @@ a:visited {
     color: #875098;
 }
 
-/*table {
-    background-color: #eee;
-    padding-left: 2px;
-    border: 2px solid #d4d4d4;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: #d4d4d4;
-    padding-right: 4px;
-}
-
-tr, th {
-    padding-left: 4px;
-    padding-right: 4px;
-}*/
-
 table {
     border-collapse: collapse;
     border: solid 2px #d4d4d4;
+    width: 100%;
 }
 
 td, th {

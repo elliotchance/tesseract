@@ -295,17 +295,17 @@ Operator/Element  Associativity   Description
  
 `IN`                              set membership
  
-BETWEEN                           containment
+`BETWEEN`                         containment
  
-LIKE ILIKE                        string pattern  matching
+`LIKE` `ILIKE`                    string pattern  matching
 
-< >                               less than, greater than
+`<` `>`                           less than, greater than
 
-=                 right           equality, assignment
+`=`               right           equality, assignment
 
-NOT               right           logical negation
+`NOT`             right           logical negation
 
-AND               left            logical conjunction
+`AND`             left            logical conjunction
 
-OR                left            logical disjunction
+`OR`              left            logical disjunction
 ----------------  --------------  --------------------------------
