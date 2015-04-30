@@ -389,17 +389,25 @@ def p_like_expression(p):
     """
         like_expression : expression LIKE expression
                         | expression NOT LIKE expression
+                        | expression ILIKE expression
+                        | expression NOT ILIKE expression
     """
 
-    #     expression LIKE expression
-    if p[2] == 'LIKE':
+    if p[2].upper() == 'LIKE':
         add_requirement(p, 'operator/like')
-        p[0] = LikeExpression(p[1], p[3], False)
+        p[0] = LikeExpression(p[1], p[3], False, True)
 
-    #     expression NOT LIKE expression
-    else:
+    elif p[2].upper() == 'ILIKE':
+        add_requirement(p, 'operator/ilike')
+        p[0] = LikeExpression(p[1], p[3], False, False)
+
+    elif p[3].upper() == 'LIKE':
         add_requirement(p, 'operator/not_like')
-        p[0] = LikeExpression(p[1], p[4], True)
+        p[0] = LikeExpression(p[1], p[4], True, True)
+
+    elif p[3].upper() == 'ILIKE':
+        add_requirement(p, 'operator/not_ilike')
+        p[0] = LikeExpression(p[1], p[4], True, False)
 
 
 def p_logic_expression(p):

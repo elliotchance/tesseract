@@ -279,11 +279,17 @@ class FunctionCall(Expression):
 
 
 class LikeExpression(BinaryExpression):
-    def __init__(self, value, regex, is_not):
+    def __init__(self, value, regex, is_not, case_sensitive):
         assert isinstance(is_not, bool)
+        assert isinstance(case_sensitive, bool)
 
         function = ':operator_not_like' if is_not else ':operator_like'
         operator = 'NOT LIKE' if is_not else 'LIKE'
+
+        if not case_sensitive:
+            function = function.replace('like', 'ilike')
+            operator = operator.replace('LIKE', 'ILIKE')
+
         BinaryExpression.__init__(self, value, operator, regex, function)
 
 

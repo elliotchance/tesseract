@@ -1,0 +1,74 @@
+tests:
+  exact_match:
+    sql: SELECT "elliot" NOT ILIKE "elliot"
+    result:
+    - {"col1": false}
+
+  exact_different_case:
+    sql: SELECT "elliot" NOT ILIKE "Elliot"
+    result:
+    - {"col1": false}
+
+  not_exact_match:
+    sql: SELECT "elliot2" NOT ILIKE "elliot"
+    result:
+    - {"col1": true}
+
+  match_single_character:
+    sql: SELECT "elliot" NOT ILIKE "ell.ot"
+    result:
+    - {"col1": false}
+
+  single_character_should_not_match_multiple:
+    sql: SELECT "elliiot" NOT ILIKE "ell.ot"
+    result:
+    - {"col1": true}
+
+  match_multiple_characters:
+    sql: SELECT "elliot" NOT ILIKE "e%t"
+    result:
+    - {"col1": false}
+
+  match_zero_characters:
+    sql: SELECT "elliot" NOT ILIKE "ell%iot"
+    result:
+    - {"col1": false}
+
+  value_is_null:
+    sql: SELECT null NOT ILIKE "foo"
+    result:
+    - {"col1": null}
+
+  regex_is_null:
+    sql: SELECT "foo" NOT ILIKE null
+    result:
+    - {"col1": null}
+
+  both_null:
+    sql: SELECT null NOT ILIKE null
+    result:
+    - {"col1": null}
+
+  lowercase_operator1:
+    sql: SELECT "elliot" not ILIKE "elliot"
+    as: SELECT "elliot" NOT ILIKE "elliot"
+    result:
+    - {"col1": false}
+
+  lowercase_operator2:
+    sql: SELECT "elliot" NOT ilike "elliot"
+    as: SELECT "elliot" NOT ILIKE "elliot"
+    result:
+    - {"col1": false}
+
+  value_incompatible_type:
+    sql: SELECT false NOT ILIKE "foo"
+    error: No such operator boolean NOT ILIKE string.
+
+  regex_incompatible_type:
+    sql: SELECT "foo" NOT ILIKE false
+    error: No such operator string NOT ILIKE boolean.
+
+  both_incompatible_type:
+    sql: SELECT false NOT ILIKE false
+    error: No such operator boolean NOT ILIKE boolean.
