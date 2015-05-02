@@ -38,6 +38,7 @@ def p_statement(p):
                   | create_notification_statement
                   | drop_notification_statement
                   | update_statement
+                  | create_index_statement
     """
 
     # This is the only rule that is not in alphabetical order because it is the
@@ -92,6 +93,14 @@ def p_arithmetic_expression(p):
     else:
         add_requirement(p, 'operator/minus')
         p[0] = SubtractExpression(p[1], p[3])
+
+
+def p_create_index_statement(p):
+    """
+        create_index_statement : CREATE INDEX IDENTIFIER ON IDENTIFIER
+    """
+
+    p[0] = CreateIndexStatement(p[3], p[5])
 
 
 def p_between_expression(p):

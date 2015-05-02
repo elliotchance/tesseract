@@ -141,6 +141,9 @@ class Server:
             statement = Update()
             return statement.execute(result, self.redis)
 
+        if isinstance(result.statement, CreateIndexStatement):
+            return Protocol.successful_response()
+
         # This is a `SELECT`
         statement = Select()
         return statement.execute(result, self.redis, self.warnings)

@@ -560,3 +560,15 @@ class OrderByClause:
             direction = ' DESC'
 
         return 'ORDER BY %s%s' % (self.field_name, direction)
+
+
+class CreateIndexStatement(Statement):
+    def __init__(self, index_name, table_name):
+        assert isinstance(index_name, Identifier)
+        assert isinstance(table_name, Identifier)
+
+        self.index_name = index_name
+        self.table_name = table_name
+
+    def __str__(self):
+        return "CREATE INDEX %s ON %s" % (self.index_name, self.table_name)

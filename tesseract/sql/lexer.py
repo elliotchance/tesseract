@@ -18,6 +18,7 @@ sql_keywords = (
     'FROM',
     'GROUP',
     'IN',
+    'INDEX',
     'INSERT',
     'INTO',
     'IS',
