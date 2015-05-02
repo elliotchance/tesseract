@@ -37,3 +37,8 @@ tests:
     - {"foo": 125}
     - {"foo": 126}
     - {"foo": 127}
+
+  offset_too_big:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 20, 3
+    result: []
