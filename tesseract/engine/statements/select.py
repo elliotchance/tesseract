@@ -6,6 +6,7 @@ from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement
+from tesseract.server.protocol import Protocol
 
 
 class Select(Statement):
@@ -17,12 +18,19 @@ class Select(Statement):
         redis.delete('agg')
 
         select = result.statement
-        lua, args, manager = self.compile_select(result)
+        lua, args, manager = self.compile_select(result, redis)
+
+        if select.explain:
+            redis.delete('explain')
+            return Protocol.successful_response([
+                {"description": "Full scan of table 'foo'."}
+            ])
+
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
 
-    def compile_select(self, result):
+    def compile_select(self, result, redis):
         assert isinstance(result.statement, SelectStatement)
 
         expression = result.statement
@@ -57,10 +65,6 @@ end
         if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
 
-        if expression.explain:
-            stages.explain()
-
         lua += stages.compile_lua(offset, expression.table_name)
 
-        # Extract the values for the expression.
         return (lua, args, stages)

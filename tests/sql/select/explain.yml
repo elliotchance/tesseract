@@ -1,3 +1,8 @@
 tests:
   parser_explain:
     sql: EXPLAIN SELECT * FROM foo
+
+  explain_simple:
+    sql: EXPLAIN SELECT * FROM foo
+    result:
+    - {"description": "Full scan of table 'foo'."}
