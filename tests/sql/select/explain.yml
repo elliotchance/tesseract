@@ -12,3 +12,9 @@ tests:
     result:
     - {"description": "Full scan of table 'bar'"}
     - {"description": "Sorting by foo (ASC)"}
+
+  explain_order_desc:
+    sql: EXPLAIN SELECT * FROM bar ORDER BY foo DESC
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Sorting by foo (DESC)"}

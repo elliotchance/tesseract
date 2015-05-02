@@ -16,8 +16,14 @@ class OrderStage(Stage):
         self.offset = offset
 
     def explain(self):
+        direction = 'ASC'
+        if self.clause.ascending is False:
+            direction = 'DESC'
         return {
-            'description': 'Sorting by %s (ASC)' % self.clause.field_name
+            'description': 'Sorting by %s (%s)' % (
+                self.clause.field_name,
+                direction
+            )
         }
 
     def compile_lua(self):
