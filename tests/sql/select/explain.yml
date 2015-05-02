@@ -18,3 +18,9 @@ tests:
     result:
     - {"description": "Full scan of table 'bar'"}
     - {"description": "Sorting by foo (DESC)"}
+
+  explain_expression:
+    sql: EXPLAIN SELECT foo, bar + 1 FROM baz
+    result:
+    - {"description": "Full scan of table 'baz'"}
+    - {"description": "Expressions: foo, bar + 1"}
