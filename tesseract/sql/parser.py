@@ -504,10 +504,13 @@ def p_optional_limit_clause(p):
     """
         optional_limit_clause : empty
                               | LIMIT NUMBER
+                              | LIMIT NUMBER COMMA NUMBER
     """
 
     if len(p) == 3:
-        p[0] = p[2]
+        p[0] = LimitClause(p[2])
+    elif len(p) == 5:
+        p[0] = LimitClause(p[4], p[2])
     else:
         p[0] = None
 

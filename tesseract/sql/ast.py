@@ -483,7 +483,7 @@ class SelectStatement(Statement):
         assert where is None or isinstance(where, Expression)
         assert order is None or isinstance(order, OrderByClause)
         assert group is None or isinstance(group, Identifier)
-        assert limit is None or isinstance(limit, Value)
+        assert limit is None or isinstance(limit, LimitClause)
 
         self.table_name = table_name
         self.where = where
@@ -561,3 +561,19 @@ class OrderByClause:
             direction = ' DESC'
 
         return 'ORDER BY %s%s' % (self.field_name, direction)
+
+
+class LimitClause:
+    def __init__(self, limit, offset=None):
+        assert isinstance(limit, Value)
+        assert offset is None or isinstance(offset, Value)
+
+        self.limit = limit
+        self.offset = offset
+
+    def __str__(self):
+        sql = str(self.limit);
+        if self.offset:
+            sql = '%s, %s' % (self.offset, sql)
+
+        return sql

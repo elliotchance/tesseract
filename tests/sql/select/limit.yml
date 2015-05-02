@@ -1,3 +1,6 @@
 tests:
-  parser1:
+  parser_without_offset:
     sql: SELECT * FROM table1 LIMIT 10
+
+  parser_with_offset:
+    sql: SELECT * FROM table1 LIMIT 10, 20
