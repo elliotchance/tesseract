@@ -22,9 +22,7 @@ class Select(Statement):
 
         if select.explain:
             redis.delete('explain')
-            return Protocol.successful_response([
-                {"description": "Full scan of table 'foo'."}
-            ])
+            return Protocol.successful_response(manager.explain(select.table_name))
 
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)

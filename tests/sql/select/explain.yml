@@ -5,4 +5,10 @@ tests:
   explain_simple:
     sql: EXPLAIN SELECT * FROM foo
     result:
-    - {"description": "Full scan of table 'foo'."}
+    - {"description": "Full scan of table 'foo'"}
+
+  explain_order:
+    sql: EXPLAIN SELECT * FROM bar ORDER BY foo
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Sorting by foo (ASC)"}
