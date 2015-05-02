@@ -1,6 +1,19 @@
+data:
+  table1:
+  - {"foo": 123}
+  - {"foo": 124}
+  - {"foo": 125}
+
 tests:
   parser_without_offset:
     sql: SELECT * FROM table1 LIMIT 10
 
   parser_with_offset:
     sql: SELECT * FROM table1 LIMIT 10, 20
+
+  simple_limit:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 2
+    result:
+    - {"foo": 123}
+    - {"foo": 124}

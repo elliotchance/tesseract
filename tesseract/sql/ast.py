@@ -504,11 +504,11 @@ class SelectStatement(Statement):
         if self.group:
             r += ' GROUP BY %s' % self.group
 
-        if self.limit:
-            r += ' LIMIT %s' % self.limit
-
         if self.order:
             r += ' %s' % self.order
+
+        if self.limit:
+            r += ' LIMIT %s' % self.limit
 
         return r
 

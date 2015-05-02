@@ -6,6 +6,7 @@ from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement
+from tesseract.engine.stage.limit import LimitStage
 
 
 class Select(Statement):
@@ -56,6 +57,9 @@ end
         # Compile the `SELECT` columns
         if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
+
+        if expression.limit:
+            stages.add(LimitStage, (expression.limit,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 
