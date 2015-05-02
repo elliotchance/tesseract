@@ -11,6 +11,7 @@ SELECT <column_definitions>
 [ WHERE <condition> ]
 [ GROUP BY <group_field> ]
 [ ORDER BY <order_field> ]
+[ LIMIT <limit> ]
 ```
 
 column_definitions
@@ -57,3 +58,22 @@ order_field
      * Any number is considered greater than a boolean.
      * Any string is considered greater than a number.
      * `null` is considered to be greater than any non-`null` value.
+
+limit
+  : Limit the amount of records to be returned. This is performed after all
+    operations on the sets are finished (such as ordering and grouping).
+    
+    If you specify a limit higher than the total number of records it will be
+    the same as not specifying the limit at all (all records).
+    
+    You may also skip rows before the limit like:
+    
+    ```sql
+    SELECT * FROM bla LIMIT 10, 20
+    ```
+    
+    This will skip the first 10 rows and return a maximum of 20 rows - the limit
+    is exlcusive of the offset.
+    
+    If the offset is larger than the available rows then no rows will be
+    returned.
