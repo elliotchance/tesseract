@@ -30,3 +30,9 @@ tests:
     result:
     - {"description": "Full scan of table 'bar'"}
     - {"description": "Grouping by foo"}
+
+  explain_where:
+    sql: EXPLAIN SELECT * FROM foo WHERE bar = "baz"
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Filter: bar = \"baz\""}
