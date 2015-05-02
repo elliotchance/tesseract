@@ -3,6 +3,8 @@ data:
   - {"foo": 123}
   - {"foo": 124}
   - {"foo": 125}
+  - {"foo": 126}
+  - {"foo": 127}
 
 tests:
   parser_without_offset:
@@ -25,3 +27,13 @@ tests:
     - {"foo": 123}
     - {"foo": 124}
     - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}
+
+  simple_limit_offset:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 2, 3
+    result:
+    - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}

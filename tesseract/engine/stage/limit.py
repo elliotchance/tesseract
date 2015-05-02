@@ -18,15 +18,24 @@ class LimitStage(Stage):
         # Clean out buffer.
         lua.append("redis.call('DEL', 'limit')")
 
+        filter = "counter < %s" % self.limit.limit
+        skip = 0
+        if self.limit.offset is not None:
+            filter = "counter >= %s and counter <= %s" % (
+                self.limit.offset,
+                self.limit.offset.value + self.limit.offset.value
+            )
+            skip = self.limit.offset.value
+
         # Iterate the page for the desired amount of rows.
         lua.extend([
             "local records = hgetall('%s')" % self.input_page,
             "local counter = 0",
             "for rowid, data in pairs(records) do",
-            "   if counter < %s then" % self.limit.limit,
-            "       redis.call('HSET', 'limit', tostring(rowid), data)",
-            "       counter = counter + 1",
+            "   if %s then" % filter,
+            "       redis.call('HSET', 'limit', tostring(rowid - %d), data)" % skip,
             "   end",
+            "   counter = counter + 1",
             "end",
         ])
 
