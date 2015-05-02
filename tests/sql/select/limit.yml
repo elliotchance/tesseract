@@ -1,0 +1,3 @@
+tests:
+  parser1:
+    sql: SELECT * FROM table1 LIMIT 10

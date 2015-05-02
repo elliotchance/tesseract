@@ -1,15 +1,10 @@
-# Abstract Syntax Tree
-# ====================
-#
-# This file contains all the objects that make up the AST when the SQL is
-# parsed.
+"""This file contains all the objects that make up the AST (Abstract Syntax
+Tree) when the SQL is parsed.
 
-
-# Expressions
-# -----------
+"""
 
 class Expression:
-    # A base class for all expressions.
+    """A base class for all expressions."""
 
     @staticmethod
     def to_sql(object):
@@ -51,8 +46,8 @@ class Value(Expression):
         self.value = value
 
     def __eq__(self, other):
-        # This is more of a convenience method for testing. It allows us to
-        # compare two `Value`s based on their internal value.
+        """This is more of a convenience method for testing. It allows us to
+        compare two `Value`s based on their internal value."""
 
         right = other
 
@@ -481,18 +476,21 @@ class SelectStatement(Statement):
 
     NO_TABLE = Identifier('__no_table')
 
-    def __init__(self, table_name, columns, where=None, order=None, group=None):
+    def __init__(self, table_name, columns, where=None, order=None, group=None,
+                 limit=None):
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, list)
         assert where is None or isinstance(where, Expression)
         assert order is None or isinstance(order, OrderByClause)
         assert group is None or isinstance(group, Identifier)
+        assert limit is None or isinstance(limit, Value)
 
         self.table_name = table_name
         self.where = where
         self.columns = columns
         self.order = order
         self.group = group
+        self.limit = limit
 
     def __str__(self):
         r = "SELECT %s" % ', '.join([str(col) for col in self.columns])
@@ -505,6 +503,9 @@ class SelectStatement(Statement):
 
         if self.group:
             r += ' GROUP BY %s' % self.group
+
+        if self.limit:
+            r += ' LIMIT %s' % self.limit
 
         if self.order:
             r += ' %s' % self.order

@@ -23,6 +23,7 @@ sql_keywords = (
     'IS',
     'ILIKE',
     'LIKE',
+    'LIMIT',
     'NOT',
     'NOTIFICATION',
     'ON',

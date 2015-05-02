@@ -500,9 +500,21 @@ def p_optional_where_clause(p):
         p[0] = None
 
 
+def p_optional_limit_clause(p):
+    """
+        optional_limit_clause : empty
+                              | LIMIT NUMBER
+    """
+
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = None
+
+
 def p_select_statement(p):
     """
-        select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause
+        select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause optional_limit_clause
                          | SELECT
     """
 
@@ -514,7 +526,7 @@ def p_select_statement(p):
         p[3] = SelectStatement.NO_TABLE
 
     p[0] = SelectStatement(table_name=p[3], columns=p[2], where=p[4],
-                           group=p[5], order=p[6])
+                           group=p[5], order=p[6], limit=p[7])
 
 
 def p_string(p):
