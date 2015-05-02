@@ -21,6 +21,14 @@ Round up to the next whole number.
     ceil(<number>)
 
 
+`COS()` -- Cosine
+=================
+
+Calculates the cosine of an angle. 
+
+    cos(<number>)
+
+
 `FLOOR()` -- Round down
 =======================
 
@@ -48,3 +56,11 @@ Calculates the square root of a number.
 If the number is negative an error will be thrown:
 
     Cannot calculate square root with negative number -17
+
+
+`TAN()` -- Tangent
+==================
+
+Calculates the tangent of an angle. 
+
+    tan(<number>)
