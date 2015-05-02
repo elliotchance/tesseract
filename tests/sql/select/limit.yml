@@ -17,3 +17,11 @@ tests:
     result:
     - {"foo": 123}
     - {"foo": 124}
+
+  limit_too_large:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 20
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
