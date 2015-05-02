@@ -24,3 +24,9 @@ tests:
     result:
     - {"description": "Full scan of table 'baz'"}
     - {"description": "Expressions: foo, bar + 1"}
+
+  explain_group:
+    sql: EXPLAIN SELECT * FROM bar GROUP BY foo
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Grouping by foo"}
