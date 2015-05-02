@@ -30,6 +30,14 @@ number.
     floor(<number>)
 
 
+`SIN()` -- Sine
+===============
+
+Calculates the sine of an angle. 
+
+    sin(<number>)
+
+
 `SQRT()` -- Square root
 =======================
 
