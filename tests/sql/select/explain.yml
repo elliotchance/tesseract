@@ -1,0 +1,3 @@
+tests:
+  parser_explain:
+    sql: EXPLAIN SELECT * FROM foo

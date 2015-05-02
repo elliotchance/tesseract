@@ -43,3 +43,6 @@ class StageManager(object):
 
         lua += "return '%s'\n" % input_page
         return lua
+
+    def explain(self):
+        return self.stages

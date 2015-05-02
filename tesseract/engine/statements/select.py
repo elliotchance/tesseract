@@ -57,6 +57,9 @@ end
         if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
 
+        if expression.explain:
+            stages.explain()
+
         lua += stages.compile_lua(offset, expression.table_name)
 
         # Extract the values for the expression.
