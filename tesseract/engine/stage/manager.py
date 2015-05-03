@@ -43,3 +43,15 @@ class StageManager(object):
 
         lua += "return '%s'\n" % input_page
         return lua
+
+    def explain(self, table_name):
+        offset = 0
+        steps = [
+            {"description": "Full scan of table '%s'" % table_name}
+        ]
+        input_page = table_name
+        for stage_details in self.stages:
+            stage = stage_details['class'](str(input_page), offset, *stage_details['args'])
+            steps.append(stage.explain())
+
+        return steps

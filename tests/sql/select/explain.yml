@@ -1,0 +1,38 @@
+tests:
+  parser_explain:
+    sql: EXPLAIN SELECT * FROM foo
+
+  explain_simple:
+    sql: EXPLAIN SELECT * FROM foo
+    result:
+    - {"description": "Full scan of table 'foo'"}
+
+  explain_order:
+    sql: EXPLAIN SELECT * FROM bar ORDER BY foo
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Sorting by foo (ASC)"}
+
+  explain_order_desc:
+    sql: EXPLAIN SELECT * FROM bar ORDER BY foo DESC
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Sorting by foo (DESC)"}
+
+  explain_expression:
+    sql: EXPLAIN SELECT foo, bar + 1 FROM baz
+    result:
+    - {"description": "Full scan of table 'baz'"}
+    - {"description": "Expressions: foo, bar + 1"}
+
+  explain_group:
+    sql: EXPLAIN SELECT * FROM bar GROUP BY foo
+    result:
+    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Grouping by foo"}
+
+  explain_where:
+    sql: EXPLAIN SELECT * FROM foo WHERE bar = "baz"
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Filter: bar = \"baz\""}

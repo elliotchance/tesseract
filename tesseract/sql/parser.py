@@ -34,7 +34,7 @@ def p_statement(p):
     """
         statement : delete_statement
                   | insert_statement
-                  | select_statement
+                  | explain_select_statement
                   | create_notification_statement
                   | drop_notification_statement
                   | update_statement
@@ -509,21 +509,38 @@ def p_optional_where_clause(p):
         p[0] = None
 
 
+def p_explain_select_statement(p):
+    """
+        explain_select_statement : select_statement
+                                 | EXPLAIN select_statement
+    """
+
+    if str(p[1]) == 'EXPLAIN':
+        p[0] = p[2]
+        p[0].explain = True
+    else:
+        p[0] = p[1]
+
+
 def p_select_statement(p):
     """
         select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause
                          | SELECT
     """
 
-    #     SELECT
     if len(p) == 2:
         raise RuntimeError("Expected expression after SELECT.")
 
     if not p[3]:
         p[3] = SelectStatement.NO_TABLE
 
-    p[0] = SelectStatement(table_name=p[3], columns=p[2], where=p[4],
-                           group=p[5], order=p[6])
+    p[0] = SelectStatement(
+        columns=p[2],
+        table_name=p[3],
+        where=p[4],
+        group=p[5],
+        order=p[6]
+    )
 
 
 def p_string(p):
