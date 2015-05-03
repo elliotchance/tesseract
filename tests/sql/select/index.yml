@@ -28,3 +28,11 @@ tests:
     - EXPLAIN SELECT * FROM table1 WHERE 124 = x
     result:
     - {"description": "Index lookup using myindex for value 124"}
+
+  simple_index_lookup_reversed:
+    data: table1
+    sql:
+    - CREATE INDEX myindex2 ON table1 (x)
+    - SELECT * FROM table1 WHERE 124 = x
+    result:
+    - {"x": 124}
