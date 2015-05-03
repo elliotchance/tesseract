@@ -57,6 +57,19 @@ class Select(Statement):
                         index_found = True
                         break
 
+            if isinstance(expression.where, EqualExpression) and \
+                isinstance(expression.where.left, Value) and \
+                isinstance(expression.where.right, Identifier):
+                for index_name in redis.hkeys('indexes'):
+                    looking_for = '%s.%s' % (
+                        result.statement.table_name,
+                        expression.where.right
+                    )
+                    if redis.hget('indexes', index_name) == looking_for:
+                        stages.add(IndexStage, (index_name, expression.where.left))
+                        index_found = True
+                        break
+
             if not index_found:
                 stages.add(WhereStage, (expression.where,))
 
