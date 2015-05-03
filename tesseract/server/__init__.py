@@ -1,14 +1,16 @@
 import json
 import socket
-from tesseract.engine.statements.create_notification import CreateNotification
 from tesseract.engine.statements.delete import Delete
-from tesseract.engine.statements.drop_notification import DropNotification
+from tesseract.engine.statements.indexes import CreateIndex, DropIndex
 from tesseract.engine.statements.insert import Insert
+from tesseract.engine.statements.notifications import CreateNotification, \
+    DropNotification
 from tesseract.engine.statements.select import Select
+from tesseract.engine.statements.tables import DropTable
 from tesseract.engine.statements.update import Update
+from tesseract.server.instance import Instance
 from tesseract.server.protocol import Protocol
 import tesseract.sql.parser as parser
-import redis
 from tesseract.sql.ast import *
 
 
@@ -20,28 +22,14 @@ except: # pragma: no cover
     import threading
 
 class Server:
-    """
-    A server will execute SQL commands and return their result.
-    """
+    """A server will execute SQL commands and return their result."""
 
     def __init__(self, redis_host=None):
-        # The default Redis host is `localhost` if it is not provided.
-        if not redis_host:
-            redis_host = 'localhost'
-
-        # The Redis host must be a `str`.
-        assert isinstance(redis_host, str)
-
-        # Attempt to connect.
-        self.redis = redis.StrictRedis(host=redis_host, port=6379, db=0)
-        self.redis.set('tesseract_server', 1)
-
-        self.notifications = {}
+        self.instance = Instance(redis_host)
 
         # Setup NO_TABLE
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
-
 
     def start(self):
         # Create an INET, STREAMing socket.
@@ -67,8 +55,10 @@ class Server:
                 start_new_thread(self.handle_client, (client_socket,))
             except:
                 # Python 3.x
-                threading.Thread(target=self.handle_client, args=(client_socket)).start()
-
+                threading.Thread(
+                    target=self.handle_client,
+                    args=(client_socket)
+                ).start()
 
     def handle_client(self, client_socket):
         while True:
@@ -96,14 +86,10 @@ class Server:
             # Send the response.
             client_socket.send(json.dumps(result))
 
-
     def execute(self, sql):
-        """
-        Execute a SQL statement.
+        """Execute a SQL statement."""
 
-            :param sql: str
-            :return: boolean
-        """
+        assert isinstance(sql, str)
 
         # Try to parse the SQL.
         try:
@@ -115,59 +101,31 @@ class Server:
         except RuntimeError as e:
             return Protocol.failed_response(str(e))
 
-        # If the statement is a `DELETE`
-        if isinstance(result.statement, DeleteStatement):
-            statement = Delete()
-            return statement.execute(result, self.redis)
+        statements = {
+            CreateIndexStatement: CreateIndex,
+            CreateNotificationStatement: CreateNotification,
+            DeleteStatement: Delete,
+            DropIndexStatement: DropIndex,
+            DropNotificationStatement: DropNotification,
+            DropTableStatement: DropTable,
+            UpdateStatement: Update
+        }
+
+        cls = result.statement.__class__
+        if cls in statements:
+            statement = statements[cls]()
+            return statement.execute(result, self.instance)
 
         # If the statement is an `INSERT` we always return success.
         if isinstance(result.statement, InsertStatement):
             statement = Insert()
-            return statement.execute(result, self.redis, self.notifications,
+            return statement.execute(result, self.instance.redis, self.instance.notifications,
                                      self.publish, self.execute)
-
-        # If the statement is a `CREATE NOTIFICATION`
-        if isinstance(result.statement, CreateNotificationStatement):
-            statement = CreateNotification()
-            return statement.execute(result, self.notifications)
-
-        # If the statement is a `DROP NOTIFICATION`
-        if isinstance(result.statement, DropNotificationStatement):
-            statement = DropNotification()
-            return statement.execute(result, self.notifications)
-
-        # If the statement is an `UPDATE`
-        if isinstance(result.statement, UpdateStatement):
-            statement = Update()
-            return statement.execute(result, self.redis)
-
-        if isinstance(result.statement, CreateIndexStatement):
-            self.redis.hset(
-                'indexes',
-                result.statement.index_name,
-                '%s.%s' % (result.statement.table_name, result.statement.field)
-            )
-            return Protocol.successful_response()
-
-        if isinstance(result.statement, DropTableStatement):
-            self.redis.delete(result.statement.table_name)
-
-            for index_name in self.redis.hkeys('indexes'):
-                prefix = '%s.' % result.statement.table_name
-                if str(self.redis.hget('indexes', index_name)).startswith(prefix):
-                    self.redis.hdel('indexes', index_name)
-                    self.redis.delete('index:%s' % index_name)
-
-            return Protocol.successful_response()
-
-        if isinstance(result.statement, DropIndexStatement):
-            self.redis.hdel('indexes', result.statement.index_name)
-            return Protocol.successful_response()
 
         # This is a `SELECT`
         statement = Select()
-        return statement.execute(result, self.redis, self.warnings)
+        return statement.execute(result, self.instance.redis, self.warnings)
 
 
     def publish(self, name, value):
-        self.redis.publish(name, value)
+        self.instance.redis.publish(name, value)
