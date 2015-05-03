@@ -151,6 +151,13 @@ class Server:
 
         if isinstance(result.statement, DropTableStatement):
             self.redis.delete(result.statement.table_name)
+
+            for index_name in self.redis.hkeys('indexes'):
+                prefix = '%s.' % result.statement.table_name
+                if str(self.redis.hget('indexes', index_name)).startswith(prefix):
+                    self.redis.hdel('indexes', index_name)
+                    self.redis.delete('index:%s' % index_name)
+            
             return Protocol.successful_response()
 
         if isinstance(result.statement, DropIndexStatement):

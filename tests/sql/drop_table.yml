@@ -12,3 +12,13 @@ tests:
     - DROP TABLE mytable
     - SELECT * FROM mytable
     result: []
+
+  delete_indexes:
+    data: mytable
+    sql:
+    - CREATE INDEX foo ON mytable (a)
+    - DROP TABLE mytable
+    - EXPLAIN SELECT * FROM mytable WHERE a = 1
+    result:
+    - {'description': "Full scan of table 'mytable'"}
+    - {'description': 'Filter: a = 1'}
