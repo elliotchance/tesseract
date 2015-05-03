@@ -1,3 +1,14 @@
+data:
+  mytable:
+  - {"a": "b"}
+
 tests:
   parser_drop_table:
     sql: DROP TABLE mytable
+
+  drop_table:
+    data: mytable
+    sql:
+    - DROP TABLE mytable
+    - SELECT * FROM mytable
+    result: []

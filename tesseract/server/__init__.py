@@ -150,6 +150,7 @@ class Server:
             return Protocol.successful_response()
 
         if isinstance(result.statement, DropTableStatement):
+            self.redis.delete(result.statement.table_name)
             return Protocol.successful_response()
 
         # This is a `SELECT`
