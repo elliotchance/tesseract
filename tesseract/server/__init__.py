@@ -154,6 +154,7 @@ class Server:
             return Protocol.successful_response()
 
         if isinstance(result.statement, DropIndexStatement):
+            self.redis.hdel('indexes', result.statement.index_name)
             return Protocol.successful_response()
 
         # This is a `SELECT`
