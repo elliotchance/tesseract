@@ -153,6 +153,9 @@ class Server:
             self.redis.delete(result.statement.table_name)
             return Protocol.successful_response()
 
+        if isinstance(result.statement, DropIndexStatement):
+            return Protocol.successful_response()
+
         # This is a `SELECT`
         statement = Select()
         return statement.execute(result, self.redis, self.warnings)

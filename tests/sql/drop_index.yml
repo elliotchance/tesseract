@@ -1,0 +1,3 @@
+tests:
+  parser_drop_index:
+    sql: DROP INDEX foo

@@ -597,3 +597,13 @@ class DropTableStatement(Statement):
 
     def __str__(self):
         return "DROP TABLE %s" % self.table_name
+
+
+class DropIndexStatement(Statement):
+    def __init__(self, index_name):
+        assert isinstance(index_name, Identifier)
+
+        self.index_name = index_name
+
+    def __str__(self):
+        return "DROP INDEX %s" % self.index_name

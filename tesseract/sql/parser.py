@@ -39,6 +39,7 @@ def p_statement(p):
                   | update_statement
                   | create_index_statement
                   | drop_table_statement
+                  | drop_index_statement
     """
 
     # This is the only rule that is not in alphabetical order because it is the
@@ -93,14 +94,6 @@ def p_arithmetic_expression(p):
     else:
         add_requirement(p, 'operator/minus')
         p[0] = SubtractExpression(p[1], p[3])
-
-
-def p_create_index_statement(p):
-    """
-        create_index_statement : CREATE INDEX IDENTIFIER ON IDENTIFIER PARAM_OPEN IDENTIFIER PARAM_CLOSE
-    """
-
-    p[0] = CreateIndexStatement(p[3], p[5], p[7])
 
 
 def p_between_expression(p):
@@ -158,6 +151,14 @@ def p_comparison_expression(p):
         p[0] = NotEqualExpression(p[1], p[3])
 
 
+def p_create_index_statement(p):
+    """
+        create_index_statement : CREATE INDEX IDENTIFIER ON IDENTIFIER PARAM_OPEN IDENTIFIER PARAM_CLOSE
+    """
+
+    p[0] = CreateIndexStatement(p[3], p[5], p[7])
+
+
 def p_create_notification_statement(p):
     """
         create_notification_statement : CREATE NOTIFICATION IDENTIFIER ON IDENTIFIER
@@ -191,6 +192,14 @@ def p_delete_statement(p):
     #     DELETE FROM IDENTIFIER optional_where_clause
     # A valid `DELETE` statement
     p[0] = DeleteStatement(p[3], p[4])
+
+
+def p_drop_index_statement(p):
+    """
+        drop_index_statement : DROP INDEX IDENTIFIER
+    """
+
+    p[0] = DropIndexStatement(p[3])
 
 
 def p_drop_notification_statement(p):
