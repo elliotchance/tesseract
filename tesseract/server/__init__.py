@@ -149,6 +149,9 @@ class Server:
             )
             return Protocol.successful_response()
 
+        if isinstance(result.statement, DropTableStatement):
+            return Protocol.successful_response()
+
         # This is a `SELECT`
         statement = Select()
         return statement.execute(result, self.redis, self.warnings)

@@ -1,0 +1,3 @@
+tests:
+  parser_drop_table:
+    sql: DROP TABLE mytable

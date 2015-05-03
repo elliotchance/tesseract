@@ -587,3 +587,13 @@ class CreateIndexStatement(Statement):
             self.table_name,
             self.field
         )
+
+
+class DropTableStatement(Statement):
+    def __init__(self, table_name):
+        assert isinstance(table_name, Identifier)
+
+        self.table_name = table_name
+
+    def __str__(self):
+        return "DROP TABLE %s" % self.table_name

@@ -2,13 +2,12 @@ import ply.yacc as yacc
 import tesseract.sql.lexer as lexer
 from tesseract.sql.ast import *
 
-# Parser
-# ======
-#
-# This file contains all the rules for the lexer to parse SQL statements. It is
-# to have all the rules listed in alphabetical order. Each of the parser rules
-# has a doc tag that explain the rule - this is ingested by Ply but it is
-# important that 4 spaces prefix so that it is formatted correctly in Pycco.
+"""This file contains all the rules for the lexer to parse SQL statements. It is
+to have all the rules listed in alphabetical order. Each of the parser rules has
+a doc tag that explain the rule - this is ingested by Ply but it is important
+that 4 spaces prefix so that it is formatted correctly in docs.
+
+"""
 
 # Load in the tokens from lexer.
 tokens = lexer.tokens
@@ -39,6 +38,7 @@ def p_statement(p):
                   | drop_notification_statement
                   | update_statement
                   | create_index_statement
+                  | drop_table_statement
     """
 
     # This is the only rule that is not in alphabetical order because it is the
@@ -199,6 +199,14 @@ def p_drop_notification_statement(p):
     """
 
     p[0] = DropNotificationStatement(p[3])
+
+
+def p_drop_table_statement(p):
+    """
+        drop_table_statement : DROP TABLE IDENTIFIER
+    """
+
+    p[0] = DropTableStatement(p[3])
 
 
 def p_function_call(p):

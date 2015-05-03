@@ -24,7 +24,7 @@ tests:
   explain_simple_index_reversed:
     data: table1
     sql:
-    - CREATE INDEX myindex ON table1 (x)
+    - CREATE INDEX myindex3 ON table1 (x)
     - EXPLAIN SELECT * FROM table1 WHERE 124 = x
     result:
     - {"description": "Index lookup using myindex for value 124"}
@@ -32,7 +32,7 @@ tests:
   simple_index_lookup_reversed:
     data: table1
     sql:
-    - CREATE INDEX myindex2 ON table1 (x)
+    - CREATE INDEX myindex4 ON table1 (x)
     - SELECT * FROM table1 WHERE 124 = x
     result:
     - {"x": 124}
