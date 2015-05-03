@@ -142,6 +142,11 @@ class Server:
             return statement.execute(result, self.redis)
 
         if isinstance(result.statement, CreateIndexStatement):
+            self.redis.hset(
+                'indexes',
+                result.statement.index_name,
+                '%s.%s' % (result.statement.table_name, result.statement.field)
+            )
             return Protocol.successful_response()
 
         # This is a `SELECT`

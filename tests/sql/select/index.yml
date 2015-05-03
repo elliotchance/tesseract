@@ -1,0 +1,14 @@
+data:
+  table1:
+  - {"x": 123}
+  - {"x": 124}
+  - {"x": 125}
+
+tests:
+  explain_simple_index:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - EXPLAIN SELECT * FROM table1 WHERE x = 124
+    result:
+    - {"description": "Index lookup using myindex for value 124"}

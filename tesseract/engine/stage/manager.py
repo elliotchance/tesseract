@@ -1,3 +1,4 @@
+from tesseract.engine.stage.index import IndexStage
 from tesseract.engine.stage.order import OrderStage
 
 
@@ -46,9 +47,12 @@ class StageManager(object):
 
     def explain(self, table_name):
         offset = 0
-        steps = [
-            {"description": "Full scan of table '%s'" % table_name}
-        ]
+        steps = []
+        if len(self.stages) == 0 or self.stages[0]['class'] != IndexStage:
+            steps.append({
+                "description": "Full scan of table '%s'" % table_name
+            })
+
         input_page = table_name
         for stage_details in self.stages:
             stage = stage_details['class'](str(input_page), offset, *stage_details['args'])

@@ -1,11 +1,13 @@
 from redis import StrictRedis
 from tesseract.engine.stage.expression import ExpressionStage
 from tesseract.engine.stage.group import GroupStage
+from tesseract.engine.stage.index import IndexStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.ast import SelectStatement
+from tesseract.sql.ast import SelectStatement, EqualExpression, Identifier, \
+    Value
 from tesseract.server.protocol import Protocol
 
 
@@ -39,7 +41,24 @@ class Select(Statement):
 
         # Compile WHERE stage.
         if expression.where:
-            stages.add(WhereStage, (expression.where,))
+            index_found = False
+
+            # Search for a possible index
+            if isinstance(expression.where, EqualExpression) and \
+                isinstance(expression.where.left, Identifier) and \
+                isinstance(expression.where.right, Value):
+                for index_name in redis.hkeys('indexes'):
+                    looking_for = '%s.%s' % (
+                        result.statement.table_name,
+                        expression.where.left
+                    )
+                    if redis.hget('indexes', index_name) == looking_for:
+                        stages.add(IndexStage, (index_name, expression.where.right))
+                        index_found = True
+                        break
+
+            if not index_found:
+                stages.add(WhereStage, (expression.where,))
 
         # Compile the GROUP BY clause.
         if expression.group or expression.contains_aggregate():

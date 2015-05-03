@@ -97,10 +97,10 @@ def p_arithmetic_expression(p):
 
 def p_create_index_statement(p):
     """
-        create_index_statement : CREATE INDEX IDENTIFIER ON IDENTIFIER
+        create_index_statement : CREATE INDEX IDENTIFIER ON IDENTIFIER PARAM_OPEN IDENTIFIER PARAM_CLOSE
     """
 
-    p[0] = CreateIndexStatement(p[3], p[5])
+    p[0] = CreateIndexStatement(p[3], p[5], p[7])
 
 
 def p_between_expression(p):

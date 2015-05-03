@@ -572,12 +572,18 @@ class OrderByClause:
 
 
 class CreateIndexStatement(Statement):
-    def __init__(self, index_name, table_name):
+    def __init__(self, index_name, table_name, field):
         assert isinstance(index_name, Identifier)
         assert isinstance(table_name, Identifier)
+        assert isinstance(field, Identifier)
 
         self.index_name = index_name
         self.table_name = table_name
+        self.field = field
 
     def __str__(self):
-        return "CREATE INDEX %s ON %s" % (self.index_name, self.table_name)
+        return "CREATE INDEX %s ON %s (%s)" % (
+            self.index_name,
+            self.table_name,
+            self.field
+        )
