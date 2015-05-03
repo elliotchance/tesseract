@@ -6,12 +6,19 @@ Syntax
 ======
 
 ```sql
+[ EXPLAIN ]
 SELECT <column_definitions>
 [ FROM <table_name> ]
 [ WHERE <condition> ]
 [ GROUP BY <group_field> ]
 [ ORDER BY <order_field> ]
 ```
+
+EXPLAIN
+  : If the `EXPLAIN` keyword is present the SQL query is not actually run - but
+    rather the query plan (the internal steps required to carry out the task)
+    are returned. This is very useful for debugging slow queries and otherwise
+    examining what tesseract is doing with a particular query.
 
 column_definitions
   : This can be an asterisk (`*`) to represent that the entire object should be
