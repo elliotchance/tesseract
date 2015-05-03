@@ -12,3 +12,11 @@ tests:
     - EXPLAIN SELECT * FROM table1 WHERE x = 124
     result:
     - {"description": "Index lookup using myindex for value 124"}
+
+  simple_index_lookup:
+    data: table1
+    sql:
+    - CREATE INDEX myindex2 ON table1 (x)
+    - SELECT * FROM table1 WHERE x = 124
+    result:
+    - {"x": 124}

@@ -1,3 +1,4 @@
+import json
 import random
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.protocol import Protocol
@@ -56,6 +57,10 @@ class Insert(Statement):
 
         # Serialize the row into the JSON we will store.
         data = Expression.to_sql(result.statement.fields)
+
+        # Add to index.
+        if 'x' in result.statement.fields:
+            redis.hset('index:myindex2', result.statement.fields['x'], data)
 
         # Insert the row, making sure to fail if we try to override a row that
         # already exists.

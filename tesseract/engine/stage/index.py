@@ -25,4 +25,16 @@ class IndexStage(Stage):
     def compile_lua(self):
         lua = []
 
-        return ('where', '\n'.join(lua), self.offset)
+        # Clean output buffer.
+        lua.append("redis.call('DEL', 'index_result')")
+
+        # Iterate the page.
+        lua.extend([
+            "local data = redis.call('HGET', 'index:myindex2', '%s')" % (
+                #self.index_name,
+                self.value
+            ),
+            "redis.call('HSET', 'index_result', '0', data)",
+        ])
+
+        return ('index_result', '\n'.join(lua), self.offset)
