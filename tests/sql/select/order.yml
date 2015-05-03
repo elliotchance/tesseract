@@ -48,22 +48,19 @@ tests:
     - {"foo": null, "bar": 1}
 
   explicit_asc:
-    data: duplicates
-    sql: SELECT * FROM duplicates ORDER BY foo ASC
+    data-randomized: non_duplicates
+    repeat: 10
+    sql: SELECT * FROM non_duplicates ORDER BY foo ASC
     result:
     - {"foo": false, "bar": 13}
     - {"foo": true, "bar": 12}
     - {"foo": 40, "bar": 2}
     - {"foo": 50, "bar": 10}
     - {"foo": 100, "bar": 5}
-    - {"foo": 100, "bar": 8}
     - {"foo": "50", "bar": 4}
     - {"foo": "abc", "bar": 3}
-    - {"foo": "abc", "bar": 9}
     - {"foo": "zzz", "bar": 6}
     - {"foo": null, "bar": 1}
-    - {"foo": null, "bar": 7}
-    - {"bar": 11}
 
   order_by_mixed_descending:
     data-randomized: non_duplicates
@@ -83,7 +80,7 @@ tests:
   order_by_null_only:
     data: duplicates
     sql: SELECT * FROM duplicates WHERE foo IS null ORDER BY foo
-    result:
+    result-unordered:
     - {"foo": null, "bar": 1}
     - {"foo": null, "bar": 7}
     - {"bar": 11}
@@ -96,21 +93,19 @@ tests:
     - {"foo": true, "bar": 12}
 
   order_by_number_only:
-    data: duplicates
-    sql: SELECT * FROM duplicates WHERE foo IS number ORDER BY foo
+    data: non_duplicates
+    sql: SELECT * FROM non_duplicates WHERE foo IS number ORDER BY foo
     result:
     - {"foo": 40, "bar": 2}
     - {"foo": 50, "bar": 10}
     - {"foo": 100, "bar": 5}
-    - {"foo": 100, "bar": 8}
 
   order_by_string_only:
-    data: duplicates
-    sql: SELECT * FROM duplicates WHERE foo IS string ORDER BY foo
+    data: non_duplicates
+    sql: SELECT * FROM non_duplicates WHERE foo IS string ORDER BY foo
     result:
     - {"foo": "50", "bar": 4}
     - {"foo": "abc", "bar": 3}
-    - {"foo": "abc", "bar": 9}
     - {"foo": "zzz", "bar": 6}
 
   order_by_array_is_not_supported:

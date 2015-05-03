@@ -27,7 +27,7 @@ tests:
     - CREATE INDEX myindex3 ON table1 (x)
     - EXPLAIN SELECT * FROM table1 WHERE 124 = x
     result:
-    - {"description": "Index lookup using myindex for value 124"}
+    - {"description": "Index lookup using myindex3 for value 124"}
 
   simple_index_lookup_reversed:
     data: table1

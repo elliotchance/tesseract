@@ -157,7 +157,7 @@ class Server:
                 if str(self.redis.hget('indexes', index_name)).startswith(prefix):
                     self.redis.hdel('indexes', index_name)
                     self.redis.delete('index:%s' % index_name)
-            
+
             return Protocol.successful_response()
 
         if isinstance(result.statement, DropIndexStatement):

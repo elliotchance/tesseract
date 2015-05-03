@@ -58,7 +58,7 @@ def process_file(file):
     if 'data' in tests_file:
         for name, table in tests_file['data'].items():
             out.write("    def load_%s(self, server, randomize):\n" % name)
-            out.write("        server.execute('DELETE FROM %s')\n" % name)
+            out.write("        server.execute('DROP TABLE %s')\n" % name)
             out.write("        records = [\n")
             for row in table:
                 out.write("            'INSERT INTO %s %s',\n" % (name, json.dumps(row)))
