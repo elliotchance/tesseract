@@ -1,7 +1,4 @@
-Testing
-=======
-
-[TOC]
+% Testing
 
 
 Basic Test (`sql`)

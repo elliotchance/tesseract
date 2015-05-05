@@ -4,6 +4,11 @@ tests:
     result:
     - {"col1": true}
 
+  exact_different_case:
+    sql: SELECT "elliot" LIKE "Elliot"
+    result:
+    - {"col1": false}
+
   not_exact_match:
     sql: SELECT "elliot2" LIKE "elliot"
     result:
@@ -43,6 +48,12 @@ tests:
     sql: SELECT null LIKE null
     result:
     - {"col1": null}
+
+  lowercase_operator:
+    sql: SELECT "elliot" like "elliot"
+    as: SELECT "elliot" LIKE "elliot"
+    result:
+    - {"col1": true}
 
   value_incompatible_type:
     sql: SELECT false LIKE "foo"

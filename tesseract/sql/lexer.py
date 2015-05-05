@@ -21,6 +21,7 @@ sql_keywords = (
     'INSERT',
     'INTO',
     'IS',
+    'ILIKE',
     'LIKE',
     'NOT',
     'NOTIFICATION',
