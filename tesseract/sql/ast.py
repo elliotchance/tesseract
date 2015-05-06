@@ -564,6 +564,8 @@ class OrderByClause:
 
 
 class LimitClause:
+    ALL = Value(-1)
+
     def __init__(self, limit=None, offset=None):
         assert limit is None or isinstance(limit, Value)
         assert offset is None or isinstance(offset, Value)
@@ -575,7 +577,8 @@ class LimitClause:
         sql = []
 
         if self.limit:
-            sql.append('LIMIT %s' % self.limit)
+            limit = 'ALL' if self.limit == LimitClause.ALL else self.limit
+            sql.append('LIMIT %s' % limit)
 
         if self.offset:
             sql.append('OFFSET %s' % self.offset)

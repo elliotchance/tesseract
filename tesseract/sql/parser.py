@@ -503,6 +503,7 @@ def p_optional_where_clause(p):
 def p_optional_limit_clause(p):
     """
         optional_limit_clause : empty
+                              | LIMIT ALL
                               | LIMIT NUMBER
                               | OFFSET NUMBER
                               | LIMIT NUMBER OFFSET NUMBER
@@ -513,7 +514,10 @@ def p_optional_limit_clause(p):
     elif len(p) == 5:
         p[0] = LimitClause(p[2], p[4])
     elif p[1] == 'LIMIT':
-        p[0] = LimitClause(p[2])
+        if p[2] == 'ALL':
+            p[0] = LimitClause(LimitClause.ALL)
+        else:
+            p[0] = LimitClause(p[2])
     elif p[1] == 'OFFSET':
         p[0] = LimitClause(None, p[2])
 

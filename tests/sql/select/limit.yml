@@ -16,6 +16,9 @@ tests:
   parser_offset:
     sql: SELECT * FROM table1 OFFSET 10
 
+  parser_limit_all:
+    sql: SELECT * FROM table1 LIMIT ALL
+
   simple_limit:
     data: table1
     sql: SELECT * FROM table1 ORDER BY foo LIMIT 2
