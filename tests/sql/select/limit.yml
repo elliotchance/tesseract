@@ -7,11 +7,14 @@ data:
   - {"foo": 127}
 
 tests:
-  parser_without_offset:
+  parser_limit:
     sql: SELECT * FROM table1 LIMIT 10
 
-  parser_with_offset:
-    sql: SELECT * FROM table1 LIMIT 10, 20
+  parser_limit_offset:
+    sql: SELECT * FROM table1 LIMIT 20 OFFSET 10
+
+  parser_offset:
+    sql: SELECT * FROM table1 OFFSET 10
 
   simple_limit:
     data: table1
@@ -32,7 +35,7 @@ tests:
 
   simple_limit_offset:
     data: table1
-    sql: SELECT * FROM table1 ORDER BY foo LIMIT 2, 3
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 3 OFFSET 2
     result:
     - {"foo": 125}
     - {"foo": 126}
@@ -40,5 +43,5 @@ tests:
 
   offset_too_big:
     data: table1
-    sql: SELECT * FROM table1 ORDER BY foo LIMIT 20, 3
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 3 OFFSET 20
     result: []

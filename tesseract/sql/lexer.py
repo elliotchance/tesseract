@@ -26,6 +26,7 @@ sql_keywords = (
     'LIMIT',
     'NOT',
     'NOTIFICATION',
+    'OFFSET',
     'ON',
     'OR',
     'ORDER',

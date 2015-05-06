@@ -508,7 +508,7 @@ class SelectStatement(Statement):
             r += ' %s' % self.order
 
         if self.limit:
-            r += ' LIMIT %s' % self.limit
+            r += ' %s' % self.limit
 
         return r
 
@@ -564,16 +564,20 @@ class OrderByClause:
 
 
 class LimitClause:
-    def __init__(self, limit, offset=None):
-        assert isinstance(limit, Value)
+    def __init__(self, limit=None, offset=None):
+        assert limit is None or isinstance(limit, Value)
         assert offset is None or isinstance(offset, Value)
 
         self.limit = limit
         self.offset = offset
 
     def __str__(self):
-        sql = str(self.limit);
-        if self.offset:
-            sql = '%s, %s' % (self.offset, sql)
+        sql = []
 
-        return sql
+        if self.limit:
+            sql.append('LIMIT %s' % self.limit)
+
+        if self.offset:
+            sql.append('OFFSET %s' % self.offset)
+
+        return ' '.join(sql)

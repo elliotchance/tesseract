@@ -504,15 +504,18 @@ def p_optional_limit_clause(p):
     """
         optional_limit_clause : empty
                               | LIMIT NUMBER
-                              | LIMIT NUMBER COMMA NUMBER
+                              | OFFSET NUMBER
+                              | LIMIT NUMBER OFFSET NUMBER
     """
 
-    if len(p) == 3:
-        p[0] = LimitClause(p[2])
-    elif len(p) == 5:
-        p[0] = LimitClause(p[4], p[2])
-    else:
+    if len(p) == 1:
         p[0] = None
+    elif len(p) == 5:
+        p[0] = LimitClause(p[2], p[4])
+    elif p[1] == 'LIMIT':
+        p[0] = LimitClause(p[2])
+    elif p[1] == 'OFFSET':
+        p[0] = LimitClause(None, p[2])
 
 
 def p_select_statement(p):
