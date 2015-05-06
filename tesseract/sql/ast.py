@@ -564,7 +564,7 @@ class OrderByClause:
 
 
 class LimitClause:
-    ALL = Value(-1)
+    ALL = Value(1000000000)
 
     def __init__(self, limit=None, offset=None):
         assert limit is None or isinstance(limit, Value)

@@ -48,3 +48,13 @@ tests:
     data: table1
     sql: SELECT * FROM table1 ORDER BY foo LIMIT 3 OFFSET 20
     result: []
+
+  limit_all:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT ALL
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}
