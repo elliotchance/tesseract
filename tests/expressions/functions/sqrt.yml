@@ -1,0 +1,18 @@
+tests:
+  null:
+    sql: SELECT sqrt(null)
+    result:
+    - {"col1": null}
+
+  positive_number:
+    sql: SELECT sqrt(4)
+    result:
+    - {"col1": 2}
+
+  negative_number:
+    sql: SELECT sqrt(-3)
+    error: "Cannot calculate square root with negative number -3"
+
+  bad_type:
+    sql: SELECT sqrt("1.23")
+    error: No such function sqrt(string).

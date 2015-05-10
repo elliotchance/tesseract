@@ -1,0 +1,14 @@
+tests:
+  null:
+    sql: SELECT cos(null)
+    result:
+    - {"col1": null}
+
+  number:
+    sql: SELECT cos(1.23)
+    result:
+    - {"col1": 0.33423772712450001}
+
+  bad_type:
+    sql: SELECT cos("foo")
+    error: No such function cos(string).
