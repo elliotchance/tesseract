@@ -55,7 +55,7 @@ class Server:
         except:
             # Python 3.x
             threading.Thread(target=self.handle_client,
-                             args=(client_socket)).start()
+                             args=(client_socket,)).start()
 
     def start(self):
         """Create an INET, STREAMing socket for the server socket. Once bound to
