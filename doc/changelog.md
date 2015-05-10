@@ -68,3 +68,11 @@ v1.0.0-alpha2 (Binary Star)
     
  #. Reformatted documentation to work with Rippledoc.
     [[#11](https://github.com/elliotchance/tesseract/pull/11)]
+
+
+v1.0.0-alpha3 (Unreleased)
+===========================
+
+**SQL**
+
+ #. Added support for `LIMIT` and `OFFSET`.

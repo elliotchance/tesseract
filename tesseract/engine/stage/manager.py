@@ -1,5 +1,4 @@
 from redis import StrictRedis
-from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.table import PermanentTable
 
 
