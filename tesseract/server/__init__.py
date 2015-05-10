@@ -84,7 +84,7 @@ class Server:
 
             # Decode the JSON.
             try:
-                request = json.loads(data)
+                request = json.loads(data.decode())
                 print("SQL: %s" % request['sql'])
             except ValueError:
                 print("Bad request: %s" % data)
