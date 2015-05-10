@@ -2,6 +2,7 @@ from redis import StrictRedis
 from tesseract.engine.stage.delete import DeleteStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.statements.statement import Statement
+from tesseract.engine.table import PermanentTable
 from tesseract.server.protocol import Protocol
 from tesseract.sql.ast import DeleteStatement
 
@@ -9,11 +10,8 @@ from tesseract.sql.ast import DeleteStatement
 class Delete(Statement):
     def __drop_table(self, redis, result):
         # Delete the whole table.
-        redis.delete(result.statement.table_name)
-
-        # Remove the row counter.
-        row_id_key = '%s_rowid' % result.statement.table_name
-        redis.delete(row_id_key)
+        table = PermanentTable(redis, str(result.statement.table_name))
+        table.drop()
 
         return Protocol.successful_response()
 
@@ -25,7 +23,7 @@ class Delete(Statement):
         if not result.statement.where:
             return self.__drop_table(redis, result)
 
-        stages = StageManager()
+        stages = StageManager(redis)
         stages.add(DeleteStage, (result.statement.where,))
         lua = stages.compile_lua(2, result.statement.table_name)
 

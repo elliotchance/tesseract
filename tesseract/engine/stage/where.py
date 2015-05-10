@@ -1,16 +1,14 @@
+from tesseract.engine.table import TransientTable
 from tesseract.sql.ast import Value, Expression
 from tesseract.engine.stage.stage import Stage
 
 
 class WhereStage(Stage):
-    def __init__(self, input_page, offset, where):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, where):
+        Stage.__init__(self, input_table, offset, redis)
         assert where is None or isinstance(where, Expression)
-
-        self.input_page = input_page
         self.where = where
-        self.offset = offset
+        self.output_table = TransientTable(redis)
 
     def compile_lua(self):
         lua = []
@@ -19,27 +17,15 @@ class WhereStage(Stage):
         where_expression = self.where if self.where else Value(True)
         where_clause, self.offset, new_args = where_expression.compile_lua(self.offset)
 
-        # Clean output buffer.
-        lua.append("redis.call('DEL', 'where')")
-
-        # Iterate the page.
         lua.extend([
-            "local records = hgetall('%s')" % self.input_page,
-            "for rowid, data in pairs(records) do",
-
-            # Each row is stored as a JSON string and needs to be decoded before
-            # we can use it.
-            "    local row = cjson.decode(data)",
-
-            # Test if the WHERE clause allows this record to be added to the
-            # result.
+            self.input_table.lua_iterate(decode=True),
             "    if %s then" % where_clause,
             "        %s" % self.action_on_match(),
             "    end",
             "end",
         ])
 
-        return ('where', '\n'.join(lua), self.offset)
+        return (self.output_table, '\n'.join(lua), self.offset)
 
     def action_on_match(self):
-        return "redis.call('HSET', 'where', rowid, data)"
+        return self.output_table.lua_add_lua_record('row')

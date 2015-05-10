@@ -1,29 +1,22 @@
+from tesseract.engine.table import TransientTable
 from tesseract.sql.ast import Identifier
 from tesseract.engine.stage.stage import Stage
 
 
 class ExpressionStage(Stage):
-    def __init__(self, input_page, offset, columns):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, columns):
+        Stage.__init__(self, input_table, offset, redis)
         assert isinstance(columns, list)
-
-        self.input_page = input_page
         self.columns = columns
-        self.offset = offset
 
     def compile_lua(self):
         lua = []
-
-        # Clean out buffer.
-        lua.append("redis.call('DEL', 'expression')")
+        table = TransientTable(self.redis)
 
         # Iterate the page.
         lua.extend([
-            "local records = hgetall('%s')" % self.input_page,
-            "for rowid, data in pairs(records) do",
-            "    local row = cjson.decode(data)",
-            "    local tuple = {}",
+            self.input_table.lua_iterate(decode=True),
+            "local tuple = {}",
         ])
 
         index = 1
@@ -38,20 +31,20 @@ class ExpressionStage(Stage):
             args.extend(new_args)
 
             if col.is_aggregate():
-                lua.append("    local temp = tonumber(row['%s'])" % str(col))
-                lua.append("    if temp == nil then")
-                lua.append("        tuple['%s'] = cjson.null" % name)
-                lua.append("    else")
-                lua.append("        tuple['%s'] = temp * 1" % name)
-                lua.append("    end")
+                lua.append("local temp = tonumber(row['%s'])" % str(col))
+                lua.append("if temp == nil then")
+                lua.append("    tuple['%s'] = cjson.null" % name)
+                lua.append("else")
+                lua.append("    tuple['%s'] = temp * 1" % name)
+                lua.append("end")
             else:
-                lua.append("    tuple['%s'] = %s" % (name, expression))
+                lua.append("tuple['%s'] = %s" % (name, expression))
 
             index += 1
 
         lua.extend([
-            "    redis.call('HSET', 'expression', tostring(rowid), cjson.encode(tuple))",
+            table.lua_add_lua_record('tuple'),
             "end",
         ])
 
-        return ('expression', '\n'.join(lua), offset)
+        return (table, '\n'.join(lua), offset)

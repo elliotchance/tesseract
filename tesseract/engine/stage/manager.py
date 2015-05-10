@@ -1,4 +1,6 @@
+from redis import StrictRedis
 from tesseract.engine.stage.order import OrderStage
+from tesseract.engine.table import PermanentTable
 
 
 class StageManager(object):
@@ -17,16 +19,15 @@ class StageManager(object):
             run. This will be empty when you create a new `StageManager`.
 
     """
-    def __init__(self):
+    def __init__(self, redis):
+        assert isinstance(redis, StrictRedis)
+
         self.stages = []
-        self.maintain_order = False
+        self.redis = redis
 
     def add(self, stage_class, args):
         assert isinstance(stage_class, object)
         assert isinstance(args, (list, tuple))
-
-        if stage_class == OrderStage:
-            self.maintain_order = True
 
         self.stages.append({
             "class": stage_class,
@@ -35,11 +36,11 @@ class StageManager(object):
 
     def compile_lua(self, offset, table_name):
         lua = ''
-        input_page = table_name
+        input_table = PermanentTable(self.redis, str(table_name))
         for stage_details in self.stages:
-            stage = stage_details['class'](str(input_page), offset, *stage_details['args'])
-            input_page, stage_lua, offset = stage.compile_lua()
+            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
+            input_table, stage_lua, offset = stage.compile_lua()
             lua += stage_lua + "\n"
 
-        lua += "return '%s'\n" % input_page
+        lua += "return '%s'\n" % input_table.table_name
         return lua

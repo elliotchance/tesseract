@@ -1,23 +1,20 @@
+from tesseract.engine.table import TransientTable
 from tesseract.sql.ast import OrderByClause
 from tesseract.engine.stage.stage import Stage
 
 
 class OrderStage(Stage):
-    """
-    This OrderStage represents the sorting of a set.
+    """This OrderStage represents the sorting of a set.
 
     """
-    def __init__(self, input_page, offset, clause):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, clause):
+        Stage.__init__(self, input_table, offset, redis)
         assert isinstance(clause, OrderByClause)
-
-        self.input_page = input_page
         self.clause = clause
-        self.offset = offset
 
     def compile_lua(self):
         lua = []
+        output_table = TransientTable(self.redis)
 
         # Clean out sort buffer.
         lua.append(
@@ -28,17 +25,11 @@ class OrderStage(Stage):
         )
 
         lua.extend([
-            "local records = hgetall('%s')" % self.input_page,
-
             # This is for making values unique.
             "local duplicate_number = 1",
             "local duplicate_string = 1",
 
-            # Iterate the page and unroll the data into the three categories.
-            "for rowid, data in pairs(records) do",
-
-            # Decode the record.
-            "    local row = cjson.decode(data)",
+            self.input_table.lua_iterate(decode=True),
 
             # The first thing we need to do it get the value that we will be
             # sorting by.
@@ -102,8 +93,8 @@ class OrderStage(Stage):
             [
                 "local records = redis.call('LRANGE', 'order_boolean_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
-                "    local record = redis.call('HGET', 'order_boolean_hash', data)",
-                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    local record = cjson.decode(redis.call('HGET', 'order_boolean_hash', data))",
+                output_table.lua_add_lua_record('record'),
                 "    rowid = rowid + 1",
                 "end"
             ],
@@ -112,8 +103,8 @@ class OrderStage(Stage):
             [
                 "local records = redis.call('LRANGE', 'order_number_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
-                "    local record = redis.call('HGET', 'order_number_hash', data)",
-                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    local record = cjson.decode(redis.call('HGET', 'order_number_hash', data))",
+                output_table.lua_add_lua_record('record'),
                 "    rowid = rowid + 1",
                 "end"
             ],
@@ -122,8 +113,8 @@ class OrderStage(Stage):
             [
                 "local records = redis.call('LRANGE', 'order_string_sorted', '0', '-1')",
                 "for i, data in ipairs(records) do",
-                "    local record = redis.call('HGET', 'order_string_hash', data)",
-                "    redis.call('HSET', 'order_result', tostring(rowid), record)",
+                "    local record = cjson.decode(redis.call('HGET', 'order_string_hash', data))",
+                output_table.lua_add_lua_record('record'),
                 "    rowid = rowid + 1",
                 "end"
             ],
@@ -133,7 +124,8 @@ class OrderStage(Stage):
             [
                 "local records = redis.call('LRANGE', 'order_null', '0', '-1')",
                 "for i, data in ipairs(records) do",
-                "    redis.call('HSET', 'order_result', tostring(rowid), data)",
+                "    local record = cjson.decode(data)",
+                output_table.lua_add_lua_record('record'),
                 "    rowid = rowid + 1",
                 "end"
             ]
@@ -146,4 +138,4 @@ class OrderStage(Stage):
                        else reconstruct):
             lua.extend(sorter)
 
-        return ('order_result', '\n'.join(lua), self.offset)
+        return (output_table, '\n'.join(lua), self.offset)

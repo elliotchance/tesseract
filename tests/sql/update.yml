@@ -18,17 +18,21 @@ tests:
     - {"foo": 3, "bar": "b"}
 
   parser_with_where:
-    sql: UPDATE mytable SET foo = 3 WHERE foo = bar
+    sql: UPDATE mytable SET foo = 3 WHERE 1 = 2
 
   # Update tests
   update_with_where:
+    comment: |
+      Recognise that the updated row now appears at the end of the set, this is
+      because records are immutable so we must delete the existing record and
+      create a new one.
     data: mytable
     sql:
     - UPDATE mytable SET foo = 3 WHERE foo = 1
     - SELECT * FROM mytable
     result:
-    - {"foo": 3, "bar": "a"}
     - {"foo": 2, "bar": "b"}
+    - {"foo": 3, "bar": "a"}
 
   parser_update_multiple_columns:
     sql: UPDATE mytable SET a = 1, b = 2, c = 3

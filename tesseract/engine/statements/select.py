@@ -18,19 +18,19 @@ class Select(Statement):
         redis.delete('agg')
 
         select = result.statement
-        lua, args, manager = self.compile_select(result)
+        lua, args, manager = self.compile_select(result, redis)
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
-
-    def compile_select(self, result):
+    def compile_select(self, result, redis):
         assert isinstance(result.statement, SelectStatement)
+        assert isinstance(redis, StrictRedis)
 
         expression = result.statement
         offset = 2
         args = []
 
-        stages = StageManager()
+        stages = StageManager(redis)
 
         # Compile WHERE stage.
         if expression.where:

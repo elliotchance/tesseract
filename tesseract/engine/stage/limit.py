@@ -1,22 +1,17 @@
+from tesseract.engine.table import TransientTable
 from tesseract.sql.ast import LimitClause
 from tesseract.engine.stage.stage import Stage
 
 
 class LimitStage(Stage):
-    def __init__(self, input_page, offset, limit):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, limit):
+        Stage.__init__(self, input_table, offset, redis)
         assert isinstance(limit, LimitClause)
-
-        self.input_page = input_page
-        self.offset = offset
         self.limit = limit
 
     def compile_lua(self):
         lua = []
-
-        # Clean out buffer.
-        lua.append("redis.call('DEL', 'limit')")
+        output_table = TransientTable(self.redis)
 
         filter = "counter < %s" % self.limit.limit
         skip = 0
@@ -29,14 +24,13 @@ class LimitStage(Stage):
 
         # Iterate the page for the desired amount of rows.
         lua.extend([
-            "local records = hgetall('%s')" % self.input_page,
             "local counter = 0",
-            "for rowid, data in pairs(records) do",
+            self.input_table.lua_iterate(decode=True),
             "   if %s then" % filter,
-            "       redis.call('HSET', 'limit', tostring(rowid - %d), data)" % skip,
+            output_table.lua_add_lua_record('row'),
             "   end",
             "   counter = counter + 1",
             "end",
         ])
 
-        return ('limit', '\n'.join(lua), self.offset)
+        return (output_table, '\n'.join(lua), self.offset)

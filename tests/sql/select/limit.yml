@@ -58,3 +58,12 @@ tests:
     - {"foo": 125}
     - {"foo": 126}
     - {"foo": 127}
+
+  limit_after_order_by:
+    comment: Make sure the LIMIT is applied after the ORDER BY
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo DESC LIMIT 3
+    result:
+    - {"foo": 127}
+    - {"foo": 126}
+    - {"foo": 125}

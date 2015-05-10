@@ -32,3 +32,17 @@ local function hgetall(key)
 	end
 	return result
 end
+
+local function zrangeall(key)
+    local bulk = redis.call('ZRANGE', key, '0', '-1', 'WITHSCORES')
+	local result = {}
+	local nextkey
+	for i, v in ipairs(bulk) do
+		if i % 2 == 1 then
+			nextkey = v
+		else
+			result[nextkey] = v
+		end
+	end
+	return result
+end

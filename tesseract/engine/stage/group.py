@@ -1,19 +1,18 @@
+from tesseract.engine.table import TransientTable
 from tesseract.sql.ast import Identifier, Expression
 from tesseract.engine.stage.stage import Stage
 
 
 class GroupStage(Stage):
-    def __init__(self, input_page, offset, field, columns):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, field, columns):
+        Stage.__init__(self, input_table, offset, redis)
         assert field is None or isinstance(field, Identifier)
         assert isinstance(columns, list)
 
-        self.input_page = input_page
         self.field = field
-        self.offset = offset
         self.columns = columns
         self.lua = []
+        self.output_table = TransientTable(redis)
 
     def __unique_group_value(self):
         """The unique group value is a name for the group contain the same
@@ -35,11 +34,7 @@ class GroupStage(Stage):
         if self.field is None:
             unique_group = "'true'"
 
-        return "    local unique_group = %s" % unique_group
-
-    def __clear_buffers(self):
-        """Reset (delete) any buffers we will need to carry out this stage."""
-        self.lua.append("redis.call('DEL', 'group', 'group_result')")
+        return "local unique_group = %s" % unique_group
 
     def __group_name(self, value, expression):
         """Generate a unique key when a query contains multiple expressions.
@@ -103,9 +98,9 @@ class GroupStage(Stage):
 
         As we iterate the records we maintain a Redis hash called `group` which
         contains keys that represent JSON strings and a value of `1`.
-        """
 
-        self.iterate_page(self.input_page, [
+        """
+        self.iterate_page([
             self.__unique_group_value(),
             "redis.call('HINCRBY', 'group', unique_group, 1)",
             self.__lua_args(),
@@ -117,7 +112,7 @@ class GroupStage(Stage):
 
         """
         self.lua.extend([
-            "if rowid == 0 then",
+            "if %s == 1 then" % self.output_table.lua_get_next_record_id(),
             "  local row = {}",
         ])
 
@@ -129,10 +124,10 @@ class GroupStage(Stage):
             if col.function_name in ('min', 'max'):
                 default_value = 'cjson.null'
 
-            self.lua.append("    row['%s'] = %s" % (str(col), default_value))
+            self.lua.append("row['%s'] = %s" % (str(col), default_value))
 
         self.lua.extend([
-            "  redis.call('HSET', 'group_result', tostring(rowid), cjson.encode(row))",
+            self.output_table.lua_add_lua_record('row'),
             "end"
         ])
 
@@ -192,11 +187,13 @@ class GroupStage(Stage):
             )
             lua.append(line)
 
-        lua.extend([
-            "redis.call('HSET', 'group_result', tostring(rowid), cjson.encode(row))",
-        ])
+        lua.append(self.output_table.lua_add_lua_record('row'))
 
         self.iterate_hash_keys('group', lua)
+
+    def __clear_buffers(self):
+        """Reset (delete) any buffers we will need to carry out this stage."""
+        self.lua.append("redis.call('DEL', 'group')")
 
     def compile_lua(self):
         self.__clear_buffers()
@@ -204,4 +201,4 @@ class GroupStage(Stage):
         self.__extract_expressions()
         self.__ensure_single_row()
 
-        return ('group_result', '\n'.join(self.lua), self.offset)
+        return (self.output_table, '\n'.join(self.lua), self.offset)

@@ -1,9 +1,18 @@
+from redis import StrictRedis
+from tesseract.engine.table import Table
+
+
 class Stage(object):
-    """This is just a container class for all stages.
+    def __init__(self, input_table, offset, redis):
+        assert isinstance(input_table, Table)
+        assert isinstance(offset, int)
+        assert isinstance(redis, StrictRedis)
 
-    """
+        self.input_table = input_table
+        self.offset = offset
+        self.redis = redis
 
-    def iterate_page(self, page, lua):
+    def iterate_page(self, lua):
         """Iterate a page and run some lua against each record.
 
         For each record read from the page there will be several initialized lua
@@ -17,19 +26,11 @@ class Stage(object):
           * `row` - The decoded JSON (as a Lua table).
 
         Arguments:
-          page (string): The name of the page to iterate.
           lua (list of str): Lua code to be executed for each page.
 
         """
-        assert isinstance(page, str)
         assert isinstance(lua, list)
 
-        self.lua.extend([
-            "local records = hgetall('%s')" % page,
-            "for rowid, data in pairs(records) do",
-            "    local row = cjson.decode(data)",
-        ])
-
+        self.lua.append(self.input_table.lua_iterate(decode=True))
         self.lua.extend(lua)
-
         self.lua.append("end")
