@@ -1,0 +1,14 @@
+tests:
+  null:
+    sql: SELECT sin(null)
+    result:
+    - {"col1": null}
+
+  number:
+    sql: SELECT sin(1.23)
+    result:
+    - {"col1": 0.94248880193170004}
+
+  bad_type:
+    sql: SELECT sin("foo")
+    error: No such function sin(string).

@@ -53,6 +53,6 @@ tests:
     data: table1
     sql: "SELECT foo, foo * 2 FROM table1"
     result-unordered:
-    - {"foo": 123, "col2": 246}
-    - {"foo": 124, "col2": 248}
-    - {"foo": 125, "col2": 250}
+    - {"col2": 246, "foo": 123}
+    - {"col2": 248, "foo": 124}
+    - {"col2": 250, "foo": 125}
