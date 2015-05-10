@@ -57,7 +57,7 @@ class Server:
                 # Python 3.x
                 threading.Thread(
                     target=self.handle_client,
-                    args=(client_socket)
+                    args=(client_socket,)
                 ).start()
 
     def handle_client(self, client_socket):
