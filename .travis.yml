@@ -18,6 +18,7 @@ install:
   # Start the server in the background. We don't acutally use this for tests but
   # we need to generate the LALR tables.
   - "bin/tesseract &"
+  - "echo "exit" | python bin/tesseract-cli"
 
   # Generate tests from YAML.
   - "python generate_tests.py"
