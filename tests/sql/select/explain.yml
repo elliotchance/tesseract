@@ -41,4 +41,10 @@ tests:
     sql: EXPLAIN SELECT * FROM foo LIMIT 10
     result:
     - {"description": "Full scan of table 'foo'"}
-    - {"description": "Limit 10 records"}
+    - {"description": "LIMIT 10"}
+
+  explain_offset:
+    sql: EXPLAIN SELECT * FROM foo OFFSET 15
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "OFFSET 15"}

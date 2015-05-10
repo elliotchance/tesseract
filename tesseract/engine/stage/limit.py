@@ -11,7 +11,7 @@ class LimitStage(Stage):
 
     def explain(self):
         return {
-            "description": "Limit %s records" % self.limit.limit
+            "description": str(self.limit)
         }
 
     def compile_lua(self):
