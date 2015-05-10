@@ -12,6 +12,11 @@ class ExpressionStage(Stage):
         self.columns = columns
         self.offset = offset
 
+    def explain(self):
+        return {
+            "description": "Expressions: %s" % ', '.join([str(col) for col in self.columns])
+        }
+
     def compile_lua(self):
         lua = []
 
