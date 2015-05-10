@@ -36,3 +36,9 @@ tests:
     result:
     - {"description": "Full scan of table 'foo'"}
     - {"description": "Filter: bar = \"baz\""}
+
+  explain_limit:
+    sql: EXPLAIN SELECT * FROM foo LIMIT 10
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Limit 10 records"}

@@ -9,6 +9,11 @@ class LimitStage(Stage):
         assert isinstance(limit, LimitClause)
         self.limit = limit
 
+    def explain(self):
+        return {
+            "description": "Limit %s records" % self.limit.limit
+        }
+
     def compile_lua(self):
         lua = []
         output_table = TransientTable(self.redis)

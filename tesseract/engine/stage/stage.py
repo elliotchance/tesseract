@@ -1,8 +1,11 @@
 from redis import StrictRedis
 from tesseract.engine.table import Table
+import abc
 
 
 class Stage(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, input_table, offset, redis):
         assert isinstance(input_table, Table)
         assert isinstance(offset, int)
@@ -11,6 +14,10 @@ class Stage(object):
         self.input_table = input_table
         self.offset = offset
         self.redis = redis
+
+    @abc.abstractmethod
+    def explain(self):
+        pass
 
     def iterate_page(self, lua):
         """Iterate a page and run some lua against each record.
