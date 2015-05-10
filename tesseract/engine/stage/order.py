@@ -12,6 +12,17 @@ class OrderStage(Stage):
         assert isinstance(clause, OrderByClause)
         self.clause = clause
 
+    def explain(self):
+        direction = 'ASC'
+        if self.clause.ascending is False:
+            direction = 'DESC'
+        return {
+            'description': 'Sorting by %s (%s)' % (
+                self.clause.field_name,
+                direction
+            )
+        }
+
     def compile_lua(self):
         lua = []
         output_table = TransientTable(self.redis)

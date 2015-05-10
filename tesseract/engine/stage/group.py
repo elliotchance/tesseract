@@ -14,6 +14,11 @@ class GroupStage(Stage):
         self.lua = []
         self.output_table = TransientTable(redis)
 
+    def explain(self):
+        return {
+            "description": "Grouping by %s" % self.field
+        }
+
     def __unique_group_value(self):
         """The unique group value is a name for the group contain the same
         values.

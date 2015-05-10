@@ -6,6 +6,7 @@ Syntax
 ======
 
 ```sql
+[ EXPLAIN ]
 SELECT <column_definitions>
 [ FROM <table_name> ]
 [ WHERE <condition> ]
@@ -13,6 +14,12 @@ SELECT <column_definitions>
 [ ORDER BY <order_field> ]
 [ LIMIT <limit> ]
 ```
+
+EXPLAIN
+  : When `EXPLAIN` is used the query does not execute. Instead the query builder
+    (which plans how the query is to be carried out) returns these steps. This
+    is useful for debugging slow queries, or otherwise understanding how a query
+    is executed internally.
 
 column_definitions
   : This can be an asterisk (`*`) to represent that the entire object should be

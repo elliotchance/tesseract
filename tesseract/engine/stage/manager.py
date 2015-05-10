@@ -43,3 +43,15 @@ class StageManager(object):
 
         lua += "return '%s'\n" % input_table.table_name
         return lua
+
+    def explain(self, table_name):
+        offset = 0
+        steps = [
+            {"description": "Full scan of table '%s'" % table_name}
+        ]
+        input_table = PermanentTable(self.redis, str(table_name))
+        for stage_details in self.stages:
+            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
+            steps.append(stage.explain())
+
+        return steps

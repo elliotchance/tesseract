@@ -10,6 +10,11 @@ class WhereStage(Stage):
         self.where = where
         self.output_table = TransientTable(redis)
 
+    def explain(self):
+        return {
+            "description": "Filter: %s" % self.where
+        }
+
     def compile_lua(self):
         lua = []
 

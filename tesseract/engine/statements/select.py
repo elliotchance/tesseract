@@ -7,6 +7,7 @@ from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement
 from tesseract.engine.stage.limit import LimitStage
+from tesseract.server.protocol import Protocol
 
 
 class Select(Statement):
@@ -19,6 +20,11 @@ class Select(Statement):
 
         select = result.statement
         lua, args, manager = self.compile_select(result, redis)
+
+        if select.explain:
+            redis.delete('explain')
+            return Protocol.successful_response(manager.explain(select.table_name))
+
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
@@ -63,5 +69,4 @@ end
 
         lua += stages.compile_lua(offset, expression.table_name)
 
-        # Extract the values for the expression.
         return (lua, args, stages)

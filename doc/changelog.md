@@ -76,3 +76,5 @@ v1.0.0-alpha3 (Unreleased)
 **SQL**
 
  #. Added support for `LIMIT` and `OFFSET`.
+ 
+ #. Added support for `EXPLAIN` on `SELECT` queries.

@@ -477,13 +477,15 @@ class SelectStatement(Statement):
     NO_TABLE = Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None, order=None, group=None,
-                 limit=None):
+                 explain=False, limit=None):
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, list)
         assert where is None or isinstance(where, Expression)
         assert order is None or isinstance(order, OrderByClause)
         assert group is None or isinstance(group, Identifier)
         assert limit is None or isinstance(limit, LimitClause)
+        assert group is None or isinstance(group, Identifier)
+        assert isinstance(explain, bool)
 
         self.table_name = table_name
         self.where = where
@@ -491,9 +493,15 @@ class SelectStatement(Statement):
         self.order = order
         self.group = group
         self.limit = limit
+        self.explain = explain
 
     def __str__(self):
-        r = "SELECT %s" % ', '.join([str(col) for col in self.columns])
+        r = ''
+
+        if self.explain:
+            r = 'EXPLAIN '
+
+        r += "SELECT %s" % ', '.join([str(col) for col in self.columns])
 
         if self.table_name != SelectStatement.NO_TABLE:
             r += " FROM %s" % self.table_name

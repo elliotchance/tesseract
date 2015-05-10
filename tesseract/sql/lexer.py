@@ -16,6 +16,7 @@ sql_keywords = (
     'DELETE',
     'DESC',
     'DROP',
+    'EXPLAIN',
     'FROM',
     'GROUP',
     'IN',

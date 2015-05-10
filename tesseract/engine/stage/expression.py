@@ -9,6 +9,11 @@ class ExpressionStage(Stage):
         assert isinstance(columns, list)
         self.columns = columns
 
+    def explain(self):
+        return {
+            "description": "Expressions: %s" % ', '.join([str(col) for col in self.columns])
+        }
+
     def compile_lua(self):
         lua = []
         table = TransientTable(self.redis)
