@@ -3,8 +3,7 @@ from tesseract.engine.stage.stage import Stage
 
 
 class OrderStage(Stage):
-    """
-    This OrderStage represents the sorting of a set.
+    """This OrderStage represents the sorting of a set.
 
     """
     def __init__(self, input_page, offset, clause):
@@ -15,6 +14,17 @@ class OrderStage(Stage):
         self.input_page = input_page
         self.clause = clause
         self.offset = offset
+
+    def explain(self):
+        direction = 'ASC'
+        if self.clause.ascending is False:
+            direction = 'DESC'
+        return {
+            'description': 'Sorting by %s (%s)' % (
+                self.clause.field_name,
+                direction
+            )
+        }
 
     def compile_lua(self):
         lua = []

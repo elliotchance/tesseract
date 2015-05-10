@@ -12,6 +12,11 @@ class WhereStage(Stage):
         self.where = where
         self.offset = offset
 
+    def explain(self):
+        return {
+            "description": "Filter: %s" % self.where
+        }
+
     def compile_lua(self):
         lua = []
 
