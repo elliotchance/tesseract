@@ -1,0 +1,14 @@
+tests:
+  null:
+    sql: SELECT tan(null)
+    result:
+    - {"col1": null}
+
+  number:
+    sql: SELECT tan(1.23)
+    result:
+    - {"col1": 2.8198157342682002}
+
+  bad_type:
+    sql: SELECT tan("foo")
+    error: No such function tan(string).

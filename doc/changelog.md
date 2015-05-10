@@ -71,8 +71,15 @@ v1.0.0-alpha2 (Binary Star)
 
 
 v1.0.0-alpha3 (Unreleased)
-===========================
+==========================
 
 **SQL**
 
  #. Added support for `EXPLAIN` on `SELECT` queries.
+
+**New Functions**
+ 
+ * `COS()`
+ * `SIN()`
+ * `SQRT()`
+ * `TAN()`

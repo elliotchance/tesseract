@@ -7,7 +7,7 @@ from os.path import dirname
 sys.path.append(dirname(__file__) + "/..")
 
 from tesseract.client import Client
-from tesseract.sql.expressions import Expression
+from tesseract.sql.ast import Expression
 
 # Connect.
 client = Client()
