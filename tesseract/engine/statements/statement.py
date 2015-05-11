@@ -22,7 +22,7 @@ class Statement(object):
         return Protocol.failed_response(message)
 
     def __retrieve_records(self, manager, redis, run):
-        table = PermanentTable(redis, str(run))
+        table = PermanentTable(redis, run.decode())
         records = []
 
         for record in redis.zrange(table._redis_key(), 0, -1):
