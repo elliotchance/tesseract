@@ -6,6 +6,7 @@ from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement
+from tesseract.engine.stage.limit import LimitStage
 from tesseract.server.protocol import Protocol
 
 
@@ -27,15 +28,15 @@ class Select(Statement):
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
-
     def compile_select(self, result, redis):
         assert isinstance(result.statement, SelectStatement)
+        assert isinstance(redis, StrictRedis)
 
         expression = result.statement
         offset = 2
         args = []
 
-        stages = StageManager()
+        stages = StageManager(redis)
 
         # Compile WHERE stage.
         if expression.where:
@@ -62,6 +63,9 @@ end
         # Compile the `SELECT` columns
         if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
+
+        if expression.limit:
+            stages.add(LimitStage, (expression.limit,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 

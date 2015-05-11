@@ -500,6 +500,28 @@ def p_optional_where_clause(p):
         p[0] = None
 
 
+def p_optional_limit_clause(p):
+    """
+        optional_limit_clause : empty
+                              | LIMIT ALL
+                              | LIMIT NUMBER
+                              | OFFSET NUMBER
+                              | LIMIT NUMBER OFFSET NUMBER
+    """
+
+    if len(p) == 1:
+        p[0] = None
+    elif len(p) == 5:
+        p[0] = LimitClause(p[2], p[4])
+    elif p[1] == 'LIMIT':
+        if p[2] == 'ALL':
+            p[0] = LimitClause(LimitClause.ALL)
+        else:
+            p[0] = LimitClause(p[2])
+    elif p[1] == 'OFFSET':
+        p[0] = LimitClause(None, p[2])
+
+
 def p_explain_select_statement(p):
     """
         explain_select_statement : select_statement
@@ -515,7 +537,7 @@ def p_explain_select_statement(p):
 
 def p_select_statement(p):
     """
-        select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause
+        select_statement : SELECT expression_list optional_from_clause optional_where_clause optional_group_clause optional_order_clause optional_limit_clause
                          | SELECT
     """
 
@@ -530,7 +552,8 @@ def p_select_statement(p):
         table_name=p[3],
         where=p[4],
         group=p[5],
-        order=p[6]
+        order=p[6],
+        limit=p[7]
     )
 
 

@@ -2,7 +2,6 @@ language: python
 python:
   - "2.6"
   - "2.7"
-  - "3.2"
   - "3.3"
   - "3.4"
 
@@ -18,7 +17,7 @@ install:
   # Start the server in the background. We don't acutally use this for tests but
   # we need to generate the LALR tables.
   - "bin/tesseract &"
-  - "sleep 1"
+  - "sleep 2"
   - "echo 'exit' | python bin/tesseract-cli"
 
   # Generate tests from YAML.

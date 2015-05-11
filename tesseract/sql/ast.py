@@ -1,15 +1,10 @@
-# Abstract Syntax Tree
-# ====================
-#
-# This file contains all the objects that make up the AST when the SQL is
-# parsed.
+"""This file contains all the objects that make up the AST (Abstract Syntax
+Tree) when the SQL is parsed.
 
-
-# Expressions
-# -----------
+"""
 
 class Expression:
-    # A base class for all expressions.
+    """A base class for all expressions."""
 
     @staticmethod
     def to_sql(object):
@@ -51,8 +46,8 @@ class Value(Expression):
         self.value = value
 
     def __eq__(self, other):
-        # This is more of a convenience method for testing. It allows us to
-        # compare two `Value`s based on their internal value.
+        """This is more of a convenience method for testing. It allows us to
+        compare two `Value`s based on their internal value."""
 
         right = other
 
@@ -482,12 +477,13 @@ class SelectStatement(Statement):
     NO_TABLE = Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None, order=None, group=None,
-                 explain=False):
+                 explain=False, limit=None):
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, list)
         assert where is None or isinstance(where, Expression)
         assert order is None or isinstance(order, OrderByClause)
         assert group is None or isinstance(group, Identifier)
+        assert limit is None or isinstance(limit, LimitClause)
         assert group is None or isinstance(group, Identifier)
         assert isinstance(explain, bool)
 
@@ -496,6 +492,7 @@ class SelectStatement(Statement):
         self.columns = columns
         self.order = order
         self.group = group
+        self.limit = limit
         self.explain = explain
 
     def __str__(self):
@@ -517,6 +514,9 @@ class SelectStatement(Statement):
 
         if self.order:
             r += ' %s' % self.order
+
+        if self.limit:
+            r += ' %s' % self.limit
 
         return r
 
@@ -569,3 +569,26 @@ class OrderByClause:
             direction = ' DESC'
 
         return 'ORDER BY %s%s' % (self.field_name, direction)
+
+
+class LimitClause:
+    ALL = Value(1000000000)
+
+    def __init__(self, limit=None, offset=None):
+        assert limit is None or isinstance(limit, Value)
+        assert offset is None or isinstance(offset, Value)
+
+        self.limit = limit
+        self.offset = offset
+
+    def __str__(self):
+        sql = []
+
+        if self.limit:
+            limit = 'ALL' if self.limit == LimitClause.ALL else self.limit
+            sql.append('LIMIT %s' % limit)
+
+        if self.offset:
+            sql.append('OFFSET %s' % self.offset)
+
+        return ' '.join(sql)

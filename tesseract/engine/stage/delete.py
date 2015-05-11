@@ -8,4 +8,4 @@ class DeleteStage(WhereStage):
 
     """
     def action_on_match(self):
-        return "redis.call('HDEL', '%s', rowid)" % self.input_page
+        return self.input_table.lua_delete_record("row[':id']")

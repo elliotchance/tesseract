@@ -2,6 +2,7 @@ import json
 import os
 from tesseract.engine.stage.manager import StageManager
 from redis import StrictRedis
+from tesseract.engine.table import PermanentTable
 from tesseract.server.protocol import Protocol
 from tesseract.sql.ast import Identifier
 
@@ -19,6 +20,17 @@ class Statement(object):
         message = message[message.rfind(':') + 1:].strip()
 
         return Protocol.failed_response(message)
+
+    def __retrieve_records(self, manager, redis, run):
+        table = PermanentTable(redis, str(run.decode()))
+        records = []
+
+        for record in redis.zrange(table._redis_key(), 0, -1):
+            record = json.loads(record.decode())
+            record.pop(':id', None)
+            records.append(record)
+
+        return records
 
     def run(self, redis, table_name, warnings, lua, args, result, manager=None):
         assert manager is None or isinstance(manager, StageManager)
@@ -38,25 +50,12 @@ class Statement(object):
 
         try:
             run = redis.eval(lua, 0, table_name, *args)
-
-            if not manager or manager.maintain_order == False:
-                records = []
-
-                # The value returns will be the name of the key that can be
-                # scanned for results.
-                for record in redis.hvals(run):
-                    records.append(json.loads(record.decode()))
-            else:
-                records = [None] * redis.hlen(run)
-
-                # The value returns will be the name of the key that can be
-                # scanned for results.
-                for rowid, record in redis.hgetall(run).items():
-                    records[int(rowid)] = json.loads(record.decode())
-
-            return Protocol.successful_response(records, warnings)
         except Exception as e:
             return self.__lua_error(e)
+
+        records = self.__retrieve_records(manager, redis, run)
+
+        return Protocol.successful_response(records, warnings)
 
 
     def __load_lua_dependency(self, operator):

@@ -1,0 +1,83 @@
+data:
+  table1:
+  - {"foo": 123}
+  - {"foo": 124}
+  - {"foo": 125}
+  - {"foo": 126}
+  - {"foo": 127}
+
+  table2:
+  - {"foo": "a"}
+  - {"foo": "a"}
+  - {"foo": "b"}
+  - {"foo": "c"}
+
+tests:
+  parser_limit:
+    sql: SELECT * FROM table1 LIMIT 10
+
+  parser_limit_offset:
+    sql: SELECT * FROM table1 LIMIT 20 OFFSET 10
+
+  parser_offset:
+    sql: SELECT * FROM table1 OFFSET 10
+
+  parser_limit_all:
+    sql: SELECT * FROM table1 LIMIT ALL
+
+  simple_limit:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 2
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+
+  limit_too_large:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 20
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}
+
+  simple_limit_offset:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 3 OFFSET 2
+    result:
+    - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}
+
+  offset_too_big:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT 3 OFFSET 20
+    result: []
+
+  limit_all:
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo LIMIT ALL
+    result:
+    - {"foo": 123}
+    - {"foo": 124}
+    - {"foo": 125}
+    - {"foo": 126}
+    - {"foo": 127}
+
+  limit_after_order_by:
+    comment: Make sure the LIMIT is applied after the ORDER BY
+    data: table1
+    sql: SELECT * FROM table1 ORDER BY foo DESC LIMIT 3
+    result:
+    - {"foo": 127}
+    - {"foo": 126}
+    - {"foo": 125}
+
+  limit_after_group_by:
+    comment: Make sure the LIMIT is applied after the GROUP BY
+    data: table2
+    sql: SELECT * FROM table2 GROUP BY foo LIMIT 2
+    result:
+    - {"foo": "a"}
+    - {"foo": "b"}

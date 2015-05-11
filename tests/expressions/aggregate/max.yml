@@ -72,8 +72,8 @@ tests:
     data: table1
     sql: SELECT a, max(a) FROM table1 GROUP BY a
     result:
-    - {"a": 456, "col2": 456}
     - {"a": 123, "col2": 123}
+    - {"a": 456, "col2": 456}
 
   max_groups_2:
     comment: |
@@ -82,8 +82,8 @@ tests:
     data: table3
     sql: SELECT a, max(b) FROM table3 GROUP BY a
     result:
-    - {"a": 456, "col2": 7}
     - {"a": 123, "col2": null}
+    - {"a": 456, "col2": 7}
 
   max_groups_3:
     comment: |
@@ -92,8 +92,8 @@ tests:
     data: table4
     sql: SELECT a, max(b) FROM table4 GROUP BY a
     result:
-    - {"a": null, "col2": 7}
     - {"a": 123, "col2": 5}
+    - {"a": null, "col2": 7}
 
   max_groups_4:
     comment: |
@@ -102,8 +102,8 @@ tests:
     data: table5
     sql: SELECT a, max(b) FROM table5 GROUP BY a
     result:
-    - {"a": 456, "col2": 7}
     - {"a": 123, "col2": null}
+    - {"a": 456, "col2": 7}
     - {"a": null, "col2": 5}
 
   # Expressions
