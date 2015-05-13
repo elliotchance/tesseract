@@ -1,4 +1,26 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a || b FROM missing
+    result:
+    - {"col1": ""}
+
+  left_missing:
+    data: missing
+    sql: SELECT a || 3.5 FROM missing
+    result:
+    - {"col1": "3.5"}
+
+  right_missing:
+    data: missing
+    sql: SELECT 3.5 || a FROM missing
+    result:
+    - {"col1": "3.5"}
+
   both_null:
     sql: SELECT null || null
     result:

@@ -1,78 +1,100 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a <> b FROM missing
+    result:
+    - {"col1": null}
+
+  left_missing:
+    data: missing
+    sql: SELECT a <> 3.5 FROM missing
+    result:
+    - {"col1": null}
+
+  right_missing:
+    data: missing
+    sql: SELECT 3.5 <> a FROM missing
+    result:
+    - {"col1": null}
+
   left_null:
-    sql: 'SELECT null <> 123'
+    sql: SELECT null <> 123
     result:
     - {"col1": null}
 
   right_null:
-    sql: 'SELECT 123 <> null'
+    sql: SELECT 123 <> null
     result:
     - {"col1": null}
 
   both_null:
-    sql: 'SELECT null <> null'
+    sql: SELECT null <> null
     result:
     - {"col1": null}
 
   boolean_equal:
-    sql: 'SELECT true <> true'
+    sql: SELECT true <> true
     result:
     - {"col1": false}
 
   boolean_not_equal:
-    sql: 'SELECT true <> false'
+    sql: SELECT true <> false
     result:
     - {"col1": true}
 
   number_equal:
-    sql: 'SELECT 123 <> 123'
+    sql: SELECT 123 <> 123
     result:
     - {"col1": false}
 
   number_not_equal:
-    sql: 'SELECT 123 <> 456'
+    sql: SELECT 123 <> 456
     result:
     - {"col1": true}
 
   string_equal:
-    sql: 'SELECT "foo" <> "foo"'
+    sql: SELECT "foo" <> "foo"
     result:
     - {"col1": false}
 
   string_not_equal:
-    sql: 'SELECT "foo" <> "bar"'
+    sql: SELECT "foo" <> "bar"
     result:
     - {"col1": true}
 
   # Array comparisons.
   comparing_empty_arrays:
-    sql: 'SELECT [] <> []'
+    sql: SELECT [] <> []
     result:
     - {"col1": false}
 
   left_array_has_more_items:
-    sql: 'SELECT [1, 2] <> [1]'
+    sql: SELECT [1, 2] <> [1]
     result:
     - {"col1": true}
 
   right_array_has_more_items:
-    sql: 'SELECT [1] <> [1, 2]'
+    sql: SELECT [1] <> [1, 2]
     result:
     - {"col1": true}
 
   equal_arrays:
-    sql: 'SELECT [1, 2] <> [1, 2]'
+    sql: SELECT [1, 2] <> [1, 2]
     result:
     - {"col1": false}
 
   non_equal_arrays:
-    sql: 'SELECT [1, 2] <> [2, 1]'
+    sql: SELECT [1, 2] <> [2, 1]
     result:
     - {"col1": true}
 
   # Object comparisons.
   comparing_empty_objects:
-    sql: 'SELECT {} <> {}'
+    sql: SELECT {} <> {}
     result:
     - {"col1": false}
 

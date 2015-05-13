@@ -1,6 +1,6 @@
 local function operator_not(value)
     -- NOT with null is always null.
-    if value == cjson.null then
+    if value == nil or value == cjson.null then
         return cjson.null
     end
 

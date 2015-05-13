@@ -1,6 +1,7 @@
 local function operator_like(value, regex)
     -- If either value is null then the result is always null.
-    if value == cjson.null or regex == cjson.null then
+    if value == nil or regex == nil or
+            value == cjson.null or regex == cjson.null then
         return cjson.null
     end
 

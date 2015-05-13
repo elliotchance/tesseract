@@ -32,6 +32,9 @@ class Expression:
     def is_aggregate(self):
         return False
 
+    def signature(self):
+        return '?'
+
 
 class Asterisk(Expression):
     def __str__(self):
@@ -105,13 +108,15 @@ class Value(Expression):
 
         return (value, offset, [])
 
+    def signature(self):
+        return 'V'
+
 
 class Identifier(Expression):
-    """
-    An `Identifier` represents a field or column in the expression to be
+    """An `Identifier` represents a field or column in the expression to be
     evaluated at runtime with the value in a record.
-    """
 
+    """
     def __init__(self, identifier):
         assert isinstance(identifier, str)
 
@@ -123,15 +128,17 @@ class Identifier(Expression):
     def compile_lua(self, offset):
         assert isinstance(offset, int)
 
-        return ('row["%s"]' % self.identifier, offset, [])
+        return ('f(row, "%s")' % self.identifier, offset, [])
+
+    def signature(self):
+        return 'I'
 
 
 class BinaryExpression(Expression):
-    """
-    Binary expressions represent any two expressions that contain an operator
+    """Binary expressions represent any two expressions that contain an operator
     between them. A simple example is "1 + 2".
-    """
 
+    """
     def __init__(self, left, operator, right, lua_operator=None):
         """
         Initialise a binary expression.
@@ -180,6 +187,13 @@ class BinaryExpression(Expression):
 
     def is_aggregate(self):
         return self.left.is_aggregate() or self.right.is_aggregate()
+
+    def signature(self):
+        return '%s%s%s' % (
+            self.left.signature(),
+            self.operator,
+            self.right.signature()
+        )
 
 
 class EqualExpression(BinaryExpression):

@@ -5,10 +5,11 @@ local function operator_concat(left, right)
     end
 
     -- null renders to a blank string.
-    if left == cjson.null then
+    if left == nil or left == cjson.null then
         left = ''
     end
-    if right == cjson.null then
+
+    if right == nil or right == cjson.null then
         right = ''
     end
 

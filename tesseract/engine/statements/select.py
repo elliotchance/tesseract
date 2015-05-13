@@ -6,7 +6,6 @@ from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.ast import EqualExpression, Identifier, Value
 from tesseract.sql.ast import SelectStatement
 from tesseract.engine.stage.limit import LimitStage
 from tesseract.server.protocol import Protocol
@@ -30,39 +29,67 @@ class Select(Statement):
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
+    def __find_index(self, expression, redis, result, stages):
+        """Try and find an index that can be used for the WHERE expression. If
+        and index is found it is added to the query plan.
+
+        Returns:
+          If an index was found True is returned, else False.
+
+        """
+        tn = result.statement.table_name
+        rules = {
+            'I=V': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': lambda e: [e.right],
+            },
+            'V=I': {
+                'index_name': lambda e: '%s.%s' % (tn, e.right),
+                'args': lambda e: [e.left],
+            },
+        }
+
+        signature = expression.where.signature()
+        if signature in rules:
+            for index_name in redis.hkeys('indexes'):
+                # noinspection PyCallingNonCallable
+                looking_for = rules[signature]['index_name'](expression.where)
+                if redis.hget('indexes', index_name).decode() == looking_for:
+                    # noinspection PyCallingNonCallable
+                    args = rules[signature]['args'](expression.where)
+                    args.insert(0, str(index_name.decode()))
+                    stages.add(IndexStage, args)
+                    return True
+
+        return False
+
     def __compile_where(self, expression, redis, result, stages):
+        """WHen compiling the WHERE clause we need to see if there is an
+        available index with `__find_index()` - hopefully there is. Otherwise we
+        fall back to a full table scan.
+
+        """
         if expression.where:
-            index_found = False
-
-            # Search for a possible index
-            if isinstance(expression.where, EqualExpression) and isinstance(
-                    expression.where.left, Identifier) and isinstance(
-                    expression.where.right, Value):
-                for index_name in redis.hkeys('indexes'):
-                    looking_for = '%s.%s' % (
-                        result.statement.table_name, expression.where.left
-                    )
-                    if redis.hget('indexes', index_name).decode() == looking_for:
-                        stages.add(IndexStage,
-                                   (str(index_name.decode()), expression.where.right))
-                        index_found = True
-                        break
-
-            if isinstance(expression.where, EqualExpression) and isinstance(
-                    expression.where.left, Value) and isinstance(
-                    expression.where.right, Identifier):
-                for index_name in redis.hkeys('indexes'):
-                    looking_for = '%s.%s' % (
-                        result.statement.table_name, expression.where.right
-                    )
-                    if redis.hget('indexes', index_name).decode() == looking_for:
-                        stages.add(IndexStage,
-                                   (str(index_name.decode()), expression.where.left))
-                        index_found = True
-                        break
-
+            index_found = self.__find_index(expression, redis, result, stages)
             if not index_found:
                 stages.add(WhereStage, (expression.where,))
+
+    def __compile_group(self, expression, stages):
+        if expression.group or expression.contains_aggregate():
+            stages.add(GroupStage, (expression.group, expression.columns))
+
+    def __compile_order(self, expression, stages):
+        if expression.order:
+            stages.add(OrderStage, (expression.order,))
+
+    def __compile_columns(self, expression, stages):
+        """Compile the `SELECT` columns."""
+        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
+            stages.add(ExpressionStage, (expression.columns,))
+
+    def __compile_limit(self, expression, stages):
+        if expression.limit:
+            stages.add(LimitStage, (expression.limit,))
 
     def compile_select(self, result, redis):
         assert isinstance(result.statement, SelectStatement)
@@ -75,16 +102,11 @@ class Select(Statement):
         stages = StageManager(redis)
 
         self.__compile_where(expression, redis, result, stages)
+        self.__compile_group(expression, stages)
+        self.__compile_order(expression, stages)
+        self.__compile_columns(expression, stages)
+        self.__compile_limit(expression, stages)
 
-        # Compile the GROUP BY clause.
-        if expression.group or expression.contains_aggregate():
-            stages.add(GroupStage, (expression.group, expression.columns))
-
-        # Compile the ORDER BY clause.
-        if expression.order:
-            stages.add(OrderStage, (expression.order,))
-
-        # Generate the full Lua program.
         lua = """
 -- First thing is to convert all the incoming values from JSON to native.
 -- Skipping the first two arguments that are not JSON and will always exist.
@@ -93,13 +115,6 @@ for i = 3, #ARGV do
     args[i] = cjson.decode(ARGV[i])
 end
 """
-
-        # Compile the `SELECT` columns
-        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
-            stages.add(ExpressionStage, (expression.columns,))
-
-        if expression.limit:
-            stages.add(LimitStage, (expression.limit,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 

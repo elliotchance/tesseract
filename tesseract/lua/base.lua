@@ -17,22 +17,6 @@ local function no_such_type(type)
     error(string.format("No such type '%s'.", type))
 end
 
--- Gets all fields from a hash as a dictionary.
--- https://gist.github.com/klovadis/5170446
-local function hgetall(key)
-  local bulk = redis.call('HGETALL', key)
-	local result = {}
-	local nextkey
-	for i, v in ipairs(bulk) do
-		if i % 2 == 1 then
-			nextkey = v
-		else
-			result[nextkey] = v
-		end
-	end
-	return result
-end
-
 local function zrangeall(key)
     local bulk = redis.call('ZRANGE', key, '0', '-1', 'WITHSCORES')
 	local result = {}
@@ -45,4 +29,17 @@ local function zrangeall(key)
 		end
 	end
 	return result
+end
+
+-- nil values in Lua that are inside of a table will not exist as elements. For
+-- example if we had { row["foo"] } and the "foo" key did not exist the table
+-- would consist of zero elements which causes all sorts of logic to go wrong.
+-- All row accesses are run through this method so we can force a SQL NULL to
+-- come out for missing values.
+local function f(row, path)
+    if row[path] == nil then
+        return cjson.null
+    end
+
+    return row[path]
 end

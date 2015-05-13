@@ -1,13 +1,13 @@
 local function operator_in(left, right)
     -- If the value is null then the result is always null.
-    if left == cjson.null then
+    if left == nil or left == cjson.null then
         return cjson.null
     end
 
     -- We must check for any `null` value before testing for equality.
     for key in pairs(right) do
         -- If any of the values are null we can end here.
-        if right[key] == cjson.null then
+        if right[key] == nil or right[key] == cjson.null then
             return cjson.null
         end
     end

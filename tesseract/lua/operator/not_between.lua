@@ -1,7 +1,8 @@
 local function operator_not_between(left, right)
     -- If the value is null then the result is always null.
-    if left == cjson.null or right[1] == cjson.null
-        or right[2] == cjson.null then
+    if left == nil or right[1] == nil or right[2] == nil or
+            left == cjson.null or right[1] == cjson.null or
+            right[2] == cjson.null then
         return cjson.null
     end
 

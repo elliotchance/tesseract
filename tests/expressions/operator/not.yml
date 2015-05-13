@@ -1,4 +1,14 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT NOT a FROM missing
+    result:
+    - {"col1": null}
+
   not_null:
     sql: SELECT NOT null
     result:

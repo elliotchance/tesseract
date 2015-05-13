@@ -1,48 +1,70 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a > b FROM missing
+    result:
+    - {"col1": null}
+
+  left_missing:
+    data: missing
+    sql: SELECT a > 3.5 FROM missing
+    result:
+    - {"col1": null}
+
+  right_missing:
+    data: missing
+    sql: SELECT 3.5 > a FROM missing
+    result:
+    - {"col1": null}
+
   # NULLs
   left_null:
-    sql: 'SELECT null > 123'
+    sql: SELECT null > 123
     result:
     - {"col1": null}
 
   right_null:
-    sql: 'SELECT 123 > null'
+    sql: SELECT 123 > null
     result:
     - {"col1": null}
 
   both_null:
-    sql: 'SELECT null > null'
+    sql: SELECT null > null
     result:
     - {"col1": null}
 
   # Basic comparisons.
   number_equal:
-    sql: 'SELECT 100 > 100'
+    sql: SELECT 100 > 100
     result:
     - {"col1": false}
 
   number_less_than:
-    sql: 'SELECT 100 > 200'
+    sql: SELECT 100 > 200
     result:
     - {"col1": false}
 
   number_not_less_than:
-    sql: 'SELECT 200 > 100'
+    sql: SELECT 200 > 100
     result:
     - {"col1": true}
 
   string_equal:
-    sql: 'SELECT "ab" > "ab"'
+    sql: SELECT "ab" > "ab"
     result:
     - {"col1": false}
 
   string_less_than:
-    sql: 'SELECT "ab" > "ba"'
+    sql: SELECT "ab" > "ba"
     result:
     - {"col1": false}
 
   string_not_less_than:
-    sql: 'SELECT "ba" > "ab"'
+    sql: SELECT "ba" > "ab"
     result:
     - {"col1": true}
 
