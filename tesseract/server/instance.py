@@ -7,7 +7,9 @@ class Instance:
     sharding against multiple Redis nodes - but for now lets keep it simple.
 
     """
-    def __init__(self, redis_host=None):
+    def __init__(self, server, redis_host=None):
+        self.server = server
+
         assert redis_host is None or isinstance(redis_host, str)
 
         # The default Redis host is `localhost` if it is not provided.
@@ -23,5 +25,10 @@ class Instance:
 
         self.notifications = {}
 
+        self.reset_warnings()
+
     def publish(self, name, value):
         self.redis.publish(name, value)
+
+    def reset_warnings(self):
+        self.warnings = []

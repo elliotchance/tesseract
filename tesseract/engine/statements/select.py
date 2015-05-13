@@ -12,22 +12,28 @@ from tesseract.server.protocol import Protocol
 
 
 class Select(Statement):
-    def execute(self, result, redis, warnings):
+    def execute(self, result, instance):
         assert isinstance(result.statement, SelectStatement)
-        assert isinstance(redis, StrictRedis)
-        assert isinstance(warnings, list)
+        assert isinstance(instance.redis, StrictRedis)
 
-        redis.delete('agg')
+        instance.redis.delete('agg')
 
         select = result.statement
-        lua, args, manager = self.compile_select(result, redis)
+        lua, args, manager = self.compile_select(result, instance.redis)
 
         if select.explain:
-            redis.delete('explain')
+            instance.redis.delete('explain')
             return Protocol.successful_response(manager.explain(select.table_name))
 
-        return self.run(redis, select.table_name, warnings, lua, args, result,
-                        manager)
+        return self.run(
+            instance.redis,
+            select.table_name,
+            instance.warnings,
+            lua,
+            args,
+            result,
+            manager
+        )
 
     def __find_index(self, expression, redis, result, stages):
         """Try and find an index that can be used for the WHERE expression. If

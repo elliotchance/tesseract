@@ -60,40 +60,19 @@ def p_arithmetic_expression(p):
                               | expression CONCAT expression
     """
 
-    #     expression PLUS expression
-    if p[2].upper() == '+':
-        add_requirement(p, 'operator/plus')
-        p[0] = AddExpression(p[1], p[3])
+    rules = {
+        '+': (AddExpression, 'operator/plus'),
+        '-': (SubtractExpression, 'operator/minus'),
+        '*': (MultiplyExpression, 'operator/times'),
+        '/': (DivideExpression, 'operator/divide'),
+        '^': (PowerExpression, 'operator/power'),
+        '%': (ModuloExpression, 'operator/modulo'),
+        '||': (ConcatExpression, 'operator/concat'),
+    }
 
-    #     expression TIMES expression
-    elif p[2].upper() == '*':
-        add_requirement(p, 'operator/times')
-        p[0] = MultiplyExpression(p[1], p[3])
-
-    #     expression DIVIDE expression
-    elif p[2].upper() == '/':
-        add_requirement(p, 'operator/divide')
-        p[0] = DivideExpression(p[1], p[3])
-
-    #     expression CARET expression
-    elif p[2].upper() == '^':
-        add_requirement(p, 'operator/power')
-        p[0] = PowerExpression(p[1], p[3])
-
-    #     expression MODULO expression
-    elif p[2].upper() == '%':
-        add_requirement(p, 'operator/modulo')
-        p[0] = ModuloExpression(p[1], p[3])
-
-    #     expression CONCAT expression
-    elif p[2] == '||':
-        add_requirement(p, 'operator/concat')
-        p[0] = ConcatExpression(p[1], p[3])
-
-    #     expression MINUS expression
-    else:
-        add_requirement(p, 'operator/minus')
-        p[0] = SubtractExpression(p[1], p[3])
+    op = str(p[2])
+    add_requirement(p, rules[op][1])
+    p[0] = rules[op][0](p[1], p[3])
 
 
 def p_between_expression(p):

@@ -3,7 +3,6 @@ from tesseract.engine.statements.statement import Statement
 from tesseract.engine.table import TransientTable, PermanentTable
 from tesseract.server.protocol import Protocol
 from tesseract.sql.ast import Expression
-import re
 
 
 class Insert(Statement):
@@ -48,15 +47,21 @@ class Insert(Statement):
                     data
                 )
 
-    def execute(self, result, redis, notifications, publish, execute):
-        table = PermanentTable(redis, str(result.statement.table_name))
+    def execute(self, result, instance):
+        table = PermanentTable(instance.redis, str(result.statement.table_name))
         data = Expression.to_sql(result.statement.fields)
 
-        self.__add_to_index(data, redis, result)
+        self.__add_to_index(data, instance.redis, result)
 
         table.add_record(json.loads(data))
 
-        self.__publish_notifications(redis, notifications, publish, execute,
-                                     data, result)
+        self.__publish_notifications(
+            instance.redis,
+            instance.notifications,
+            instance.server.publish,
+            instance.server.execute,
+            data,
+            result
+        )
 
         return Protocol.successful_response()

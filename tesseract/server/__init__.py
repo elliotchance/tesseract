@@ -24,12 +24,13 @@ except: # pragma: no cover
 class Server:
     """A server will execute SQL commands and return their result."""
 
-    def __init__(self, redis_host=None):
-        self.instance = Instance(redis_host)
-
-        # Setup NO_TABLE
+    def __setup_no_table(self):
         self.execute('DELETE FROM %s' % SelectStatement.NO_TABLE)
         self.execute('INSERT INTO %s {}' % SelectStatement.NO_TABLE)
+
+    def __init__(self, redis_host=None):
+        self.instance = Instance(self, redis_host)
+        self.__setup_no_table()
 
     def __accept_connection(self, server_socket):
         """Accept a connection then spawn off a new thread to handle it. This
@@ -94,10 +95,12 @@ class Server:
 
         assert isinstance(sql, str)
 
+        self.instance.reset_warnings()
+
         # Try to parse the SQL.
         try:
             result = parser.parse(sql)
-            self.warnings = result.warnings
+            self.instance.warnings = result.warnings
 
         # We could not parse the SQL, so return the error message in the
         # response.
@@ -111,24 +114,15 @@ class Server:
             DropIndexStatement: DropIndex,
             DropNotificationStatement: DropNotification,
             DropTableStatement: DropTable,
-            UpdateStatement: Update
+            InsertStatement: Insert,
+            SelectStatement: Select,
+            UpdateStatement: Update,
         }
 
         cls = result.statement.__class__
         if cls in statements:
             statement = statements[cls]()
             return statement.execute(result, self.instance)
-
-        # If the statement is an `INSERT` we always return success.
-        if isinstance(result.statement, InsertStatement):
-            statement = Insert()
-            return statement.execute(result, self.instance.redis, self.instance.notifications,
-                                     self.publish, self.execute)
-
-        # This is a `SELECT`
-        statement = Select()
-        return statement.execute(result, self.instance.redis, self.warnings)
-
 
     def publish(self, name, value):
         self.instance.redis.publish(name, value)

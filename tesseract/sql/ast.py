@@ -24,27 +24,72 @@ class Expression:
         return str(object)
 
     def compile_lua(self, offset):
-        # This is just a placeholder to be overridden by sub-classes. It exists
-        # here to satisfy PyCharms need to know that `compile_lua()` is
-        # available on `Expression`
+        """This is just a placeholder to be overridden by sub-classes. It exists
+        here to satisfy PyCharms need to know that `compile_lua()` is available
+        on `Expression`
+
+        """
         pass
 
     def is_aggregate(self):
+        """Test if the expression contains any elements (like function calls)
+        that are on an aggregate set.
+
+        """
         return False
 
     def signature(self):
+        """Any expression can be reduced into a signature. This is expected to
+        be overridden by the appropriate child classes.
+
+        The signature should not contain spaces and each non-operator character
+        has a meaning, here are some examples:
+
+        expression   | signature
+        ------------ | ---------
+        123 + foo    | V+I
+        12 > bar - 3 | V>I-V
+
+        The signatures are used for detecting specific expressions for things
+        like indexes.
+
+        Returns:
+          A string.
+
+        """
         return '?'
 
 
 class Asterisk(Expression):
+    """A unary asterisk (different from a binary asterisk which would be a
+    MultiplyExpression) signals that all columns in a record are to be used
+    like:
+
+    SELECT * FROM foo
+
+    """
     def __str__(self):
         return '*'
 
     def compile_lua(self, offset):
+        """There is only one case where compiling this to Lua might make sense.
+        For the `COUNT()` aggregate function where we want to count all the
+        records and therefore `COUNT(*)` could be evaluated as `COUNT(true)`.
+        For this reason we just return a blatant `true` until a case is found
+        that is illogical.
+
+        Returns:
+          "true" for the reasoning above.
+
+        """
         return ('true', offset, [])
 
 
 class Value(Expression):
+    """A constant value of any type (numbers, strings, arrays, etc) like `3`,
+    `"foo"`, `[1, 2]`, etc.
+
+    """
     def __init__(self, value):
         self.value = value
 
@@ -60,55 +105,70 @@ class Value(Expression):
 
         return self.value == right
 
+    def __list_to_sql(self):
+        items = [str(value) for value in self.value]
+        return '[%s]' % ', '.join(items)
+
+    def __dict_to_sql(self):
+        items = ['"%s": %s' % (key, str(value)) for key, value in
+                 self.value.items()]
+        return '{%s}' % ', '.join(items)
+
     def __str__(self):
         if self.value is None:
             return "null"
 
-        if isinstance(self.value, bool):
+        if isinstance(self.value, (bool, int, float)):
             return str(self.value).lower()
 
-        if isinstance(self.value, (int, float)):
-            return str(self.value)
-
         if isinstance(self.value, list):
-            items = [str(value) for value in self.value]
-            return '[%s]' % ', '.join(items)
+            return self.__list_to_sql()
 
         if isinstance(self.value, dict):
-            items = ['"%s": %s' % (key, str(value))
-                     for key, value
-                     in self.value.items()]
-            return '{%s}' % ', '.join(items)
+            return self.__dict_to_sql()
 
         return '"%s"' % self.value
 
+    def __compile_lua_array(self, offset, value):
+        """Arrays are also represented differently in Lua (called tables) -
+        surrounded by curly braces instead of square ones.
+
+        """
+        items = [value.compile_lua(offset)[0] for value in self.value]
+        return '{%s}' % ', '.join(items)
+
+    def __compile_lua_object(self, offset, value):
+        """Objects have a weird syntax in Lua."""
+        items = ['["%s"] = %s' % (key, value.compile_lua(offset)[0]) for
+                 key, value in self.value.items()]
+        return '{%s}' % ', '.join(items)
+
     def compile_lua(self, offset):
-        # In most cases we can render the literal value as a string and use
-        # that.
+        """In most cases we can render the literal value as a string and use
+        that - for example `3` or `foo`.
+
+        `nil` is a special case because a table in Lua that has a `nil` value
+        will not be encoded at all. So the `cjson` library provides a special
+        value for when you explicitly want a `null` in the JSON output - this is
+        called `cjson.null`.
+
+        """
         value = str(self)
 
-        # `nil` is a special case because a table in Lua that has a `nil` value
-        # will not be encoded at all. So the `cjson` library provides a special
-        # value for when you explicitly want a `null` in the JSON output.
         if self.value is None:
             value = 'cjson.null'
-
-        # Arrays are also represented differently in Lua - surrounded by curly
-        # braces instead of square ones.
-        if isinstance(self.value, list):
-            items = [value.compile_lua(offset)[0] for value in self.value]
-            value = '{%s}' % ', '.join(items)
-
-        # Last, but not least, is objects. There's a weird syntax...
-        if isinstance(self.value, dict):
-            items = ['["%s"] = %s' % (key, value.compile_lua(offset)[0])
-                     for key, value
-                     in self.value.items()]
-            value = '{%s}' % ', '.join(items)
+        elif isinstance(self.value, list):
+            value = self.__compile_lua_array(offset, value)
+        elif isinstance(self.value, dict):
+            value = self.__compile_lua_object(offset, value)
 
         return (value, offset, [])
 
     def signature(self):
+        """A `V` for Value is used in signatures. This represents any value of
+        any kind.
+
+        """
         return 'V'
 
 
@@ -119,7 +179,6 @@ class Identifier(Expression):
     """
     def __init__(self, identifier):
         assert isinstance(identifier, str)
-
         self.identifier = identifier
 
     def __str__(self):
@@ -131,6 +190,7 @@ class Identifier(Expression):
         return ('f(row, "%s")' % self.identifier, offset, [])
 
     def signature(self):
+        """A `I` for Identifier is used in signatures."""
         return 'I'
 
 
@@ -139,26 +199,13 @@ class BinaryExpression(Expression):
     between them. A simple example is "1 + 2".
 
     """
-    def __init__(self, left, operator, right, lua_operator=None):
-        """
-        Initialise a binary expression.
-        """
+    def __init__(self, left, operator, right, lua_operator):
+        """Initialise a binary expression."""
         assert isinstance(left, Expression)
         assert isinstance(operator, str)
         assert isinstance(right, Expression)
-        assert lua_operator is None or isinstance(lua_operator, str)
+        assert isinstance(lua_operator, str)
 
-        # In most cases the SQL operator (`operator` - like '+') will be the
-        # same operator when we render this binary expression in Lua
-        # (`lua_operator`) - so addition in Lua also uses the '+' operator. But
-        # sometimes it will be different, for example equality in SQL ('=') uses
-        # the '==' operator in Lua to represent the same comparison.
-        # It is important to note that Lua word operators are case-sensitive and
-        # so 'AND' in SQL will not work in Lua, it must be made lowercase 'and'.
-        if lua_operator is None:
-            lua_operator = operator
-
-        # Assign all the properties.
         self.left = left
         self.right = right
         self.operator = operator
@@ -174,14 +221,7 @@ class BinaryExpression(Expression):
         right, offset, args2 = self.right.compile_lua(offset)
         args1.extend(args2)
 
-        # If the `lua_operator` starts with a colon then we mean a local
-        # function rather than an operator, which has a different syntax.
-        if self.lua_operator[0] == ':':
-            lua = '%s(%s, %s)' % (self.lua_operator[1:], left, right)
-
-        # Otherwise we are just replacing the operator.
-        else:
-            lua = '%s %s %s' % (left, self.lua_operator, right)
+        lua = '%s(%s, %s)' % (self.lua_operator, left, right)
 
         return (lua, offset, args1)
 
@@ -198,66 +238,66 @@ class BinaryExpression(Expression):
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '=', right, ':operator_equal')
+        BinaryExpression.__init__(self, left, '=', right, 'operator_equal')
 
 
 class NotEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '<>', right, ':operator_not_equal')
+        BinaryExpression.__init__(self, left, '<>', right, 'operator_not_equal')
 
 
 class GreaterExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '>', right, ':operator_greater')
+        BinaryExpression.__init__(self, left, '>', right, 'operator_greater')
 
 
 class LessExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '<', right, ':operator_less')
+        BinaryExpression.__init__(self, left, '<', right, 'operator_less')
 
 
 class GreaterEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '>=', right, ':operator_greater_equal')
+        BinaryExpression.__init__(self, left, '>=', right, 'operator_greater_equal')
 
 
 class LessEqualExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '<=', right, ':operator_less_equal')
+        BinaryExpression.__init__(self, left, '<=', right, 'operator_less_equal')
 
 
 class AndExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'AND', right, ':operator_and')
+        BinaryExpression.__init__(self, left, 'AND', right, 'operator_and')
 
 
 class OrExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, 'OR', right, ':operator_or')
+        BinaryExpression.__init__(self, left, 'OR', right, 'operator_or')
 
 
 class AddExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '+', right, ':operator_plus')
+        BinaryExpression.__init__(self, left, '+', right, 'operator_plus')
 
 
 class SubtractExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '-', right, ':operator_minus')
+        BinaryExpression.__init__(self, left, '-', right, 'operator_minus')
 
 
 class MultiplyExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '*', right, ':operator_times')
+        BinaryExpression.__init__(self, left, '*', right, 'operator_times')
 
 
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '/', right, ':operator_divide')
+        BinaryExpression.__init__(self, left, '/', right, 'operator_divide')
 
 class ConcatExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '||', right, ':operator_concat')
+        BinaryExpression.__init__(self, left, '||', right, 'operator_concat')
 
 class FunctionCall(Expression):
     def __init__(self, function_name, argument):
@@ -270,7 +310,6 @@ class FunctionCall(Expression):
     def compile_lua(self, offset):
         assert isinstance(offset, int)
 
-        # Compile the argument.
         lua_arg, offset, new_args = self.argument.compile_lua(offset)
 
         if self.is_aggregate():
@@ -292,7 +331,7 @@ class LikeExpression(BinaryExpression):
         assert isinstance(is_not, bool)
         assert isinstance(case_sensitive, bool)
 
-        function = ':operator_not_like' if is_not else ':operator_like'
+        function = 'operator_not_like' if is_not else 'operator_like'
         operator = 'NOT LIKE' if is_not else 'LIKE'
 
         if not case_sensitive:
@@ -306,7 +345,7 @@ class IsExpression(BinaryExpression):
     def __init__(self, value, type, is_not):
         assert isinstance(is_not, bool)
 
-        function = ':operator_is_not' if is_not else ':operator_is'
+        function = 'operator_is_not' if is_not else 'operator_is'
         operator = 'IS NOT' if is_not else 'IS'
         BinaryExpression.__init__(self, value, operator, type, function)
 
@@ -326,9 +365,7 @@ class NotExpression(Expression):
     def compile_lua(self, offset):
         assert isinstance(offset, int)
 
-        # Compile the argument.
         lua_arg, offset, new_args = self.value.compile_lua(offset)
-
         lua = 'operator_not(%s)' % lua_arg
 
         return (lua, offset, new_args)
@@ -339,12 +376,12 @@ class NotExpression(Expression):
 
 class PowerExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '^', right, ':operator_power')
+        BinaryExpression.__init__(self, left, '^', right, 'operator_power')
 
 
 class ModuloExpression(BinaryExpression):
     def __init__(self, left, right):
-        BinaryExpression.__init__(self, left, '%', right, ':operator_modulo')
+        BinaryExpression.__init__(self, left, '%', right, 'operator_modulo')
 
 
 class InExpression(BinaryExpression):
@@ -353,7 +390,7 @@ class InExpression(BinaryExpression):
 
         self.is_not = is_not
 
-        function = ':operator_not_in' if is_not else ':operator_in'
+        function = 'operator_not_in' if is_not else 'operator_in'
         operator = 'NOT IN' if is_not else 'IN'
         BinaryExpression.__init__(self, left, operator, right, function)
 
@@ -368,7 +405,7 @@ class BetweenExpression(BinaryExpression):
 
         self.is_not = is_not
 
-        function = ':operator_not_between' if is_not else ':operator_between'
+        function = 'operator_not_between' if is_not else 'operator_between'
         operator = 'NOT BETWEEN' if is_not else 'BETWEEN'
         BinaryExpression.__init__(self, left, operator, right, function)
 
@@ -399,23 +436,15 @@ class GroupExpression(Expression):
         return self.value.is_aggregate()
 
 
-# Statements
-# ----------
-
 class Statement:
-    # Represents a SQL statement.
-
-    def __eq__(self, other):
-        # Compare objects based on their attributes.
-
-        assert isinstance(other, object)
-
-        return cmp(self.__dict__, other.__dict__)
+    """Represents a SQL statement."""
+    pass
 
 
 class CreateNotificationStatement(Statement):
-    # `CREATE NOTIFICATION` statement.
+    """`CREATE NOTIFICATION` statement.
 
+    """
     def __init__(self, notification_name, table_name, where=None):
         assert isinstance(notification_name, Identifier)
         assert isinstance(table_name, Identifier)
@@ -438,8 +467,9 @@ class CreateNotificationStatement(Statement):
 
 
 class DeleteStatement(Statement):
-    # `DELETE` statement.
+    """`DELETE` statement.
 
+    """
     def __init__(self, table_name, where=None):
         assert isinstance(table_name, Identifier)
         assert where is None or isinstance(where, Expression)
@@ -457,11 +487,11 @@ class DeleteStatement(Statement):
 
 
 class DropNotificationStatement(Statement):
-    # `DROP NOTIFICATION` statement.
+    """`DROP NOTIFICATION` statement.
 
+    """
     def __init__(self, notification_name):
         assert isinstance(notification_name, Identifier)
-
         self.notification_name = notification_name
 
     def __str__(self):
@@ -469,8 +499,9 @@ class DropNotificationStatement(Statement):
 
 
 class InsertStatement(Statement):
-    # `INSERT` statement.
+    """`INSERT` statement.
 
+    """
     def __init__(self, table_name, fields):
         assert isinstance(table_name, Identifier)
         assert isinstance(fields, dict)
@@ -486,8 +517,16 @@ class InsertStatement(Statement):
 
 
 class SelectStatement(Statement):
-    # `SELECT` statement.
+    """`SELECT` statement.
 
+    Attributes:
+      NO_TABLE (Identifier, static) - is used when no table is provided. So
+        this:
+          SELECT 1
+        Is actually equivalent to:
+          SELECT 1 FROM __no_table
+
+    """
     NO_TABLE = Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None, order=None, group=None,
@@ -509,41 +548,63 @@ class SelectStatement(Statement):
         self.limit = limit
         self.explain = explain
 
-    def __str__(self):
-        r = ''
-
-        if self.explain:
-            r = 'EXPLAIN '
-
-        r += "SELECT %s" % ', '.join([str(col) for col in self.columns])
-
-        if self.table_name != SelectStatement.NO_TABLE:
-            r += " FROM %s" % self.table_name
-
-        if self.where:
-            r += ' WHERE %s' % self.where
-
-        if self.group:
-            r += ' GROUP BY %s' % self.group
-
-        if self.order:
-            r += ' %s' % self.order
-
+    def __limit_to_sql(self):
         if self.limit:
-            r += ' %s' % self.limit
+            return ' %s' % self.limit
+
+        return ''
+
+    def __order_to_sql(self):
+        if self.order:
+            return ' %s' % self.order
+
+        return ''
+
+    def __group_to_sql(self):
+        if self.group:
+            return ' GROUP BY %s' % self.group
+
+        return ''
+
+    def __where_to_sql(self):
+        if self.where:
+            return ' WHERE %s' % self.where
+
+        return ''
+
+    def __table_to_sql(self):
+        if self.table_name != SelectStatement.NO_TABLE:
+            return " FROM %s" % self.table_name
+
+        return ''
+
+    def __str__(self):
+        r = 'EXPLAIN ' if self.explain else ''
+        r += "SELECT %s" % ', '.join([str(col) for col in self.columns])
+        r += self.__table_to_sql()
+        r += self.__where_to_sql()
+        r += self.__group_to_sql()
+        r += self.__order_to_sql()
+        r += self.__limit_to_sql()
 
         return r
 
     def contains_aggregate(self):
+        """Tests if any of the expressions in the `SELECT` clause contain
+        aggregate expressions.
+
+        """
         for col in self.columns:
-            if isinstance(col, FunctionCall) and col.is_aggregate():
+            if col.is_aggregate():
                 return True
+
         return False
 
 
 class UpdateStatement(Statement):
-    # `UPDATE` statement.
+    """`UPDATE` statement.
 
+    """
     def __init__(self, table_name, columns, where):
         assert isinstance(table_name, Identifier)
         assert isinstance(columns, list)
@@ -568,6 +629,9 @@ class UpdateStatement(Statement):
 
 
 class OrderByClause:
+    """An `ORDER BY` to be used with `SELECT`.
+
+    """
     def __init__(self, field_name, ascending):
         assert isinstance(field_name, Identifier)
         assert ascending is None or isinstance(ascending, bool)
@@ -586,6 +650,9 @@ class OrderByClause:
 
 
 class CreateIndexStatement(Statement):
+    """`CREATE INDEX` statement.
+
+    """
     def __init__(self, index_name, table_name, field):
         assert isinstance(index_name, Identifier)
         assert isinstance(table_name, Identifier)
@@ -604,6 +671,9 @@ class CreateIndexStatement(Statement):
 
 
 class DropTableStatement(Statement):
+    """`DROP TABLE` statement.
+
+    """
     def __init__(self, table_name):
         assert isinstance(table_name, Identifier)
 
@@ -614,9 +684,11 @@ class DropTableStatement(Statement):
 
 
 class DropIndexStatement(Statement):
+    """`DROP INDEX` statement.
+
+    """
     def __init__(self, index_name):
         assert isinstance(index_name, Identifier)
-
         self.index_name = index_name
 
     def __str__(self):
@@ -624,6 +696,14 @@ class DropIndexStatement(Statement):
 
 
 class LimitClause:
+    """A `LIMIT` clause to be used with a `SELECT` statement.
+
+    Attributes:
+      ALL (Value, static) - is used to represent the SQL `LIMIT ALL`. Even
+        though this is the same as having no limit it must be rendered out
+        exactly as it came in.
+
+    """
     ALL = Value(1000000000)
 
     def __init__(self, limit=None, offset=None):
@@ -633,14 +713,17 @@ class LimitClause:
         self.limit = limit
         self.offset = offset
 
-    def __str__(self):
-        sql = []
-
+    def __append_limit_to_sql(self, sql):
         if self.limit:
             limit = 'ALL' if self.limit == LimitClause.ALL else self.limit
             sql.append('LIMIT %s' % limit)
 
+    def __append_offset_to_sql(self, sql):
         if self.offset:
             sql.append('OFFSET %s' % self.offset)
 
+    def __str__(self):
+        sql = []
+        self.__append_limit_to_sql(sql)
+        self.__append_offset_to_sql(sql)
         return ' '.join(sql)
