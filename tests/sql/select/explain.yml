@@ -36,3 +36,15 @@ tests:
     result:
     - {"description": "Full scan of table 'foo'"}
     - {"description": "Filter: bar = \"baz\""}
+
+  explain_limit:
+    sql: EXPLAIN SELECT * FROM foo LIMIT 10
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "LIMIT 10"}
+
+  explain_offset:
+    sql: EXPLAIN SELECT * FROM foo OFFSET 15
+    result:
+    - {"description": "Full scan of table 'foo'"}
+    - {"description": "OFFSET 15"}

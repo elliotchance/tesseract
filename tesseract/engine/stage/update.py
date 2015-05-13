@@ -2,11 +2,9 @@ from tesseract.engine.stage.where import WhereStage
 
 
 class UpdateStage(WhereStage):
-    def __init__(self, input_page, offset, columns, where):
-        WhereStage.__init__(self, input_page, offset, where)
-
+    def __init__(self, input_page, offset, redis, columns, where):
+        WhereStage.__init__(self, input_page, offset, redis, where)
         assert isinstance(columns, list)
-
         self.columns = columns
 
     def action_on_match(self):
@@ -18,8 +16,8 @@ class UpdateStage(WhereStage):
             )
 
         lua.extend((
-            "data = cjson.encode(row)",
-            "redis.call('HSET', '%s', rowid, data)" % self.input_page,
+            self.input_table.lua_delete_record("row[':id']"),
+            self.input_table.lua_add_lua_record('row'),
         ))
 
         return '\n'.join(lua)

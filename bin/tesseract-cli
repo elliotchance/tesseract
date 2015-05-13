@@ -6,8 +6,8 @@ from os.path import dirname
 # This is to allow the server to be run before its installed properly.
 sys.path.append(dirname(__file__) + "/..")
 
-from tesseract.client import Client
 from tesseract.sql.ast import Expression
+from tesseract.client import Client
 
 # Connect.
 client = Client()

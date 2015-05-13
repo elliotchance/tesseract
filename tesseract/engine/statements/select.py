@@ -6,8 +6,9 @@ from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.ast import SelectStatement, EqualExpression, Identifier, \
-    Value
+from tesseract.sql.ast import EqualExpression, Identifier, Value
+from tesseract.sql.ast import SelectStatement
+from tesseract.engine.stage.limit import LimitStage
 from tesseract.server.protocol import Protocol
 
 
@@ -29,49 +30,51 @@ class Select(Statement):
         return self.run(redis, select.table_name, warnings, lua, args, result,
                         manager)
 
-
-    def compile_select(self, result, redis):
-        assert isinstance(result.statement, SelectStatement)
-
-        expression = result.statement
-        offset = 2
-        args = []
-
-        stages = StageManager()
-
-        # Compile WHERE stage.
+    def __compile_where(self, expression, redis, result, stages):
         if expression.where:
             index_found = False
 
             # Search for a possible index
-            if isinstance(expression.where, EqualExpression) and \
-                isinstance(expression.where.left, Identifier) and \
-                isinstance(expression.where.right, Value):
+            if isinstance(expression.where, EqualExpression) and isinstance(
+                    expression.where.left, Identifier) and isinstance(
+                    expression.where.right, Value):
                 for index_name in redis.hkeys('indexes'):
                     looking_for = '%s.%s' % (
-                        result.statement.table_name,
-                        expression.where.left
+                        result.statement.table_name, expression.where.left
                     )
-                    if redis.hget('indexes', index_name) == looking_for:
-                        stages.add(IndexStage, (index_name, expression.where.right))
+                    if redis.hget('indexes', index_name).decode() == looking_for:
+                        stages.add(IndexStage,
+                                   (str(index_name.decode()), expression.where.right))
                         index_found = True
                         break
 
-            if isinstance(expression.where, EqualExpression) and \
-                isinstance(expression.where.left, Value) and \
-                isinstance(expression.where.right, Identifier):
+            if isinstance(expression.where, EqualExpression) and isinstance(
+                    expression.where.left, Value) and isinstance(
+                    expression.where.right, Identifier):
                 for index_name in redis.hkeys('indexes'):
                     looking_for = '%s.%s' % (
-                        result.statement.table_name,
-                        expression.where.right
+                        result.statement.table_name, expression.where.right
                     )
-                    if redis.hget('indexes', index_name) == looking_for:
-                        stages.add(IndexStage, (index_name, expression.where.left))
+                    if redis.hget('indexes', index_name).decode() == looking_for:
+                        stages.add(IndexStage,
+                                   (str(index_name.decode()), expression.where.left))
                         index_found = True
                         break
 
             if not index_found:
                 stages.add(WhereStage, (expression.where,))
+
+    def compile_select(self, result, redis):
+        assert isinstance(result.statement, SelectStatement)
+        assert isinstance(redis, StrictRedis)
+
+        expression = result.statement
+        offset = 2
+        args = []
+
+        stages = StageManager(redis)
+
+        self.__compile_where(expression, redis, result, stages)
 
         # Compile the GROUP BY clause.
         if expression.group or expression.contains_aggregate():
@@ -94,6 +97,9 @@ end
         # Compile the `SELECT` columns
         if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
             stages.add(ExpressionStage, (expression.columns,))
+
+        if expression.limit:
+            stages.add(LimitStage, (expression.limit,))
 
         lua += stages.compile_lua(offset, expression.table_name)
 

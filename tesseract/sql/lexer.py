@@ -7,6 +7,7 @@ import ply.lex as lex
 from tesseract.sql.ast import Value, Identifier
 
 sql_keywords = (
+    'ALL',
     'AND',
     'ASC',
     'BETWEEN',
@@ -25,8 +26,10 @@ sql_keywords = (
     'IS',
     'ILIKE',
     'LIKE',
+    'LIMIT',
     'NOT',
     'NOTIFICATION',
+    'OFFSET',
     'ON',
     'OR',
     'ORDER',

@@ -1,16 +1,14 @@
-from tesseract.sql.ast import Value, Expression
+from tesseract.engine.table import TransientTable
+from tesseract.sql.ast import Value
 from tesseract.engine.stage.stage import Stage
 
 
 class IndexStage(Stage):
-    def __init__(self, input_page, offset, index_name, value):
-        assert isinstance(input_page, str)
-        assert isinstance(offset, int)
+    def __init__(self, input_table, offset, redis, index_name, value):
+        Stage.__init__(self, input_table, offset, redis)
         assert isinstance(index_name, str)
         assert isinstance(value, Value)
 
-        self.input_page = input_page
-        self.offset = offset
         self.index_name = index_name
         self.value = value
 
@@ -24,17 +22,17 @@ class IndexStage(Stage):
 
     def compile_lua(self):
         lua = []
+        output_table = TransientTable(self.redis)
 
-        # Clean output buffer.
-        lua.append("redis.call('DEL', 'index_result')")
-
-        # Iterate the page.
         lua.extend([
-            "local data = redis.call('HGET', 'index:myindex2', '%s')" % (
-                #self.index_name,
+            "local data = redis.call('HGET', 'index:%s', '%s')" % (
+                self.index_name,
                 self.value
             ),
-            "redis.call('HSET', 'index_result', '0', data)",
+            "if data ~= false then",
+            "local row = cjson.decode(data)",
+            output_table.lua_add_lua_record('row'),
+            "end",
         ])
 
-        return ('index_result', '\n'.join(lua), self.offset)
+        return (output_table, '\n'.join(lua), self.offset)

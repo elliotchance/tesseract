@@ -21,6 +21,7 @@ local function function_max(group, value)
     end
 end
 
+--noinspection UnusedDef
 local function function_max_post(unique_group, group)
     return redis.call('HGET', 'agg', group)
 end

@@ -12,7 +12,7 @@ class Update(Statement):
 
         statement = result.statement
 
-        stages = StageManager()
+        stages = StageManager(instance.redis)
         stages.add(UpdateStage, (statement.columns, statement.where))
         lua = stages.compile_lua(2, statement.table_name)
 
