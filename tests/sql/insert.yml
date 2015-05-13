@@ -1,3 +1,6 @@
+data:
+  index_test: []
+
 tests:
   fail_1:
     sql: INSERT
@@ -19,3 +22,14 @@ tests:
       Inserting into a table that doesn't exist is permitted because table only
       come into existance from inserting records into them.
     sql: 'INSERT INTO %table_name% {"foo": "bar"}'
+
+  inserted_value_will_be_available_in_index:
+    comment: |
+      When a record is inserted it should be avilable on the index immediatly.
+    data: index_test
+    sql:
+    - CREATE INDEX foo ON index_test (a)
+    - 'INSERT INTO index_test {"x": 1}'
+    - SELECT * FROM index_test WHERE x = 1
+    result:
+    - {"x": 1}
