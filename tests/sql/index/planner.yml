@@ -58,3 +58,19 @@ tests:
     result:
     - {"description": "Full scan of table 'blank'"}
     - {"description": "Filter: x IS number"}
+
+  equal_left:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x = 123
+    result:
+    - {"description": "Index lookup using myindex for value 123"}
+
+  equal_right:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE 123 = x
+    result:
+    - {"description": "Index lookup using myindex for value 123"}

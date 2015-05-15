@@ -36,7 +36,8 @@ class IndexStage(Stage):
         lua.extend([
             "local records = %s" % index.lua_lookup_exact(self.value.value),
             "for _, data in ipairs(records) do",
-            "local row = cjson.decode(%s[1])" % table.lua_get_lua_record('data'),
+            table.lua_get_lua_record('data'),
+            "local row = cjson.decode(irecords[1])",
             output_table.lua_add_lua_record('row'),
             "end",
         ])

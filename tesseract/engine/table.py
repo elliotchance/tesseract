@@ -89,18 +89,24 @@ class Table:
           lua (str): Some expression in Lua that contains the record ID.
 
         Returns:
-          A Lua call to fetch the record. The value returned will be the raw
-          JSON record and will have to be decoded if you need to access
-          properties.
+          Lua code that will fetch the record. The Lua variable "irecords" will
+          be exposed containing the raw JSON record. You will have to decode it
+          if you wish to access elements.
 
         """
         assert isinstance(lua, str)
 
-        return "redis.call('ZRANGEBYSCORE', '%s', tostring(%s), tostring(%s)) " % (
-            self._redis_key(),
-            lua,
-            lua,
-        )
+        return '\n'.join((
+            "local score = %s" % lua,
+            "if type(score) == 'string' then",
+            "  score = string.match(score, '%d+$')",
+            "else"
+            "  score = tostring(score)",
+            "end",
+            "local irecords = redis.call('ZRANGEBYSCORE', '%s', score, score) " % (
+                self._redis_key(),
+            ),
+        ))
 
     def lua_add_record(self, record):
         """Generate the Lua required to add a new record to the table. Redis

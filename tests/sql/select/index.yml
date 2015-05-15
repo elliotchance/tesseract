@@ -3,39 +3,29 @@ data:
   - {"x": 123}
   - {"x": 124}
   - {"x": 125}
-
-  v:
-  - {"a": null, "b": 1}
+  - {"x": null, "y": 1}
 
 tests:
-  explain_simple_index:
+  is_null:
     data: table1
     sql:
     - CREATE INDEX myindex ON table1 (x)
-    - EXPLAIN SELECT * FROM table1 WHERE x = 124
+    - SELECT * FROM table1 WHERE x IS null
     result:
-    - {"description": "Index lookup using myindex for value 124"}
+    - {"x": null, "y": 1}
 
-  simple_index_lookup:
+  exact_integer_left:
     data: table1
     sql:
-    - CREATE INDEX myindex2 ON table1 (x)
+    - CREATE INDEX myindex ON table1 (x)
     - SELECT * FROM table1 WHERE x = 124
     result:
     - {"x": 124}
 
-  explain_simple_index_reversed:
+  exact_integer_right:
     data: table1
     sql:
-    - CREATE INDEX myindex3 ON table1 (x)
-    - EXPLAIN SELECT * FROM table1 WHERE 124 = x
-    result:
-    - {"description": "Index lookup using myindex3 for value 124"}
-
-  simple_index_lookup_reversed:
-    data: table1
-    sql:
-    - CREATE INDEX myindex4 ON table1 (x)
+    - CREATE INDEX myindex ON table1 (x)
     - SELECT * FROM table1 WHERE 124 = x
     result:
     - {"x": 124}

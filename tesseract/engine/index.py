@@ -113,7 +113,7 @@ class IndexManager(object):
         table = PermanentTable(self._redis, table_name)
         for data in self._redis.zrange(table._redis_key(), 0, -1):
             row = json.loads(data.decode())
-            if isinstance(row[field], (int, float, bool)):
+            if row[field] is None or isinstance(row[field], (int, float, bool)):
                 index.add_record(row[field], row[':id'])
             else:
                 index.add_record(str(row[field]), row[':id'])
@@ -255,8 +255,7 @@ class Index(object):
           record_id (int): The record ID from the original record.
 
         """
-        if not (value is None or isinstance(value, (int, float, bool, str))):
-            pass
+        assert value is None or isinstance(value, (int, float, bool, str))
         assert isinstance(record_id, int)
 
         if isinstance(value, (int, float)):
@@ -282,12 +281,19 @@ class Index(object):
         if isinstance(value, (int, float)):
             return self.__lua_lookup_number_exact(value)
 
+        return self.__lua_lookup_nonnumber_exact(value)
+
     def __lua_lookup_number_exact(self, value):
         assert isinstance(value, (int, float))
         return "redis.call('ZRANGEBYSCORE', '%s', '%s', '%s')" % (
             self.__number_index_key(),
             value,
             value,
+        )
+
+    def __lua_lookup_nonnumber_exact(self, value):
+        return "redis.call('ZRANGEBYLEX', '%s', '[N', '(O')" % (
+            self.__nonnumber_index_key(),
         )
 
     def __add_number_value(self, value, record_id):
