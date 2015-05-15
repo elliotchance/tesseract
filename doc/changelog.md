@@ -70,8 +70,8 @@ v1.0.0-alpha2 (Binary Star)
     [[#11](https://github.com/elliotchance/tesseract/pull/11)]
 
 
-v1.0.0-alpha3 (Unreleased)
-==========================
+v1.0.0-alpha3 (Comet)
+=====================
 
 **Major**
 
