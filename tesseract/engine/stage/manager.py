@@ -1,5 +1,6 @@
 from tesseract.engine.stage.index import IndexStage
 from redis import StrictRedis
+from tesseract.engine.stage.where import ImpossibleWhereStage
 from tesseract.engine.table import PermanentTable
 
 
@@ -48,7 +49,9 @@ class StageManager(object):
     def explain(self, table_name):
         offset = 0
         steps = []
-        if len(self.stages) == 0 or self.stages[0]['class'] != IndexStage:
+
+        if len(self.stages) == 0 or self.stages[0]['class'] != IndexStage and \
+            self.stages[0]['class'] != ImpossibleWhereStage:
             steps.append({
                 "description": "Full scan of table '%s'" % table_name
             })

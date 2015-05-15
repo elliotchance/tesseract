@@ -34,3 +34,13 @@ class WhereStage(Stage):
 
     def action_on_match(self):
         return self.output_table.lua_add_lua_record('row')
+
+
+class ImpossibleWhereStage(Stage):
+    def explain(self):
+        return {
+            "description": "WHERE clause will never return records"
+        }
+
+    def compile_lua(self):
+        return (TransientTable(self.redis), '', self.offset)

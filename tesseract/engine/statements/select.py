@@ -6,7 +6,7 @@ from tesseract.engine.stage.group import GroupStage
 from tesseract.engine.stage.index import IndexStage
 from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
-from tesseract.engine.stage.where import WhereStage
+from tesseract.engine.stage.where import WhereStage, ImpossibleWhereStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement, Value
 from tesseract.engine.stage.limit import LimitStage
@@ -84,12 +84,22 @@ class Select(Statement):
         return False
 
     def __compile_where(self, expression, redis, result, stages):
-        """When compiling the WHERE clause we need to see if there is an
-        available index with __find_index() - hopefully there is. Otherwise we
-        fall back to a full table scan.
+        """When compiling the WHERE clause we need to do a few things:
+
+        1. Verify the WHERE clause is not impossible. This is when the
+           expression will always be false like 'x = null'.
+
+        2. See if there is an available index with __find_index() - hopefully
+           there is.
+
+        3. Otherwise we fall back to a full table scan.
 
         """
         if expression.where:
+            if expression.where.signature() == '@I = @Vn':
+                stages.add(ImpossibleWhereStage, ())
+                return
+
             index_found = self.__find_index(expression, redis, result, stages)
             if not index_found:
                 stages.add(WhereStage, (expression.where,))
