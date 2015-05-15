@@ -16,8 +16,6 @@ class IndexStage(Stage):
     def explain(self):
         if self.value.value is None:
             description = 'null'
-        elif self.value.value is True:
-            description = 'true'
         else:
             description = 'value %s' % self.value
 

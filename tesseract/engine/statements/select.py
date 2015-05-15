@@ -48,7 +48,7 @@ class Select(Statement):
         def is_to_value(e):
             if e.right.value == 'null':
                 return [Value(None)]
-            return [Value(True)]
+            return [Value(True if e.right.value == 'true' else False)]
 
         tn = result.statement.table_name
         rules = {

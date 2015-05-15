@@ -36,4 +36,12 @@ tests:
     - CREATE INDEX myindex ON blank (x)
     - EXPLAIN SELECT * FROM blank WHERE x IS true
     result:
-    - {"description": "Index lookup using myindex for true"}
+    - {"description": "Index lookup using myindex for value true"}
+
+  is_false:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x IS false
+    result:
+    - {"description": "Index lookup using myindex for value false"}
