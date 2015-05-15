@@ -17,3 +17,15 @@ tests:
     - EXPLAIN SELECT * FROM blank WHERE x IS null
     result:
     - {"description": "Index lookup using myindex for null"}
+
+  is_not_null:
+    comment: |
+      We do not have the ability to do inverse lookups, so fall back to a full
+      table scan.
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x IS NOT null
+    result:
+    - {"description": "Full scan of table 'blank'"}
+    - {"description": "Filter: x IS NOT null"}

@@ -381,7 +381,11 @@ class IsExpression(BinaryExpression):
         return '%s %s %s' % (str(self.left), self.operator, self.right.value)
 
     def signature(self):
-        return '%s IS %s' % (self.left.signature(), self.right.signature())
+        return '%s %s %s' % (
+            self.left.signature(),
+            self.operator,
+            self.right.signature()
+        )
 
 
 class NotExpression(Expression):
