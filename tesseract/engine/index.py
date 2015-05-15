@@ -111,7 +111,7 @@ class IndexManager(object):
         """
         index = Index(self._redis, table_name, index_name, field)
         table = PermanentTable(self._redis, table_name)
-        for data in self._redis.zrange(table._redis_key(), 0, -1):
+        for data in self._redis.zrange(table.redis_key(), 0, -1):
             row = json.loads(data.decode())
             if row[field] is None or isinstance(row[field], (int, float, bool)):
                 index.add_record(row[field], row[':id'])
@@ -307,7 +307,7 @@ class Index(object):
         type = self.__get_type_character(value)
         if type == self.TYPE_STRING:
             type += value
-            
+
         return "redis.call('ZRANGEBYLEX', '%s', '[%s:', '[%s:Z')" % (
             self.__nonnumber_index_key(),
             type,

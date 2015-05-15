@@ -1,5 +1,5 @@
-from tesseract.engine.stage.delete import DeleteStage
-from tesseract.engine.stage.manager import StageManager
+from tesseract.engine.stages import StageManager
+from tesseract.engine.stages import DeleteStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.instance import Instance
 from tesseract.engine.table import PermanentTable

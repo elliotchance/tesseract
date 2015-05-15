@@ -1,15 +1,7 @@
 import re
-from redis import StrictRedis
-from tesseract.engine.index import IndexManager
-from tesseract.engine.stage.expression import ExpressionStage
-from tesseract.engine.stage.group import GroupStage
-from tesseract.engine.stage.index import IndexStage
-from tesseract.engine.stage.manager import StageManager
-from tesseract.engine.stage.order import OrderStage
-from tesseract.engine.stage.where import WhereStage, ImpossibleWhereStage
+from tesseract.engine.stages import *
 from tesseract.engine.statements.statement import Statement
 from tesseract.sql.ast import SelectStatement, Value
-from tesseract.engine.stage.limit import LimitStage
 from tesseract.server.protocol import Protocol
 
 

@@ -67,7 +67,7 @@ class Table:
         assert isinstance(lua, str)
 
         return "redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
-            self._redis_key(),
+            self.redis_key(),
             lua,
             lua
         )
@@ -76,7 +76,7 @@ class Table:
         return '\n'.join((
             "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
             "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
-                self._redis_key(),
+                self.redis_key(),
                 lua_variable,
                 lua_variable
             )
@@ -104,7 +104,7 @@ class Table:
             "  score = tostring(score)",
             "end",
             "local irecords = redis.call('ZRANGEBYSCORE', '%s', score, score) " % (
-                self._redis_key(),
+                self.redis_key(),
             ),
         ))
 
@@ -126,7 +126,7 @@ class Table:
         record[':id'] = self.get_next_record_id()
 
         return "redis.call('ZADD', '%s', '%s', '%s') " % (
-            self._redis_key(),
+            self.redis_key(),
             record[':id'],
             json.dumps(record)
         )
@@ -135,7 +135,7 @@ class Table:
         assert isinstance(record, dict)
 
         record[':id'] = self.get_next_record_id()
-        self.redis.zadd(self._redis_key(), record[':id'], json.dumps(record))
+        self.redis.zadd(self.redis_key(), record[':id'], json.dumps(record))
         return record[':id']
 
     def lua_iterate(self, decode=False):
@@ -156,7 +156,7 @@ class Table:
             variable `row` will be available.
 
         """
-        zrange = "redis.call('ZRANGE', '%s', '0', '-1')" % self._redis_key()
+        zrange = "redis.call('ZRANGE', '%s', '0', '-1')" % self.redis_key()
         lua = "for _, data in ipairs(%s) do " % zrange
 
         if decode:
@@ -170,7 +170,7 @@ class Table:
     def get_next_record_id(self):
         return self.redis.incr(self._redis_record_id_key())
 
-    def _redis_key(self):
+    def redis_key(self):
         """Get the name of the Redis key.
 
         Returns:
@@ -195,7 +195,7 @@ class Table:
 
     def drop(self):
         self.__drop_all_indexes()
-        self.redis.delete(self._redis_key())
+        self.redis.delete(self.redis_key())
         self.redis.delete(self._redis_record_id_key())
 
 class PermanentTable(Table):

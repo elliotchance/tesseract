@@ -1,5 +1,5 @@
-from tesseract.engine.stage.manager import StageManager
-from tesseract.engine.stage.update import UpdateStage
+from tesseract.engine.stages import StageManager
+from tesseract.engine.stages import UpdateStage
 from tesseract.engine.statements.statement import Statement
 from tesseract.server.instance import Instance
 from tesseract.sql.ast import UpdateStatement

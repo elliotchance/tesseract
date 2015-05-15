@@ -1,7 +1,5 @@
-import json
 from tesseract.engine.index import IndexManager
 from tesseract.engine.statements.statement import Statement
-from tesseract.engine.table import PermanentTable
 from tesseract.server.instance import Instance
 from tesseract.server.protocol import Protocol
 from tesseract.sql.ast import CreateIndexStatement, DropIndexStatement

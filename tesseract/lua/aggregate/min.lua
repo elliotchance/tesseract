@@ -21,6 +21,7 @@ local function function_min(group, value)
     end
 end
 
+--noinspection UnusedDef
 local function function_min_post(unique_group, group)
     return redis.call('HGET', 'agg', group)
 end

@@ -1,7 +1,7 @@
 import json
 import os
-from tesseract.engine.stage.manager import StageManager
 from redis import StrictRedis
+from tesseract.engine.stages import StageManager
 from tesseract.engine.table import PermanentTable
 from tesseract.server.protocol import Protocol
 from tesseract.sql.ast import Identifier
@@ -59,7 +59,7 @@ class Statement(object):
         table = PermanentTable(redis, str(run.decode()))
         records = []
 
-        for record in redis.zrange(table._redis_key(), 0, -1):
+        for record in redis.zrange(table.redis_key(), 0, -1):
             record = json.loads(record.decode())
             record.pop(':id', None)
             records.append(record)

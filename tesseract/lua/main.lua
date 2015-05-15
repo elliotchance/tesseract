@@ -10,6 +10,7 @@ local records = redis.call('HVALS', ARGV[1])
 
 -- Iterate each record in the page.
 local matches = {}
+--noinspection UnusedDef
 for i, data in ipairs(records) do
     -- Each row is stored as a JSON string and needs to be decoded before we can
     -- use it.
