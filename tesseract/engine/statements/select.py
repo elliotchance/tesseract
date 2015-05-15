@@ -45,6 +45,11 @@ class Select(Statement):
           If an index was found True is returned, else False.
 
         """
+        def is_to_value(e):
+            if e.right.value == 'null':
+                return [Value(None)]
+            return [Value(True)]
+
         tn = result.statement.table_name
         rules = {
             '^@I = @V.$': {
@@ -57,7 +62,7 @@ class Select(Statement):
             },
             '^@I IS @V.$': {
                 'index_name': lambda e: '%s.%s' % (tn, e.left),
-                'args': lambda e: [Value(None)],
+                'args': is_to_value,
             },
         }
 

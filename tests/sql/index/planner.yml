@@ -29,3 +29,11 @@ tests:
     result:
     - {"description": "Full scan of table 'blank'"}
     - {"description": "Filter: x IS NOT null"}
+
+  is_true:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x IS true
+    result:
+    - {"description": "Index lookup using myindex for true"}
