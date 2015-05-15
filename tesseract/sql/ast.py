@@ -42,19 +42,26 @@ class Expression:
         """Any expression can be reduced into a signature. This is expected to
         be overridden by the appropriate child classes.
 
-        The signature should not contain spaces and each non-operator character
-        has a meaning, here are some examples:
+        The signature should contain spaces where tokens are separated and use
+        an "@" followed by a single character for distinct types. You can find
+        more information about these types in Value.signature() and
+        Identifier.signature().
 
-        expression   | signature
-        ------------ | ---------
-        123 + foo    | V+I
-        12 > bar - 3 | V>I-V
+        Some examples:
+
+        expression      | signature
+        --------------- | ---------
+        12.3 + foo      | @Vf + @I
+        12 > bar - true | @Vi > @I - @V1
+        baz IS NOT null | @I IS NOT @Vn
 
         The signatures are used for detecting specific expressions for things
         like indexes.
 
         Returns:
-          A string.
+          A string. If there is an exceptional case where a token cannot be made
+          into a reliable signature (or it is not implemented) the return value
+          should be "?".
 
         """
         return '?'
@@ -165,11 +172,32 @@ class Value(Expression):
         return (value, offset, [])
 
     def signature(self):
-        """A `V` for Value is used in signatures. This represents any value of
-        any kind.
+        """Values use a two 3 character signature:
+
+        value  | token
+        ------ | -----
+        null   | @Vn
+        true   | @V1
+        false  | @V0
+        int    | @Vi
+        float  | @Vf
+        string | @Vs
+        array  | @Vl
+        object | @Vd
+
+        The reason we use two characters prefixed with a "V" is to allow
+        regular expressions that do not care about the value type, for example
+        "/@V./" will safely match any value rather than the more brittle and
+        longer "/@[n01ifsld]/".
 
         """
-        return 'V'
+        if self.value is None:
+            return '@Vn'
+
+        if isinstance(self.value, bool):
+            return '@V%d' % int(self.value)
+
+        return '@V%s' % type(self.value).__name__[0]
 
 
 class Identifier(Expression):
@@ -190,8 +218,8 @@ class Identifier(Expression):
         return ('f(row, "%s")' % self.identifier, offset, [])
 
     def signature(self):
-        """A `I` for Identifier is used in signatures."""
-        return 'I'
+        """An "@I" for an Identifier is used in signatures."""
+        return '@I'
 
 
 class BinaryExpression(Expression):
@@ -229,7 +257,7 @@ class BinaryExpression(Expression):
         return self.left.is_aggregate() or self.right.is_aggregate()
 
     def signature(self):
-        return '%s%s%s' % (
+        return '%s %s %s' % (
             self.left.signature(),
             self.operator,
             self.right.signature()
@@ -351,6 +379,9 @@ class IsExpression(BinaryExpression):
 
     def __str__(self):
         return '%s %s %s' % (str(self.left), self.operator, self.right.value)
+
+    def signature(self):
+        return '%s IS %s' % (self.left.signature(), self.right.signature())
 
 
 class NotExpression(Expression):

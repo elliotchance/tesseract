@@ -1,4 +1,6 @@
+import re
 from redis import StrictRedis
+from tesseract.engine.index import IndexManager
 from tesseract.engine.stage.expression import ExpressionStage
 from tesseract.engine.stage.group import GroupStage
 from tesseract.engine.stage.index import IndexStage
@@ -6,7 +8,7 @@ from tesseract.engine.stage.manager import StageManager
 from tesseract.engine.stage.order import OrderStage
 from tesseract.engine.stage.where import WhereStage
 from tesseract.engine.statements.statement import Statement
-from tesseract.sql.ast import SelectStatement
+from tesseract.sql.ast import SelectStatement, Value
 from tesseract.engine.stage.limit import LimitStage
 from tesseract.server.protocol import Protocol
 
@@ -45,33 +47,45 @@ class Select(Statement):
         """
         tn = result.statement.table_name
         rules = {
-            'I=V': {
+            '^@I = @V.$': {
                 'index_name': lambda e: '%s.%s' % (tn, e.left),
                 'args': lambda e: [e.right],
             },
-            'V=I': {
+            '^@V. = @I$': {
                 'index_name': lambda e: '%s.%s' % (tn, e.right),
                 'args': lambda e: [e.left],
+            },
+            '^@I IS @V.$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': lambda e: [Value(None)],
             },
         }
 
         signature = expression.where.signature()
-        if signature in rules:
-            for index_name in redis.hkeys('indexes'):
+        rule = None
+        for r in rules.keys():
+            if re.match(r, signature):
+                rule = r
+                break
+
+        if rule:
+            index_manager = IndexManager.get_instance(redis)
+            indexes = index_manager.get_indexes_for_table(str(result.statement.table_name))
+            for index_name in indexes:
                 # noinspection PyCallingNonCallable
-                looking_for = rules[signature]['index_name'](expression.where)
+                looking_for = rules[rule]['index_name'](expression.where)
                 if redis.hget('indexes', index_name).decode() == looking_for:
                     # noinspection PyCallingNonCallable
-                    args = rules[signature]['args'](expression.where)
-                    args.insert(0, str(index_name.decode()))
+                    args = rules[rule]['args'](expression.where)
+                    args.insert(0, index_name)
                     stages.add(IndexStage, args)
                     return True
 
         return False
 
     def __compile_where(self, expression, redis, result, stages):
-        """WHen compiling the WHERE clause we need to see if there is an
-        available index with `__find_index()` - hopefully there is. Otherwise we
+        """When compiling the WHERE clause we need to see if there is an
+        available index with __find_index() - hopefully there is. Otherwise we
         fall back to a full table scan.
 
         """

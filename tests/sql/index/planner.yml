@@ -1,0 +1,19 @@
+comment: |
+  These tests are responsible for making sure the query planner uses indexes
+  when it should, but also does not use an index when it shouldn't.
+
+  At this time tesseract always uses an index even if the table is zero rows.
+  This may change in the future, but for now expect that the query planner
+  should always use an index if it fulfills the expression requirement.
+
+data:
+  blank: []
+
+tests:
+  is_null:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x IS null
+    result:
+    - {"description": "Index lookup using myindex for null"}

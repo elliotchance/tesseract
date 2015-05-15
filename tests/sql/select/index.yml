@@ -4,6 +4,9 @@ data:
   - {"x": 124}
   - {"x": 125}
 
+  v:
+  - {"a": null, "b": 1}
+
 tests:
   explain_simple_index:
     data: table1

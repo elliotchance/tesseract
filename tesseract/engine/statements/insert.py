@@ -1,4 +1,5 @@
 import json
+from tesseract.engine.index import IndexManager
 from tesseract.engine.statements.statement import Statement
 from tesseract.engine.table import TransientTable, PermanentTable
 from tesseract.server.protocol import Protocol
@@ -37,23 +38,18 @@ class Insert(Statement):
             self.__publish_notification(data, execute, notification, publish,
                                         redis)
 
-    def __add_to_index(self, data, redis, result):
-        for index_name in redis.hkeys('indexes'):
-            looking_for = '%s.' % result.statement.table_name
-            if str(redis.hget('indexes', index_name)).startswith(looking_for):
-                redis.hset(
-                    'index:%s' % index_name.decode(),
-                    result.statement.fields['x'],
-                    data
-                )
-
     def execute(self, result, instance):
         table = PermanentTable(instance.redis, str(result.statement.table_name))
         data = Expression.to_sql(result.statement.fields)
 
-        self.__add_to_index(data, instance.redis, result)
+        record_id = table.add_record(json.loads(data))
 
-        table.add_record(json.loads(data))
+        manager = IndexManager.get_instance(instance.redis)
+        indexes = manager.get_indexes_for_table(
+            str(result.statement.table_name)
+        )
+        for index in indexes.values():
+            index.add_record(result.statement.fields[index.field_name].value, record_id)
 
         self.__publish_notifications(
             instance.redis,

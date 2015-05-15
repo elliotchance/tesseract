@@ -1,7 +1,3 @@
-import json
-import random
-from redis import StrictRedis
-
 """A table represents a permanent or temporary set of records. Table are not
 always public, they can also be intermediately steps during a query. This module
 provides ways to manipulate tables - abstracted away from Redis.
@@ -37,6 +33,11 @@ stored:
    not need to be retrieved when records are iterated.
 
 """
+
+import json
+import random
+from redis import StrictRedis
+
 
 class Table:
     """The base functionality of a table.
@@ -81,6 +82,26 @@ class Table:
             )
         ))
 
+    def lua_get_lua_record(self, lua):
+        """Fetch a record by its ID.
+
+        Arguments:
+          lua (str): Some expression in Lua that contains the record ID.
+
+        Returns:
+          A Lua call to fetch the record. The value returned will be the raw
+          JSON record and will have to be decoded if you need to access
+          properties.
+
+        """
+        assert isinstance(lua, str)
+
+        return "redis.call('ZRANGEBYSCORE', '%s', tostring(%s), tostring(%s)) " % (
+            self._redis_key(),
+            lua,
+            lua,
+        )
+
     def lua_add_record(self, record):
         """Generate the Lua required to add a new record to the table. Redis
         does not require all the scores to be unique - however to be able to
@@ -109,6 +130,7 @@ class Table:
 
         record[':id'] = self.get_next_record_id()
         self.redis.zadd(self._redis_key(), record[':id'], json.dumps(record))
+        return record[':id']
 
     def lua_iterate(self, decode=False):
         """Generate the Lua required to iterate the records in a table.
