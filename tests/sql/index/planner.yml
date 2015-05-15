@@ -45,3 +45,16 @@ tests:
     - EXPLAIN SELECT * FROM blank WHERE x IS false
     result:
     - {"description": "Index lookup using myindex for value false"}
+
+  is_number:
+    comment: |
+      Only null, true and false can be looked up by value. The other types are
+      actually more complicated range queries so we must fall back to full table
+      scans.
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x IS number
+    result:
+    - {"description": "Full scan of table 'blank'"}
+    - {"description": "Filter: x IS number"}

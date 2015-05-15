@@ -48,7 +48,12 @@ class Select(Statement):
         def is_to_value(e):
             if e.right.value == 'null':
                 return [Value(None)]
-            return [Value(True if e.right.value == 'true' else False)]
+            if e.right.value == 'true':
+                return [Value(True)]
+            if e.right.value == 'false':
+                return [Value(False)]
+
+            return []
 
         tn = result.statement.table_name
         rules = {
@@ -82,9 +87,10 @@ class Select(Statement):
                 if redis.hget('indexes', index_name).decode() == looking_for:
                     # noinspection PyCallingNonCallable
                     args = rules[rule]['args'](expression.where)
-                    args.insert(0, index_name)
-                    stages.add(IndexStage, args)
-                    return True
+                    if len(args) > 0:
+                        args.insert(0, index_name)
+                        stages.add(IndexStage, args)
+                        return True
 
         return False
 
