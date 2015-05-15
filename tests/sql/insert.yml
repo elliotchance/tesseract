@@ -1,5 +1,5 @@
 data:
-  index_test: []
+  indextest: []
 
 tests:
   fail_1:
@@ -26,10 +26,10 @@ tests:
   inserted_value_will_be_available_in_index:
     comment: |
       When a record is inserted it should be avilable on the index immediatly.
-    data: index_test
+    data: indextest
     sql:
-    - CREATE INDEX foo ON index_test (x)
-    - 'INSERT INTO index_test {"x": 1}'
-    - SELECT * FROM index_test WHERE x = 1
+    - CREATE INDEX foo ON indextest (x)
+    - 'INSERT INTO indextest {"x": 1}'
+    - SELECT * FROM indextest WHERE x = 1
     result:
     - {"x": 1}

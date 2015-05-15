@@ -85,6 +85,19 @@ tests:
     sql: 'SELECT 123'
 ```
 
+This is also used at the root of the document to comment on the entire test
+suite like:
+
+```yml
+comment: |
+  This file is responsible for stuff.
+
+tests:
+  my_test:
+    comment: Test everything!
+    sql: 'SELECT 123'
+```
+
 ### Repeating Tests (`repeat`)
 
 If a test lacks some predictability or you need to test the outcome multiple
