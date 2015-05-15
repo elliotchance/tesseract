@@ -134,8 +134,8 @@ def process_file(file):
                       test['result'])
         if 'result-unordered' in test:
             out.write("            expected = %s\n" % test['result-unordered'])
-            out.write("            a = sorted([json.dumps(r) for r in result['data']])\n")
-            out.write("            b = sorted([json.dumps(r) for r in expected])\n")
+            out.write("            a = sorted([json.dumps(r, sort_keys=True) for r in result['data']])\n")
+            out.write("            b = sorted([json.dumps(r, sort_keys=True) for r in expected])\n")
             out.write("            self.assertEqual('\\n'.join(a), '\\n'.join(b))\n")
 
         # If there are warnings we need to assert those at the end.
