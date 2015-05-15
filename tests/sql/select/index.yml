@@ -2,6 +2,7 @@ data:
   table1:
   - {"x": 123}
   - {"x": 124}
+  - {"x": "foo bar"}
   - {"x": 125}
   - {"x": null, "y": 1}
   - {"x": true, "y": 2}
@@ -32,6 +33,22 @@ tests:
     result:
     - {"x": false, "y": 3}
 
+  equals_true:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - SELECT * FROM table1 WHERE x = true
+    result:
+    - {"x": true, "y": 2}
+
+  equals_false:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - SELECT * FROM table1 WHERE x = false
+    result:
+    - {"x": false, "y": 3}
+
   exact_integer_left:
     data: table1
     sql:
@@ -47,3 +64,19 @@ tests:
     - SELECT * FROM table1 WHERE 124 = x
     result:
     - {"x": 124}
+
+  exact_string_left:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - SELECT * FROM table1 WHERE x = "foo bar"
+    result:
+    - {"x": "foo bar"}
+
+  exact_string_right:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - SELECT * FROM table1 WHERE "foo bar" = x
+    result:
+    - {"x": "foo bar"}

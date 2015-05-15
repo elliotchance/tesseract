@@ -74,3 +74,19 @@ tests:
     - EXPLAIN SELECT * FROM blank WHERE 123 = x
     result:
     - {"description": "Index lookup using myindex for value 123"}
+
+  equal_left_string:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE x = "a"
+    result:
+    - {"description": "Index lookup using myindex for value \"a\""}
+
+  equal_right_string:
+    data: blank
+    sql:
+    - CREATE INDEX myindex ON blank (x)
+    - EXPLAIN SELECT * FROM blank WHERE "b" = x
+    result:
+    - {"description": "Index lookup using myindex for value \"b\""}

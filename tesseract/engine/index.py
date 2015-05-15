@@ -304,16 +304,14 @@ class Index(object):
         )
 
     def __lua_lookup_nonnumber_exact(self, value):
-        if value is None:
-            range = "'[N', '(O'"
-        elif value is True:
-            range = "'[T', '(U'"
-        else:
-            range = "'[F', '(G'"
-
-        return "redis.call('ZRANGEBYLEX', '%s', %s)" % (
+        type = self.__get_type_character(value)
+        if type == self.TYPE_STRING:
+            type += value
+            
+        return "redis.call('ZRANGEBYLEX', '%s', '[%s:', '[%s:Z')" % (
             self.__nonnumber_index_key(),
-            range,
+            type,
+            type,
         )
 
     def __add_number_value(self, value, record_id):
