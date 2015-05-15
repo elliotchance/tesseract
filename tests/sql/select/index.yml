@@ -5,6 +5,7 @@ data:
   - {"x": 125}
   - {"x": null, "y": 1}
   - {"x": true, "y": 2}
+  - {"x": false, "y": 3}
 
 tests:
   is_null:
@@ -22,6 +23,14 @@ tests:
     - SELECT * FROM table1 WHERE x IS true
     result:
     - {"x": true, "y": 2}
+
+  is_false:
+    data: table1
+    sql:
+    - CREATE INDEX myindex ON table1 (x)
+    - SELECT * FROM table1 WHERE x IS false
+    result:
+    - {"x": false, "y": 3}
 
   exact_integer_left:
     data: table1

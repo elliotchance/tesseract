@@ -1,7 +1,7 @@
 """An index is used to speed up lookup operations. You can expect that these
 work exactly the same as any other RDBMS."""
-import json
 
+import json
 from redis import StrictRedis
 from tesseract.engine.table import PermanentTable
 
@@ -284,6 +284,15 @@ class Index(object):
         return self.__lua_lookup_nonnumber_exact(value)
 
     def __is_number(self, value):
+        """Test if a value should be considered for the "number" index.
+
+        This is mainly to keep the repeating logic in one place and also a
+        bool is a subclass of int so we have to be careful with that as well.
+
+        Returns:
+          True if this value should be in the number index, otherwise False.
+
+        """
         return isinstance(value, (int, float)) and not isinstance(value, bool)
 
     def __lua_lookup_number_exact(self, value):
@@ -297,8 +306,11 @@ class Index(object):
     def __lua_lookup_nonnumber_exact(self, value):
         if value is None:
             range = "'[N', '(O'"
-        else:
+        elif value is True:
             range = "'[T', '(U'"
+        else:
+            range = "'[F', '(G'"
+
         return "redis.call('ZRANGEBYLEX', '%s', %s)" % (
             self.__nonnumber_index_key(),
             range,
@@ -308,13 +320,21 @@ class Index(object):
         self._redis.zadd(self.__number_index_key(), value, record_id)
 
     def __add_nonnumber_value(self, value, record_id):
+        """Add a nonnumber value to the index.
+
+        It is important that they all have the same score (in this case zero)
+        otherwise when select the data back with ZRANGEBYLEX it does all sorts
+        of crazy things. Fortunately the score is no use to use as we get the
+        record ID from the value.
+
+        """
         type = self.__get_type_character(value)
         if isinstance(value, str):
             redis_value = '%s%s:%s' % (type, value, record_id)
         else:
             redis_value = '%s:%s' % (type, record_id)
 
-        self._redis.zadd(self.__nonnumber_index_key(), record_id, redis_value)
+        self._redis.zadd(self.__nonnumber_index_key(), 0, redis_value)
 
     def __number_index_key(self):
         return 'index:%s:%s:number' % (self.table_name, self.index_name)
