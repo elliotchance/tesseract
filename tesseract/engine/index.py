@@ -258,7 +258,7 @@ class Index(object):
         assert value is None or isinstance(value, (int, float, bool, str))
         assert isinstance(record_id, int)
 
-        if isinstance(value, (int, float)):
+        if self.__is_number(value):
             self.__add_number_value(value, record_id)
         else:
             self.__add_nonnumber_value(value, record_id)
@@ -278,10 +278,13 @@ class Index(object):
         """
         assert value is None or isinstance(value, (int, float, bool, str))
 
-        if isinstance(value, (int, float)):
+        if self.__is_number(value):
             return self.__lua_lookup_number_exact(value)
 
         return self.__lua_lookup_nonnumber_exact(value)
+
+    def __is_number(self, value):
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
 
     def __lua_lookup_number_exact(self, value):
         assert isinstance(value, (int, float))
@@ -292,8 +295,13 @@ class Index(object):
         )
 
     def __lua_lookup_nonnumber_exact(self, value):
-        return "redis.call('ZRANGEBYLEX', '%s', '[N', '(O')" % (
+        if value is None:
+            range = "'[N', '(O'"
+        else:
+            range = "'[T', '(U'"
+        return "redis.call('ZRANGEBYLEX', '%s', %s)" % (
             self.__nonnumber_index_key(),
+            range,
         )
 
     def __add_number_value(self, value, record_id):
