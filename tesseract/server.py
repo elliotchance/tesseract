@@ -1,14 +1,11 @@
-import json
 import socket
-from tesseract.engine.statements import *
-from tesseract.server.instance import Instance
-from tesseract.server.protocol import Protocol
-import tesseract.sql.parser as parser
-from tesseract.sql.ast import *
+import tesseract.parser as parser
+from tesseract.statements import *
 
 
 try: # pragma: no cover
     # Python 2.x
+    # noinspection PyUnresolvedReferences
     from thread import start_new_thread
 except: # pragma: no cover
     # Python 3.x

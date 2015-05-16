@@ -1,6 +1,6 @@
 import ply.yacc as yacc
-import tesseract.sql.lexer as lexer
-from tesseract.sql.ast import *
+import tesseract.lexer as lexer
+from tesseract.ast import *
 
 """This file contains all the rules for the lexer to parse SQL statements. It is
 to have all the rules listed in alphabetical order. Each of the parser rules has

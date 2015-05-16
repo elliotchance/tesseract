@@ -1,10 +1,7 @@
 import ply.lex as lex
 
-# Lexer
-# =====
-
 # SQL keywords.
-from tesseract.sql.ast import Value, Identifier
+from tesseract.ast import Value, Identifier
 
 sql_keywords = (
     'ALL',
@@ -105,18 +102,21 @@ def t_IDENTIFIER(t):
     # Expression for an identifier or keyword.
     r'[a-zA-Z_][a-zA-Z_0-9]*'
 
+    assert isinstance(t, lex.LexToken)
+    v = str(t.value).upper()
+
     # Check for value keywords.
-    if t.value.upper() == 'NULL':
+    if v == 'NULL':
         t.value = Value(None)
-    elif t.value.upper() == 'TRUE':
+    elif v == 'TRUE':
         t.value = Value(True)
-    elif t.value.upper() == 'FALSE':
+    elif v == 'FALSE':
         t.value = Value(False)
 
     # Check for reserved words. Be sure to convert all identifiers to upper
     # case.
-    elif t.value.upper() in sql_keywords:
-        t.type = t.value.upper()
+    elif v in sql_keywords:
+        t.type = v
         t.value = t.type
 
     # If all the above fail then it really is an identifier.

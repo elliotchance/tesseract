@@ -39,7 +39,7 @@ def process_file(file):
 
     out.write("from unittest import TestCase\n")
     out.write("from tesseract.server import Server\n")
-    out.write("import tesseract.sql.parser as parser\n")
+    out.write("import tesseract.parser as parser\n")
     out.write("import json\n")
     out.write("import random\n\n")
 

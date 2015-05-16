@@ -3,7 +3,7 @@ work exactly the same as any other RDBMS."""
 
 import json
 from redis import StrictRedis
-from tesseract.engine.table import PermanentTable
+from tesseract.table import PermanentTable
 
 
 class IndexManager(object):

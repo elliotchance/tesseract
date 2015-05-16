@@ -1,8 +1,7 @@
 import abc
-from redis import StrictRedis
-from tesseract.engine.index import IndexManager
-from tesseract.engine.table import Table, PermanentTable, TransientTable
-from tesseract.sql.ast import Identifier, Expression, Value, LimitClause, \
+from tesseract.index import IndexManager
+from tesseract.table import *
+from tesseract.ast import Identifier, Expression, Value, LimitClause, \
     OrderByClause
 
 

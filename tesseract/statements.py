@@ -1,12 +1,10 @@
-import json
 import os
 import re
-from tesseract.engine.stages import *
-from tesseract.engine.stages import DeleteStage
-from tesseract.server.instance import Instance
-from tesseract.engine.table import PermanentTable
-from tesseract.server.protocol import Protocol
-from tesseract.sql.ast import *
+from tesseract.stages import *
+from tesseract.instance import Instance
+from tesseract.table import PermanentTable
+from tesseract.protocol import Protocol
+from tesseract.ast import *
 
 
 class Statement(object):
