@@ -1,13 +1,6 @@
 import json
 import socket
-from tesseract.engine.statements.delete import Delete
-from tesseract.engine.statements.indexes import CreateIndex, DropIndex
-from tesseract.engine.statements.insert import Insert
-from tesseract.engine.statements.notifications import CreateNotification, \
-    DropNotification
-from tesseract.engine.statements.select import Select
-from tesseract.engine.statements.tables import DropTable
-from tesseract.engine.statements.update import Update
+from tesseract.engine.statements import *
 from tesseract.server.instance import Instance
 from tesseract.server.protocol import Protocol
 import tesseract.sql.parser as parser
