@@ -6,7 +6,7 @@ from os.path import dirname
 # This is to allow the server to be run before its installed properly.
 sys.path.append(dirname(__file__) + "/..")
 
-from tesseract.sql.ast import Expression
+from tesseract.ast import Expression
 from tesseract.client import Client
 
 # Connect.
@@ -25,11 +25,7 @@ while True:
         print("Bye.")
         break
 
-    # Execute the SQL.
-    request = {
-        "sql": sql,
-    }
-    result = client.send(request)
+    result = client.execute(sql)
 
     if not result['success']:
         # There was something wrong, lets print out the error.
