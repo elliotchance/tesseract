@@ -574,6 +574,7 @@ def p_string(p):
 def p_transaction_statement(p):
     """
         transaction_statement : START TRANSACTION
+                              | BEGIN
     """
     p[0] = StartTransactionStatement()
 

@@ -1,3 +1,7 @@
 tests:
   parser_start_transaction:
     sql: START TRANSACTION
+
+  parser_begin:
+    sql: BEGIN
+    as: START TRANSACTION

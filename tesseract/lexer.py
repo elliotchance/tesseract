@@ -9,6 +9,7 @@ sql_keywords = (
     'ALL',
     'AND',
     'ASC',
+    'BEGIN',
     'BETWEEN',
     'BY',
     'CREATE',
