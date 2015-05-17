@@ -573,8 +573,9 @@ def p_string(p):
 
 def p_transaction_statement(p):
     """
-        transaction_statement : START TRANSACTION
-                              | BEGIN
+        transaction_statement : BEGIN
+                              | BEGIN TRANSACTION
+                              | START TRANSACTION
     """
     p[0] = StartTransactionStatement()
 
