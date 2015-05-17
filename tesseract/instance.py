@@ -2,8 +2,8 @@ import redis
 
 class Instance:
     """An instance contains all the state of one instance. It is the job of the
-    `Server` to create, maintain and interact with one instance. It is possible
-    in the future we will let the `Server` utilise several instances for
+    Server to create, maintain and interact with one instance. It is possible
+    in the future we will let the Server utilise several instances for
     sharding against multiple Redis nodes - but for now lets keep it simple.
 
     """

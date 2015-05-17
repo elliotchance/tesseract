@@ -1,13 +1,12 @@
-import ply.yacc as yacc
-import tesseract.lexer as lexer
-from tesseract.ast import *
-
 """This file contains all the rules for the lexer to parse SQL statements. It is
 to have all the rules listed in alphabetical order. Each of the parser rules has
 a doc tag that explain the rule - this is ingested by Ply but it is important
 that 4 spaces prefix so that it is formatted correctly in docs.
-
 """
+
+import ply.yacc as yacc
+import tesseract.lexer as lexer
+from tesseract.ast import *
 
 # Load in the tokens from lexer.
 tokens = lexer.tokens

@@ -1,9 +1,9 @@
 import os
 import re
+from tesseract.client import Protocol
 from tesseract.stages import *
 from tesseract.instance import Instance
 from tesseract.table import PermanentTable
-from tesseract.protocol import Protocol
 from tesseract.ast import *
 
 
@@ -159,8 +159,8 @@ class Insert(Statement):
         self.__publish_notifications(
             instance.redis,
             instance.notifications,
-            instance.server.publish,
-            instance.server.execute,
+            instance.server._publish,
+            instance.server._execute,
             data,
             result
         )

@@ -1,6 +1,8 @@
-import ply.lex as lex
+"""This is the lexer for the SQL parser. It handle converting the SQL into a
+stream of tokens that are ingested with the parser.py module.
+"""
 
-# SQL keywords.
+import ply.lex as lex
 from tesseract.ast import Value, Identifier
 
 sql_keywords = (
@@ -37,7 +39,6 @@ sql_keywords = (
     'WHERE',
 )
 
-# Operators.
 operators = (
     'CARET',
     'COLON',
@@ -62,7 +63,6 @@ operators = (
     'TIMES',
 )
 
-# Values and identifiers.
 expression_types = (
     'NUMBER',
     'IDENTIFIER',
@@ -152,12 +152,9 @@ def t_STRING_SINGLE(t):
 t_ignore = " \n\t\r"
 
 def t_error(token):
-    """
-    Handle an unknown token.
-    :type token: LexToken
-    """
+    """Handle an unknown token."""
+    assert isinstance(token, lex.LexToken)
     raise RuntimeError("Unexpected token %s." % token.value)
-
 
 # Build the lexer.
 lex.lex()

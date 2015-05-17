@@ -1,5 +1,7 @@
 """An index is used to speed up lookup operations. You can expect that these
-work exactly the same as any other RDBMS."""
+work exactly the same as any other RDBMS. See each class for further details
+about implementation and examples.
+"""
 
 import json
 from redis import StrictRedis
@@ -14,7 +16,6 @@ class IndexManager(object):
       _redis (StrictRedis): This is the Redis connection.
       INDEXES_KEY (str): The Redis key that contains all the information about
         all indexes.
-
     """
     INDEXES_KEY = 'indexes'
 
@@ -24,12 +25,13 @@ class IndexManager(object):
         is not guaranteed to be a singleton but it may hold some state that
         allows caching to be more effective.
 
+        Arguments:
+          redis (StrictRedis): The Redis connection.
+
         Returns:
           A new or existing instance of IndexManager.
-
         """
         assert isinstance(redis, StrictRedis)
-
         return IndexManager(redis)
 
     def __init__(self, redis):
@@ -38,10 +40,8 @@ class IndexManager(object):
 
         Arguments:
           redis (StrictRedis): The Redis connection.
-
         """
         assert isinstance(redis, StrictRedis)
-
         self._redis = redis
 
     def get_indexes_for_table(self, table_name):
@@ -54,7 +54,6 @@ class IndexManager(object):
 
         Returns:
           An dictionary of Index objects where the key is the name of the index.
-
         """
         assert isinstance(table_name, str)
 
@@ -81,7 +80,6 @@ class IndexManager(object):
 
         Returns:
           An Index object if the index exists, otherwise False.
-
         """
         assert isinstance(index_name, str)
 
@@ -107,41 +105,58 @@ class IndexManager(object):
 
         Returns:
           An Index object with the newly created index.
-
         """
-        index = Index(self._redis, table_name, index_name, field)
-        table = PermanentTable(self._redis, table_name)
-        for data in self._redis.zrange(table.redis_key(), 0, -1):
-            row = json.loads(data.decode())
-            if row[field] is None or isinstance(row[field], (int, float, bool)):
-                index.add_record(row[field], row[':id'])
-            else:
-                index.add_record(str(row[field]), row[':id'])
+        assert isinstance(index_name, str)
+        assert isinstance(table_name, str)
+        assert isinstance(field, str)
 
-        self._redis.hset(
-            self.INDEXES_KEY,
-            index_name,
-            '%s.%s' % (table_name, field)
-        )
+        index = self.__build_index(field, index_name, table_name)
+        self.__register_index(field, index_name, table_name)
 
         return index
 
     def drop_index(self, index_name):
         """Drop (delete) an index by name.
 
-        TODO: This does not drop the actual index on the reference to it.
-
         Arguments:
           index_name (str): The name of the index.
 
         Returns:
           True if the index was dropped. False if the index did not exist.
-
         """
         assert isinstance(index_name, str)
 
+        index = self.get_index(index_name)
+        if index:
+            index._drop()
+
         result = self._redis.hdel(self.INDEXES_KEY, index_name)
         return result == '1'
+
+    def __register_index(self, field, index_name, table_name):
+        """Make the index visible to the query planner."""
+        value = '%s.%s' % (table_name, field)
+        self._redis.hset(self.INDEXES_KEY, index_name, value)
+
+    def __build_index(self, field, index_name, table_name):
+        """Build the index now. This may take some time if there are a lot of
+        values to index.
+        """
+        index = Index(self._redis, table_name, index_name, field)
+        table = PermanentTable(self._redis, table_name)
+
+        for data in self._redis.zrange(table.redis_key(), 0, -1):
+            self.__index_value(data, field, index)
+
+        return index
+
+    def __index_value(self, data, field, index):
+        row = json.loads(data.decode())
+
+        if row[field] is None or isinstance(row[field], (int, float, bool)):
+            index.add_record(row[field], row[':id'])
+        else:
+            index.add_record(str(row[field]), row[':id'])
 
 
 class Index(object):
@@ -218,6 +233,7 @@ class Index(object):
       table_name (str): The name of the table this index belongs to.
       index_name (str): The name of the index. This will be globally unique
         across all tables and indexes.
+      field_name (str): The name of the field that is in the index.
       _redis (StrictRedis): The Redis connection.
 
     """
@@ -235,7 +251,6 @@ class Index(object):
           table_name (str): The name of the table.
           index_name (str): The name of the index.
           field_name (str): The name of the field that is indexed.
-
         """
         assert isinstance(redis, StrictRedis)
         assert isinstance(table_name, str)
@@ -253,7 +268,6 @@ class Index(object):
         Arguments:
           value (None, int, float, bool or str): The value to be indexed.
           record_id (int): The record ID from the original record.
-
         """
         assert value is None or isinstance(value, (int, float, bool, str))
         assert isinstance(record_id, int)
@@ -274,7 +288,6 @@ class Index(object):
 
           >>> index = Index('a', 'b')
           >>> lua = "local records = %s" % index.lua_lookup_exact()
-
         """
         assert value is None or isinstance(value, (int, float, bool, str))
 
@@ -282,6 +295,14 @@ class Index(object):
             return self.__lua_lookup_number_exact(value)
 
         return self.__lua_lookup_nonnumber_exact(value)
+
+    def _drop(self):
+        """This is an internal method and should never be called.
+
+        If you want to drop an index use the IndexManager.drop_index() method.
+        """
+        self._redis.delete(self.__number_index_key())
+        self._redis.delete(self.__nonnumber_index_key())
 
     def __is_number(self, value):
         """Test if a value should be considered for the "number" index.
@@ -291,7 +312,6 @@ class Index(object):
 
         Returns:
           True if this value should be in the number index, otherwise False.
-
         """
         return isinstance(value, (int, float)) and not isinstance(value, bool)
 
@@ -315,6 +335,7 @@ class Index(object):
         )
 
     def __add_number_value(self, value, record_id):
+        """Add a number value to the index."""
         self._redis.zadd(self.__number_index_key(), value, record_id)
 
     def __add_nonnumber_value(self, value, record_id):
@@ -324,7 +345,6 @@ class Index(object):
         otherwise when select the data back with ZRANGEBYLEX it does all sorts
         of crazy things. Fortunately the score is no use to use as we get the
         record ID from the value.
-
         """
         type = self.__get_type_character(value)
         if isinstance(value, str):
@@ -335,12 +355,28 @@ class Index(object):
         self._redis.zadd(self.__nonnumber_index_key(), 0, redis_value)
 
     def __number_index_key(self):
+        """This is the redis key that contains the sorted set of numbers for the
+        index.
+
+        Returns:
+          A string key.
+        """
         return 'index:%s:%s:number' % (self.table_name, self.index_name)
 
     def __nonnumber_index_key(self):
+        """This is the redis key that contains the sorted set of nonnumbers for
+        the index.
+
+        Returns:
+          A string key.
+        """
         return 'index:%s:%s:nonnumber' % (self.table_name, self.index_name)
 
     def __get_type_character(self, value):
+        """When indexing nonnumbers each indexed value must be prefixed with a
+        single character for its type. This is explained in more detail in the
+        class description.
+        """
         if value is None:
             return self.TYPE_NULL
 

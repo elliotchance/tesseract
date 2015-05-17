@@ -53,16 +53,30 @@ class Table:
 
     """
     def __init__(self, redis, table_name):
+        """Initialise the base class for the table. You should not use this, use
+        one of the subclasses instead.
+
+        Arguments:
+          redis (StrictRedis): The Redis connection.
+          table_name (str): The name of the table.
+        """
         assert isinstance(redis, StrictRedis)
         assert isinstance(table_name, str)
-
         self.redis = redis
         self.table_name = table_name
 
     def lua_delete_record(self, lua):
-        """Generate the Lua to delete a record based on a Lua expression. This
-        Lua expression could be a variable.
+        """Generate the Lua to delete a record based on a Lua expression.
 
+        Note:
+          The ``lua`` is executed twice so it is much safer to provide a single
+          variable name.
+
+        Arguments:
+          lua (str): A lua expression (preferably a variable).
+
+        Returns:
+          A string containing Lua code.
         """
         assert isinstance(lua, str)
 
