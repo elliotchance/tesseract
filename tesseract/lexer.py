@@ -34,6 +34,7 @@ sql_keywords = (
     'ON',
     'OR',
     'ORDER',
+    'ROLLBACK',
     'SELECT',
     'SET',
     'START',

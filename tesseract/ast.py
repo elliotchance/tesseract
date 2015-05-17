@@ -772,3 +772,8 @@ class StartTransactionStatement(Statement):
 class CommitTransactionStatement(Statement):
     def __str__(self):
         return 'COMMIT'
+
+
+class RollbackTransactionStatement(Statement):
+    def __str__(self):
+        return 'ROLLBACK'

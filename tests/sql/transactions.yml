@@ -24,3 +24,14 @@ tests:
   parser_commit_work:
     sql: COMMIT WORK
     as: COMMIT
+
+  parser_rollback:
+    sql: ROLLBACK
+
+  parser_rollback_transaction:
+    sql: ROLLBACK TRANSACTION
+    as: ROLLBACK
+
+  parser_rollback_work:
+    sql: ROLLBACK WORK
+    as: ROLLBACK

@@ -34,6 +34,7 @@ class Server:
         InsertStatement: Insert,
         SelectStatement: Select,
         UpdateStatement: Update,
+        RollbackTransactionStatement: RollbackTransaction,
         StartTransactionStatement: StartTransaction,
     }
 

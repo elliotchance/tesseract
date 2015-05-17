@@ -580,9 +580,14 @@ def p_transaction_statement(p):
                               | COMMIT
                               | COMMIT TRANSACTION
                               | COMMIT WORK
+                              | ROLLBACK
+                              | ROLLBACK TRANSACTION
+                              | ROLLBACK WORK
     """
     if p[1] == 'COMMIT':
         p[0] = CommitTransactionStatement()
+    elif p[1] == 'ROLLBACK':
+        p[0] = RollbackTransactionStatement()
     else:
         p[0] = StartTransactionStatement()
 

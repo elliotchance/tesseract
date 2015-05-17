@@ -382,3 +382,7 @@ class StartTransaction(Statement):
 class CommitTransaction(Statement):
     def execute(self, result, instance):
         return Protocol.successful_response()
+
+class RollbackTransaction(Statement):
+    def execute(self, result, instance):
+        return Protocol.successful_response()
