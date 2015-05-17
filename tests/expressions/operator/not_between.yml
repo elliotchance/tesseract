@@ -1,4 +1,26 @@
+data:
+  missing:
+  - {}
+
 tests:
+  a_missing:
+    data: missing
+    sql: SELECT a NOT BETWEEN 1 AND 2 FROM missing
+    result:
+    - {"col1": null}
+
+  b_missing:
+    data: missing
+    sql: SELECT 1 NOT BETWEEN b AND 2 FROM missing
+    result:
+    - {"col1": null}
+
+  c_missing:
+    data: missing
+    sql: SELECT 1 NOT BETWEEN 2 AND c FROM missing
+    result:
+    - {"col1": null}
+
   a_null:
     sql: SELECT null NOT BETWEEN 3 AND 7
     result:

@@ -70,14 +70,20 @@ v1.0.0-alpha2 (Binary Star)
     [[#11](https://github.com/elliotchance/tesseract/pull/11)]
 
 
-v1.0.0-alpha3 (Unreleased)
-==========================
+v1.0.0-alpha3 (Comet)
+=====================
+
+**Major**
+
+ #. Support for indexes. At the moment only exact lookups are supported.
 
 **SQL**
 
  #. Added support for `LIMIT` and `OFFSET`.
  
  #. Added support for `EXPLAIN` on `SELECT` queries.
+ 
+ #. Added `CREATE INDEX` and `DROP INDEX`.
 
 **New Functions**
  
@@ -85,3 +91,7 @@ v1.0.0-alpha3 (Unreleased)
  * `SIN()`
  * `SQRT()`
  * `TAN()`
+
+**Miscelanious**
+
+ #. The query planner now understands some basic impossible `WHERE` clauses.

@@ -1,0 +1,12 @@
+tests:
+  parser_drop_index:
+    sql: DROP INDEX foo
+
+  drop_index:
+    sql:
+    - CREATE INDEX foo ON mytable (a)
+    - DROP INDEX foo
+    - EXPLAIN SELECT * FROM mytable WHERE a = 1
+    result:
+    - {'description': "Full scan of table 'mytable'"}
+    - {'description': 'Filter: a = 1'}

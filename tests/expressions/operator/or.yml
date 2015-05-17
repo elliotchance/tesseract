@@ -1,4 +1,26 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a OR b FROM missing
+    result:
+    - {"col1": null}
+
+  left_missing:
+    data: missing
+    sql: SELECT a OR true FROM missing
+    result:
+    - {"col1": null}
+
+  right_missing:
+    data: missing
+    sql: SELECT true OR a FROM missing
+    result:
+    - {"col1": null}
+
   both_null:
     sql: SELECT null OR null
     result:

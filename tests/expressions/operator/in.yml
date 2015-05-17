@@ -1,4 +1,26 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a IN (a) FROM missing
+    result:
+    - {"col1": null}
+
+  left_missing:
+    data: missing
+    sql: SELECT a IN (1) FROM missing
+    result:
+    - {"col1": null}
+
+  right_missing:
+    data: missing
+    sql: SELECT 1 IN (a) FROM missing
+    result:
+    - {"col1": null}
+
   left_is_null:
     comment: When the test value is `null` the result must be `null`.
     sql: SELECT null IN (1, 2, 3)

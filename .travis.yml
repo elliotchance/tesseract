@@ -21,7 +21,7 @@ install:
   - "echo 'exit' | python bin/tesseract-cli"
 
   # Generate tests from YAML.
-  - "python generate_tests.py"
+  - "python tesseract/test.py"
 
 # Run tests.
 script: nosetests --with-coverage --cover-package=tesseract

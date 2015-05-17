@@ -1,4 +1,26 @@
+data:
+  missing:
+  - {}
+
 tests:
+  both_missing:
+    data: missing
+    sql: SELECT a ILIKE b FROM missing
+    result:
+    - {"col1": null}
+
+  left_missing:
+    data: missing
+    sql: SELECT a ILIKE "a" FROM missing
+    result:
+    - {"col1": null}
+
+  right_missing:
+    data: missing
+    sql: SELECT "a" ILIKE a FROM missing
+    result:
+    - {"col1": null}
+
   exact_match:
     sql: SELECT "elliot" ILIKE "elliot"
     result:

@@ -1,0 +1,10 @@
+comment: |
+  These tests are responsible for making sure the query planner is able to
+  detect impossible WHERE expressions that will never yield records.
+
+tests:
+  equals_null:
+    sql:
+    - EXPLAIN SELECT * FROM a WHERE x = null
+    result:
+    - {"description": "WHERE clause will never return records"}

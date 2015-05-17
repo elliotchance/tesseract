@@ -16,10 +16,10 @@ SELECT <column_definitions>
 ```
 
 EXPLAIN
-  : When `EXPLAIN` is used the query does not execute. Instead the query builder
-    (which plans how the query is to be carried out) returns these steps. This
-    is useful for debugging slow queries, or otherwise understanding how a query
-    is executed internally.
+  : If the `EXPLAIN` keyword is present the SQL query is not actually run - but
+    rather the query plan (the internal steps required to carry out the task)
+    are returned. This is very useful for debugging slow queries and otherwise
+    examining what tesseract is doing with a particular query.
 
 column_definitions
   : This can be an asterisk (`*`) to represent that the entire object should be

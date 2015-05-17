@@ -28,17 +28,18 @@ tests:
     result:
     - {"first": "Elliot"}
 
-  missing_column_will_not_appear_in_the_output:
+  missing_column_will_still_appear_in_the_output:
     data: table2
     sql: SELECT does_not_exist FROM table2
     result:
-    - {}
+    - {"does_not_exist": null}
 
   columns_are_case_sensitive:
+    comment: "'First' is not the same as 'first'."
     data: table2
     sql: SELECT First FROM table2
     result:
-    - {}
+    - {"First": null}
 
   select_from_table_that_doesnt_exist:
     sql: SELECT * FROM %table_name%
