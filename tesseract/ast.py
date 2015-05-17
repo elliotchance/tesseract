@@ -762,3 +762,8 @@ class LimitClause:
         self.__append_limit_to_sql(sql)
         self.__append_offset_to_sql(sql)
         return ' '.join(sql)
+
+
+class StartTransactionStatement(Statement):
+    def __str__(self):
+        return 'START TRANSACTION'

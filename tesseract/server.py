@@ -32,6 +32,7 @@ class Server:
         InsertStatement: Insert,
         SelectStatement: Select,
         UpdateStatement: Update,
+        StartTransactionStatement: StartTransaction,
     }
 
     def __init__(self, redis_host=None):

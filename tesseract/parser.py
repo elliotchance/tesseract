@@ -39,6 +39,7 @@ def p_statement(p):
                   | create_index_statement
                   | drop_table_statement
                   | drop_index_statement
+                  | transaction_statement
     """
 
     # This is the only rule that is not in alphabetical order because it is the
@@ -569,6 +570,12 @@ def p_string(p):
 
     p[0] = p[1]
 
+
+def p_transaction_statement(p):
+    """
+        transaction_statement : START TRANSACTION
+    """
+    p[0] = StartTransactionStatement()
 
 def p_update_set_list(p):
     """

@@ -374,3 +374,7 @@ class Update(Statement):
         lua = stages.compile_lua(2, statement.table_name)
 
         return self.run(instance.redis, statement.table_name, [], lua, [], result)
+
+class StartTransaction(Statement):
+    def execute(self, result, instance):
+        return Protocol.successful_response()

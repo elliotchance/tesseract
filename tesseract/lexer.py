@@ -34,7 +34,9 @@ sql_keywords = (
     'ORDER',
     'SELECT',
     'SET',
+    'START',
     'TABLE',
+    'TRANSACTION',
     'UPDATE',
     'WHERE',
 )
