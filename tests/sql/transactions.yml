@@ -16,3 +16,11 @@ tests:
 
   parser_commit:
     sql: COMMIT
+
+  parser_commit_transaction:
+    sql: COMMIT TRANSACTION
+    as: COMMIT
+
+  parser_commit_work:
+    sql: COMMIT WORK
+    as: COMMIT

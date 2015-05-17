@@ -578,6 +578,8 @@ def p_transaction_statement(p):
                               | BEGIN WORK
                               | START TRANSACTION
                               | COMMIT
+                              | COMMIT TRANSACTION
+                              | COMMIT WORK
     """
     if p[1] == 'COMMIT':
         p[0] = CommitTransactionStatement()
