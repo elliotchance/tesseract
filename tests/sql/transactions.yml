@@ -9,3 +9,7 @@ tests:
   parser_begin_transaction:
     sql: BEGIN TRANSACTION
     as: START TRANSACTION
+
+  parser_begin_work:
+    sql: BEGIN WORK
+    as: START TRANSACTION

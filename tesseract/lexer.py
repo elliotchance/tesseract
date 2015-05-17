@@ -40,6 +40,7 @@ sql_keywords = (
     'TRANSACTION',
     'UPDATE',
     'WHERE',
+    'WORK',
 )
 
 operators = (
