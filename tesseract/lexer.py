@@ -12,6 +12,7 @@ sql_keywords = (
     'BEGIN',
     'BETWEEN',
     'BY',
+    'COMMIT',
     'CREATE',
     'DELETE',
     'DESC',

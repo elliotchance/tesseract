@@ -378,3 +378,7 @@ class Update(Statement):
 class StartTransaction(Statement):
     def execute(self, result, instance):
         return Protocol.successful_response()
+
+class CommitTransaction(Statement):
+    def execute(self, result, instance):
+        return Protocol.successful_response()

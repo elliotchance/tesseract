@@ -13,3 +13,6 @@ tests:
   parser_begin_work:
     sql: BEGIN WORK
     as: START TRANSACTION
+
+  parser_commit:
+    sql: COMMIT

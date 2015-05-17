@@ -767,3 +767,8 @@ class LimitClause:
 class StartTransactionStatement(Statement):
     def __str__(self):
         return 'START TRANSACTION'
+
+
+class CommitTransactionStatement(Statement):
+    def __str__(self):
+        return 'COMMIT'

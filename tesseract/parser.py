@@ -577,8 +577,12 @@ def p_transaction_statement(p):
                               | BEGIN TRANSACTION
                               | BEGIN WORK
                               | START TRANSACTION
+                              | COMMIT
     """
-    p[0] = StartTransactionStatement()
+    if p[1] == 'COMMIT':
+        p[0] = CommitTransactionStatement()
+    else:
+        p[0] = StartTransactionStatement()
 
 def p_update_set_list(p):
     """

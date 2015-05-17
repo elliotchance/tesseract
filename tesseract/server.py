@@ -11,6 +11,7 @@ except: # pragma: no cover
     # Python 3.x
     import threading
 
+
 class Server:
     """The server acts as the main controller for all incoming connections.
 
@@ -23,6 +24,7 @@ class Server:
     """
 
     __statements = {
+        CommitTransactionStatement: CommitTransaction,
         CreateIndexStatement: CreateIndex,
         CreateNotificationStatement: CreateNotification,
         DeleteStatement: Delete,
