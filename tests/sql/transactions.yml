@@ -47,6 +47,7 @@ tests:
     - START TRANSACTION
     - 'INSERT INTO empty {"foo": "bar"}'
     - ROLLBACK
+
     - SELECT * FROM empty
     result: []
 
@@ -72,5 +73,21 @@ tests:
     - 'INSERT INTO empty {"foo": "bar"}'
     - 'INSERT INTO empty {"foo": "baz"}'
     - ROLLBACK
+
     - SELECT * FROM empty
     result: []
+
+  rollback_will_not_affect_previous_transaction:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - COMMIT
+
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "baz"}'
+    - ROLLBACK
+
+    - SELECT * FROM empty
+    result:
+    - {"foo": "bar"}

@@ -30,9 +30,9 @@ class TransactionManager(object):
         self.__end_transaction()
 
     def rollback(self):
-        self.__end_transaction()
         for action in self.__rollback_actions:
             self.__redis.execute_command(action)
+        self.__end_transaction()
 
     def in_transaction(self):
         return self.__connection_id() in self.__active_transactions
@@ -63,6 +63,7 @@ class TransactionManager(object):
         return connection.Connection.current_connection().connection_id
 
     def __end_transaction(self):
+        self.__rollback_actions = []
         try:
             self.__active_transactions.remove(self.__connection_id())
         except KeyError:
