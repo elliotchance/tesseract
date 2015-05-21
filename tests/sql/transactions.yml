@@ -60,3 +60,7 @@ tests:
   commit_outside_transaction_throws_warning:
     sql: COMMIT
     warning: COMMIT used after transaction is complete. This will be ignored.
+
+  rollback_outside_transaction_throws_warning:
+    sql: ROLLBACK
+    warning: ROLLBACK used after transaction is complete. This will be ignored.

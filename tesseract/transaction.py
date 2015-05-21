@@ -112,6 +112,12 @@ class RollbackTransactionStatement(statement.Statement):
 
     def execute(self, result, instance):
         manager = TransactionManager.get_instance(instance.redis)
-        manager.rollback()
+        warnings = None
 
-        return client.Protocol.successful_response()
+        if manager.in_transaction():
+            manager.rollback()
+        else:
+            warnings = ['ROLLBACK used after transaction is complete. '
+                        'This will be ignored.']
+
+        return client.Protocol.successful_response(warnings=warnings)
