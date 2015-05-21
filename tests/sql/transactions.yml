@@ -56,3 +56,7 @@ tests:
     - START TRANSACTION
     warning: |
       START TRANSACTION called inside a transaction. This will be ignored.
+
+  commit_outside_transaction_throws_warning:
+    sql: COMMIT
+    warning: COMMIT used after transaction is complete. This will be ignored.

@@ -95,9 +95,15 @@ class CommitTransactionStatement(statement.Statement):
 
     def execute(self, result, instance):
         manager = TransactionManager.get_instance(instance.redis)
-        manager.commit()
+        warnings = None
 
-        return client.Protocol.successful_response()
+        if manager.in_transaction():
+            manager.commit()
+        else:
+            warnings = ['COMMIT used after transaction is complete. '
+                        'This will be ignored.']
+
+        return client.Protocol.successful_response(warnings=warnings)
 
 
 class RollbackTransactionStatement(statement.Statement):
