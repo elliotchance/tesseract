@@ -3,21 +3,21 @@ tests.
 """
 
 import glob
-import os
 import random
 import time
-from unittest import TestCase
+import unittest
 import yaml
 import json
-from os import listdir
+import os
 import re
 
 
-class YAMLTestCase(TestCase):
+
+class YAMLTestCase(unittest.TestCase):
     """The base TestCase for all YAML tests."""
 
     def setUp(self):
-        TestCase.setUp(self)
+        unittest.TestCase.setUp(self)
         self.notifications = []
         self.table_name = ''.join(
             random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)
@@ -27,20 +27,22 @@ class YAMLTestCase(TestCase):
         self.notifications.append({'to': name, 'with': json.loads(value)})
 
     def load_table(self, table_name, records, randomize=False):
-        self.server._execute('DROP TABLE %s' % table_name)
+        connection.execute('DROP TABLE %s' % table_name)
 
         if randomize:
             random.shuffle(records)
 
         for record in records:
             sql = 'INSERT INTO %s %s' % (table_name, json.dumps(record))
-            self.server._execute(sql)
+            connection.execute(sql)
 
     def begin_iteration(self):
-        import tesseract.server
         self.warnings = []
-        self.server = tesseract.server.Server()
-        self.server._publish = self.publish
+
+        global connection
+
+        connection = TestConnection()
+        connection.instance.publish = self.publish
 
     def assert_result_unordered(self, expected):
         a = sorted([json.dumps(r, sort_keys=True) for r in self.result['data']])
@@ -60,7 +62,7 @@ class YAMLTestCase(TestCase):
         self.assertEquals(sql, str(result.statement))
 
     def execute(self, sql, must_succeed=False):
-        result = self.server._execute(sql)
+        result = connection.execute(sql)
 
         if 'error' not in result:
             result['error'] = None
@@ -113,7 +115,7 @@ class TestGenerator(object):
         """
         assert isinstance(path, str)
 
-        for file in listdir(path):
+        for file in os.listdir(path):
             file_path = '%s/%s' % (path, file)
             if os.path.isdir(file_path):
                 self.process_folder(file_path)
@@ -286,85 +288,6 @@ class TestGenerator(object):
 
         return sql
 
-class YAMLTestCase(TestCase):
-    """The base TestCase for all YAML tests."""
-
-    def setUp(self):
-        TestCase.setUp(self)
-        self.notifications = []
-        self.table_name = ''.join(
-            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)
-        )
-
-    def publish(self, name, value):
-        self.notifications.append({'to': name, 'with': json.loads(value)})
-
-    def load_table(self, table_name, records, randomize=False):
-        self.server._execute('DROP TABLE %s' % table_name)
-
-        if randomize:
-            random.shuffle(records)
-
-        for record in records:
-            sql = 'INSERT INTO %s %s' % (table_name, json.dumps(record))
-            self.server._execute(sql)
-
-    def begin_iteration(self):
-        import tesseract.server
-        self.warnings = []
-        self.server = tesseract.server.Server()
-        self.server._publish = self.publish
-
-    def assert_result_unordered(self, expected):
-        a = sorted([json.dumps(r, sort_keys=True) for r in self.result['data']])
-        b = sorted([json.dumps(r, sort_keys=True) for r in expected])
-        self.assertEqual('\n'.join(a), '\n'.join(b))
-
-    def assert_notifications(self, expected):
-        self.assertEqual(len(self.notifications), len(expected))
-        for n in expected:
-            self.assertTrue(n in self.notifications)
-
-    def assert_parser(self, sql, sql_as=None):
-        from tesseract import parser
-        result = parser.parse(sql)
-        if sql_as:
-            sql = sql_as
-        self.assertEquals(sql, str(result.statement))
-
-    def execute(self, sql, must_succeed=False):
-        result = self.server._execute(sql)
-
-        if 'error' not in result:
-            result['error'] = None
-
-        if 'data' not in result:
-            result['data'] = None
-
-        if must_succeed:
-            self.assertTrue(result['success'], msg=result['error'])
-
-        # Catch all the warnings along the way
-        if 'warnings' in result and isinstance(result['warnings'], list):
-            self.warnings.extend(result['warnings'])
-
-        self.result = result
-
-    def assert_success(self, sql):
-        self.execute(sql, must_succeed=True)
-
-    def assert_result(self, expected):
-        self.assertEqual(self.result['data'], expected)
-
-    def assert_error(self, message):
-        self.assertFalse(self.result['success'], msg=self.result['error'])
-        self.assertEquals(self.result['error'], message)
-
-    def assert_warnings(self, warnings):
-        if not isinstance(warnings, list):
-            warnings = [warnings]
-        self.assertEqual(self.warnings, warnings)
-
 if __name__ == "__main__":
     generator = TestGenerator()
     generator.clean_all()
@@ -374,3 +297,16 @@ if __name__ == "__main__":
         generator.total_tests,
         generator.elapsed_time()
     ))
+else:
+    from tesseract import connection
+    from tesseract import instance
+
+    class TestConnection(connection.Connection):
+        # noinspection PyMissingConstructor
+        def __init__(self):
+            self.connection_id = 0
+            self.instance = instance.Instance(self, '127.0.0.1')
+
+        @staticmethod
+        def current_connection():
+            return TestConnection()

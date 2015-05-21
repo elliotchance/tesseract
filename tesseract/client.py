@@ -99,7 +99,10 @@ class Client:
           request (dict): The request.
         """
         assert isinstance(request, dict)
-        self._socket.send(bytes(json.dumps(request), 'UTF-8'))
+        try:
+            self._socket.send(bytes(json.dumps(request), 'UTF-8'))
+        except TypeError:
+            self._socket.send(json.dumps(request))
 
     def _read_response(self):
         """Wait on the response from the server.
@@ -110,9 +113,11 @@ class Client:
         response = self._socket.recv(1024)
         return json.loads(response.decode())
 
+
 class ClientException(Exception):
     """Thrown when an error is returned from the tesseract server."""
     pass
+
 
 class Protocol:
     """This class handles the basic protocols that tesseract uses to communicate

@@ -1,3 +1,6 @@
+data:
+  empty: []
+
 tests:
   parser_start_transaction:
     sql: START TRANSACTION
@@ -35,3 +38,12 @@ tests:
   parser_rollback_work:
     sql: ROLLBACK WORK
     as: ROLLBACK
+
+  rollback_insert:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - ROLLBACK
+    - SELECT * FROM empty
+    result: []

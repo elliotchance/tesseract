@@ -36,10 +36,14 @@ stored:
 
 import json
 import random
-from redis import StrictRedis
+import redis
+from tesseract import ast
+from tesseract import client
+from tesseract import instance
+from tesseract import statement
 
 
-class Table:
+class Table(object):
     """The base functionality of a table.
 
     Methods with the `lua_` prefix do not actually perform anything on the
@@ -49,20 +53,20 @@ class Table:
     Attributes:
       table_name (str): The name of the table. This is used to locate the Redis
         key - but the `table_name` is *not* exactly the Redis key.
-      redis (StrictRedis): The Redis connection.
+      redis_connection (redis.StrictRedis): The Redis connection.
 
     """
-    def __init__(self, redis, table_name):
+    def __init__(self, redis_connection, table_name):
         """Initialise the base class for the table. You should not use this, use
         one of the subclasses instead.
 
         Arguments:
-          redis (StrictRedis): The Redis connection.
+          redis_connection (redis.StrictRedis): The Redis connection.
           table_name (str): The name of the table.
         """
-        assert isinstance(redis, StrictRedis)
+        assert isinstance(redis_connection, redis.StrictRedis)
         assert isinstance(table_name, str)
-        self.redis = redis
+        self.redis = redis_connection
         self.table_name = table_name
 
     def lua_delete_record(self, lua):
@@ -133,7 +137,6 @@ class Table:
 
         Returns:
           str Lua code.
-
         """
         assert isinstance(record, dict)
 
@@ -148,7 +151,12 @@ class Table:
     def add_record(self, record):
         assert isinstance(record, dict)
 
+        #manager = TransactionManager.get_instance()
+        #xid = manager.get_current_transaction_id()
+
         record[':id'] = self.get_next_record_id()
+        record[':xid'] = 0
+        record[':xex'] = 0
         self.redis.zadd(self.redis_key(), record[':id'], json.dumps(record))
         return record[':id']
 
@@ -259,3 +267,23 @@ class TransientTable(Table):
 
     def __del__(self):
         self.drop()
+
+class DropTableStatement(statement.Statement):
+    """`DROP TABLE` statement."""
+
+    def __init__(self, table_name):
+        assert isinstance(table_name, ast.Identifier)
+
+        self.table_name = table_name
+
+    def __str__(self):
+        return "DROP TABLE %s" % self.table_name
+
+    def execute(self, result, tesseract):
+        assert isinstance(result.statement, DropTableStatement)
+        assert isinstance(tesseract, instance.Instance)
+
+        table = PermanentTable(tesseract.redis, str(result.statement.table_name))
+        table.drop()
+
+        return client.Protocol.successful_response()

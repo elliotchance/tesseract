@@ -1,110 +1,247 @@
-import abc
-from tesseract.index import IndexManager
-from tesseract.table import *
-from tesseract.ast import *
+import re
+import redis
+from tesseract import ast
+from tesseract import client
+from tesseract import index
+from tesseract import stage
+from tesseract import statement
+from tesseract import table
 
 
-class Stage(object):
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, input_table, offset, redis):
-        assert isinstance(input_table, Table)
-        assert isinstance(offset, int)
-        assert isinstance(redis, StrictRedis)
-
-        self.input_table = input_table
-        self.offset = offset
-        self.redis = redis
-
-    @abc.abstractmethod
-    def explain(self):
-        pass
-
-    def iterate_page(self, lua):
-        """Iterate a page and run some lua against each record.
-
-        For each record read from the page there will be several initialized lua
-        variables:
-
-          * `rowid` - A unique integer that is an ID for the record. You cannot
-            rely on this value staying the same for the same records against
-            multiple sets - for instance it may change once or more between each
-            stage.
-          * `data` - The raw JSON (as a string) that is the record.
-          * `row` - The decoded JSON (as a Lua table).
-
-        Arguments:
-          lua (list of str): Lua code to be executed for each page.
-
-        """
-        assert isinstance(lua, list)
-
-        self.lua.append(self.input_table.lua_iterate(decode=True))
-        self.lua.extend(lua)
-        self.lua.append("end")
-
-class StageManager(object):
-    """The `StageManager` is used to create the plan for the SQL query. This
-    query does not have to be a `SELECT`. Once all the stages have been added
-    to the manager it is then run which will cause each stage to run
-    sequentially using the return value of the last stage as the input page for
-    the next stage.
-
-    The first stage must take an input page which in most cases is the input
-    table and each of the stages must return a key that points to the location
-    of another temporary table that will be fed into the subsequent stage.
+class SelectStatement(statement.Statement):
+    """`SELECT` statement.
 
     Attributes:
-        stages (list of tesseract.engine.stage.stage.Stage): The stages to be
-            run. This will be empty when you create a new `StageManager`.
+      NO_TABLE (Identifier, static) - is used when no table is provided. So
+        this:
+          SELECT 1
+        Is actually equivalent to:
+          SELECT 1 FROM __no_table
 
     """
-    def __init__(self, redis):
-        assert isinstance(redis, StrictRedis)
+    NO_TABLE = ast.Identifier('__no_table')
 
-        self.stages = []
-        self.redis = redis
+    def __init__(self, table_name, columns, where=None, order=None, group=None,
+                 explain=False, limit=None):
+        assert isinstance(table_name, ast.Identifier)
+        assert isinstance(columns, list)
+        assert where is None or isinstance(where, ast.Expression)
+        assert order is None or isinstance(order, ast.OrderByClause)
+        assert group is None or isinstance(group, ast.Identifier)
+        assert limit is None or isinstance(limit, ast.LimitClause)
+        assert group is None or isinstance(group, ast.Identifier)
+        assert isinstance(explain, bool)
 
-    def add(self, stage_class, args):
-        assert isinstance(stage_class, object)
-        assert isinstance(args, (list, tuple))
+        self.table_name = table_name
+        self.where = where
+        self.columns = columns
+        self.order = order
+        self.group = group
+        self.limit = limit
+        self.explain = explain
 
-        self.stages.append({
-            "class": stage_class,
-            "args": args,
-        })
+    def __limit_to_sql(self):
+        if self.limit:
+            return ' %s' % self.limit
 
-    def compile_lua(self, offset, table_name):
-        lua = ''
-        input_table = PermanentTable(self.redis, str(table_name))
-        for stage_details in self.stages:
-            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
-            input_table, stage_lua, offset = stage.compile_lua()
-            lua += stage_lua + "\n"
+        return ''
 
-        lua += "return '%s'\n" % input_table.table_name
-        return lua
+    def __order_to_sql(self):
+        if self.order:
+            return ' %s' % self.order
 
-    def explain(self, table_name):
-        offset = 0
-        steps = []
+        return ''
 
-        if len(self.stages) == 0 or self.stages[0]['class'] != IndexStage and \
-            self.stages[0]['class'] != ImpossibleWhereStage:
-            steps.append({
-                "description": "Full scan of table '%s'" % table_name
-            })
+    def __group_to_sql(self):
+        if self.group:
+            return ' GROUP BY %s' % self.group
 
-        input_table = PermanentTable(self.redis, str(table_name))
-        for stage_details in self.stages:
-            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
-            steps.append(stage.explain())
+        return ''
 
-        return steps
+    def __where_to_sql(self):
+        if self.where:
+            return ' WHERE %s' % self.where
 
-class ExpressionStage(Stage):
+        return ''
+
+    def __table_to_sql(self):
+        if self.table_name != SelectStatement.NO_TABLE:
+            return " FROM %s" % self.table_name
+
+        return ''
+
+    def __str__(self):
+        r = 'EXPLAIN ' if self.explain else ''
+        r += "SELECT %s" % ', '.join([str(col) for col in self.columns])
+        r += self.__table_to_sql()
+        r += self.__where_to_sql()
+        r += self.__group_to_sql()
+        r += self.__order_to_sql()
+        r += self.__limit_to_sql()
+
+        return r
+
+    def contains_aggregate(self):
+        """Tests if any of the expressions in the `SELECT` clause contain
+        aggregate expressions.
+
+        """
+        for col in self.columns:
+            if col.is_aggregate():
+                return True
+
+        return False
+
+    def execute(self, result, tesseract):
+        assert isinstance(result.statement, SelectStatement)
+        assert isinstance(tesseract.redis, redis.StrictRedis)
+
+        tesseract.redis.delete('agg')
+
+        select = result.statement
+        lua, args, manager = self.compile_select(result, tesseract.redis)
+
+        if select.explain:
+            tesseract.redis.delete('explain')
+            explain = manager.explain(select.table_name)
+            return client.Protocol.successful_response(explain)
+
+        return self.run(
+            tesseract.redis,
+            select.table_name,
+            tesseract.warnings,
+            lua,
+            args,
+            result,
+            manager
+        )
+
+    def __find_index(self, expression, redis, result, stages):
+        """Try and find an index that can be used for the WHERE expression. If
+        and index is found it is added to the query plan.
+
+        Returns:
+          If an index was found True is returned, else False.
+        """
+        def is_to_value(e):
+            if e.right.value == 'null':
+                return [ast.Value(None)]
+            if e.right.value == 'true':
+                return [ast.Value(True)]
+            if e.right.value == 'false':
+                return [ast.Value(False)]
+
+            return []
+
+        tn = result.statement.table_name
+        rules = {
+            '^@I = @V.$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': lambda e: [e.right],
+            },
+            '^@V. = @I$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.right),
+                'args': lambda e: [e.left],
+            },
+            '^@I IS @V.$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': is_to_value,
+            },
+        }
+
+        signature = expression.where.signature()
+        rule = None
+        for r in rules.keys():
+            if re.match(r, signature):
+                rule = r
+                break
+
+        if rule:
+            index_manager = index.IndexManager.get_instance(redis)
+            indexes = index_manager.get_indexes_for_table(str(result.statement.table_name))
+            for index_name in indexes:
+                # noinspection PyCallingNonCallable
+                looking_for = rules[rule]['index_name'](expression.where)
+                if redis.hget('indexes', index_name).decode() == looking_for:
+                    # noinspection PyCallingNonCallable
+                    args = rules[rule]['args'](expression.where)
+                    if len(args) > 0:
+                        args.insert(0, index_name)
+                        stages.add(index.IndexStage, args)
+                        return True
+
+        return False
+
+    def __compile_where(self, expression, redis, result, stages):
+        """When compiling the WHERE clause we need to do a few things:
+
+        1. Verify the WHERE clause is not impossible. This is when the
+           expression will always be false like 'x = null'.
+
+        2. See if there is an available index with __find_index() - hopefully
+           there is.
+
+        3. Otherwise we fall back to a full table scan.
+
+        """
+        if expression.where:
+            if expression.where.signature() == '@I = @Vn':
+                stages.add(ImpossibleWhereStage, ())
+                return
+
+            index_found = self.__find_index(expression, redis, result, stages)
+            if not index_found:
+                stages.add(WhereStage, (expression.where,))
+
+    def __compile_group(self, expression, stages):
+        if expression.group or expression.contains_aggregate():
+            stages.add(GroupStage, (expression.group, expression.columns))
+
+    def __compile_order(self, expression, stages):
+        if expression.order:
+            stages.add(OrderStage, (expression.order,))
+
+    def __compile_columns(self, expression, stages):
+        """Compile the `SELECT` columns."""
+        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
+            stages.add(ExpressionStage, (expression.columns,))
+
+    def __compile_limit(self, expression, stages):
+        if expression.limit:
+            stages.add(LimitStage, (expression.limit,))
+
+    def compile_select(self, result, redis_connection):
+        assert isinstance(result.statement, SelectStatement)
+        assert isinstance(redis_connection, redis.StrictRedis)
+
+        expression = result.statement
+        offset = 2
+        args = []
+
+        stages = stage.StageManager(redis_connection)
+
+        self.__compile_where(expression, redis_connection, result, stages)
+        self.__compile_group(expression, stages)
+        self.__compile_order(expression, stages)
+        self.__compile_columns(expression, stages)
+        self.__compile_limit(expression, stages)
+
+        lua = """
+-- First thing is to convert all the incoming values from JSON to native.
+-- Skipping the first two arguments that are not JSON and will always exist.
+local args = {}
+for i = 3, #ARGV do
+    args[i] = cjson.decode(ARGV[i])
+end
+"""
+
+        lua += stages.compile_lua(offset, expression.table_name)
+
+        return (lua, args, stages)
+
+class ExpressionStage(stage.Stage):
     def __init__(self, input_table, offset, redis, columns):
-        Stage.__init__(self, input_table, offset, redis)
+        stage.Stage.__init__(self, input_table, offset, redis)
         assert isinstance(columns, list)
         self.columns = columns
 
@@ -115,7 +252,7 @@ class ExpressionStage(Stage):
 
     def compile_lua(self):
         lua = []
-        table = TransientTable(self.redis)
+        output_table = table.TransientTable(self.redis)
 
         # Iterate the page.
         lua.extend([
@@ -128,7 +265,7 @@ class ExpressionStage(Stage):
         args = []
         for col in self.columns:
             name = "col%d" % index
-            if isinstance(col, Identifier):
+            if isinstance(col, ast.Identifier):
                 name = str(col)
 
             expression, offset, new_args = col.compile_lua(offset)
@@ -147,22 +284,22 @@ class ExpressionStage(Stage):
             index += 1
 
         lua.extend([
-            table.lua_add_lua_record('tuple'),
+            output_table.lua_add_lua_record('tuple'),
             "end",
         ])
 
-        return (table, '\n'.join(lua), offset)
+        return (output_table, '\n'.join(lua), offset)
 
-class GroupStage(Stage):
+class GroupStage(stage.Stage):
     def __init__(self, input_table, offset, redis, field, columns):
-        Stage.__init__(self, input_table, offset, redis)
-        assert field is None or isinstance(field, Identifier)
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert field is None or isinstance(field, ast.Identifier)
         assert isinstance(columns, list)
 
         self.field = field
         self.columns = columns
         self.lua = []
-        self.output_table = TransientTable(redis)
+        self.output_table = table.TransientTable(redis)
 
     def explain(self):
         return {
@@ -209,7 +346,7 @@ class GroupStage(Stage):
 
         """
         assert isinstance(value, str)
-        assert isinstance(expression, Expression)
+        assert isinstance(expression, ast.Expression)
 
         return '%s .. ":%s"' % (value, str(expression))
 
@@ -358,50 +495,21 @@ class GroupStage(Stage):
 
         return (self.output_table, '\n'.join(self.lua), self.offset)
 
-class IndexStage(Stage):
-    def __init__(self, input_table, offset, redis, index_name, value):
-        Stage.__init__(self, input_table, offset, redis)
-        assert isinstance(index_name, str)
-        assert isinstance(value, Value)
 
-        self.index_name = index_name
-        self.value = value
-
+class ImpossibleWhereStage(stage.Stage):
     def explain(self):
-        if self.value.value is None:
-            description = 'null'
-        else:
-            description = 'value %s' % self.value
-
         return {
-            "description": "Index lookup using %s for %s" % (
-                self.index_name,
-                description
-            )
+            "description": "WHERE clause will never return records"
         }
 
     def compile_lua(self):
-        lua = []
-        output_table = TransientTable(self.redis)
-        index_manager = IndexManager(self.redis)
-        index = index_manager.get_index(self.index_name)
-        table = PermanentTable(self.redis, index.table_name)
+        return (table.TransientTable(self.redis), '', self.offset)
 
-        lua.extend([
-            "local records = %s" % index.lua_lookup_exact(self.value.value),
-            "for _, data in ipairs(records) do",
-            table.lua_get_lua_record('data'),
-            "local row = cjson.decode(irecords[1])",
-            output_table.lua_add_lua_record('row'),
-            "end",
-        ])
 
-        return (output_table, '\n'.join(lua), self.offset)
-
-class LimitStage(Stage):
+class LimitStage(stage.Stage):
     def __init__(self, input_table, offset, redis, limit):
-        Stage.__init__(self, input_table, offset, redis)
-        assert isinstance(limit, LimitClause)
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert isinstance(limit, ast.LimitClause)
         self.limit = limit
 
     def explain(self):
@@ -411,16 +519,14 @@ class LimitStage(Stage):
 
     def compile_lua(self):
         lua = []
-        output_table = TransientTable(self.redis)
+        output_table = table.TransientTable(self.redis)
 
         filter = "counter < %s" % self.limit.limit
-        skip = 0
         if self.limit.offset is not None:
             filter = "counter >= %s and counter <= %s" % (
                 self.limit.offset,
                 self.limit.offset.value + self.limit.offset.value
             )
-            skip = self.limit.offset.value
 
         # Iterate the page for the desired amount of rows.
         lua.extend([
@@ -435,13 +541,12 @@ class LimitStage(Stage):
 
         return (output_table, '\n'.join(lua), self.offset)
 
-class OrderStage(Stage):
-    """This OrderStage represents the sorting of a set.
+class OrderStage(stage.Stage):
+    """This OrderStage represents the sorting of a set."""
 
-    """
-    def __init__(self, input_table, offset, redis, clause):
-        Stage.__init__(self, input_table, offset, redis)
-        assert isinstance(clause, OrderByClause)
+    def __init__(self, input_table, offset, redis_connection, clause):
+        stage.Stage.__init__(self, input_table, offset, redis_connection)
+        assert isinstance(clause, ast.OrderByClause)
         self.clause = clause
 
     def explain(self):
@@ -457,7 +562,7 @@ class OrderStage(Stage):
 
     def compile_lua(self):
         lua = []
-        output_table = TransientTable(self.redis)
+        output_table = table.TransientTable(self.redis)
 
         # Clean out sort buffer.
         lua.append(
@@ -583,12 +688,12 @@ class OrderStage(Stage):
 
         return (output_table, '\n'.join(lua), self.offset)
 
-class WhereStage(Stage):
+class WhereStage(stage.Stage):
     def __init__(self, input_table, offset, redis, where):
-        Stage.__init__(self, input_table, offset, redis)
-        assert where is None or isinstance(where, Expression)
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert where is None or isinstance(where, ast.Expression)
         self.where = where
-        self.output_table = TransientTable(redis)
+        self.output_table = table.TransientTable(redis)
 
     def explain(self):
         return {
@@ -599,7 +704,7 @@ class WhereStage(Stage):
         lua = []
 
         # Compile the WHERE into a Lua expression.
-        where_expression = self.where if self.where else Value(True)
+        where_expression = self.where if self.where else ast.Value(True)
         where_clause, self.offset, new_args = where_expression.compile_lua(self.offset)
 
         lua.extend([
@@ -614,43 +719,3 @@ class WhereStage(Stage):
 
     def action_on_match(self):
         return self.output_table.lua_add_lua_record('row')
-
-
-class ImpossibleWhereStage(Stage):
-    def explain(self):
-        return {
-            "description": "WHERE clause will never return records"
-        }
-
-    def compile_lua(self):
-        return (TransientTable(self.redis), '', self.offset)
-
-class DeleteStage(WhereStage):
-    """The `DeleteStage` works much like the `WhereStage` except when it comes
-    across a matching record (or all records if no `WHERE` clause is provided)
-    then the record will be removed.
-
-    """
-    def action_on_match(self):
-        return self.input_table.lua_delete_record("row[':id']")
-
-class UpdateStage(WhereStage):
-    def __init__(self, input_page, offset, redis, columns, where):
-        WhereStage.__init__(self, input_page, offset, redis, where)
-        assert isinstance(columns, list)
-        self.columns = columns
-
-    def action_on_match(self):
-        lua = []
-
-        for column in self.columns:
-            lua.append(
-                "row['%s'] = %s" % (column[0], column[1].compile_lua(0)[0])
-            )
-
-        lua.extend((
-            self.input_table.lua_delete_record("row[':id']"),
-            self.input_table.lua_add_lua_record('row'),
-        ))
-
-        return '\n'.join(lua)
