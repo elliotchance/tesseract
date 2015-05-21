@@ -6,6 +6,8 @@ comment: |
   This may change in the future, but for now expect that the query planner
   should always use an index if it fulfills the expression requirement.
 
+tags: index
+
 data:
   blank: []
 

@@ -98,6 +98,33 @@ tests:
     sql: 'SELECT 123'
 ```
 
+### Tags (`tags`)
+
+`tags` can be set at the file level which means that all tests in the file have
+the same tag:
+
+```yml
+comment: |
+  All the tests are for 'foo'.
+  
+tags: foo
+
+tests:
+  ...
+```
+
+If you need multiple tags you can separate them with spaces:
+
+```yaml
+tags: bar foo
+```
+
+It is not required, but it is good practice to keep the tags sorted
+alphabetically.
+
+Tags are defined in `tags.yml`. While also not required for tags to be defined
+here is is good practice to leave a description.
+
 ### Repeating Tests (`repeat`)
 
 If a test lacks some predictability or you need to test the outcome multiple

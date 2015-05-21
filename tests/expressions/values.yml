@@ -1,5 +1,7 @@
 # Testing values of all different types can be understood by the parser.
 
+tags: parser
+
 tests:
   null:
     sql: SELECT null

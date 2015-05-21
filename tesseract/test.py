@@ -6,6 +6,7 @@ import glob
 import random
 import time
 import unittest
+import sys
 import yaml
 import json
 import os
@@ -98,6 +99,7 @@ class TestGenerator(object):
     def __init__(self):
         self.total_tests = 0
         self.__start = time.time()
+        self.exclude = []
 
     def clean_all(self):
         """Clean out the cache before we generate all the tests."""
@@ -133,6 +135,14 @@ class TestGenerator(object):
         tests_file = yaml.load(open(file, 'r'))
         safe_name = file[6:-4].replace('/', '_')
         self.__out = open('tests_cache/test_%s.py' % safe_name, 'w')
+
+        if 'tests' not in tests_file:
+            return
+
+        if 'tags' in tests_file:
+            match = list(set(tests_file['tags'].split(' ')) & set(self.exclude))
+            if match:
+                return
 
         self.__write_header(safe_name)
         self.__render_data(tests_file)
@@ -291,6 +301,7 @@ class TestGenerator(object):
 if __name__ == "__main__":
     generator = TestGenerator()
     generator.clean_all()
+    generator.exclude = [e[1:] for e in sys.argv[1:]]
     generator.process_folder('tests')
 
     print('%d tests generated in %f seconds.' % (

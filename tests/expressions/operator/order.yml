@@ -1,5 +1,7 @@
 # Refer to http://www.postgresql.org/docs/7.2/static/sql-precedence.html
 
+tags: operators
+
 tests:
   # unary minus
   unary_minus_before_power:
