@@ -49,3 +49,10 @@ tests:
     - ROLLBACK
     - SELECT * FROM empty
     result: []
+
+  nested_transactions_throws_warning:
+    sql:
+    - START TRANSACTION
+    - START TRANSACTION
+    warning: |
+      START TRANSACTION called inside a transaction. This will be ignored.

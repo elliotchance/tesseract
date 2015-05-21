@@ -76,9 +76,17 @@ class StartTransactionStatement(statement.Statement):
 
     def execute(self, result, instance):
         manager = TransactionManager.get_instance(instance.redis)
-        manager.start_transaction()
+        warnings = None
 
-        return client.Protocol.successful_response()
+        if manager.in_transaction():
+            warnings = [
+                'START TRANSACTION called inside a transaction. '
+                'This will be ignored.'
+            ]
+        else:
+            manager.start_transaction()
+
+        return client.Protocol.successful_response(warnings=warnings)
 
 
 class CommitTransactionStatement(statement.Statement):

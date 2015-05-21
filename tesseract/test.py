@@ -93,7 +93,8 @@ class YAMLTestCase(unittest.TestCase):
     def assert_warnings(self, warnings):
         if not isinstance(warnings, list):
             warnings = [warnings]
-        self.assertEqual(self.warnings, warnings)
+
+        self.assertEqual(self.warnings, [w.strip() for w in warnings])
 
 class TestGenerator(object):
     def __init__(self):
