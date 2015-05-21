@@ -21,7 +21,7 @@ class TransactionManager(object):
         self.__next_transaction_id = 1
         self.__active_transactions = set()
         self.__redis = redis_connection
-        self.__rollback_action = None
+        self.__rollback_actions = []
 
     def start_transaction(self):
         self.__active_transactions.add(self.__connection_id())
@@ -31,14 +31,14 @@ class TransactionManager(object):
 
     def rollback(self):
         self.__end_transaction()
-        if self.__rollback_action:
-            self.__redis.execute_command(self.__rollback_action)
+        for action in self.__rollback_actions:
+            self.__redis.execute_command(action)
 
     def in_transaction(self):
         return self.__connection_id() in self.__active_transactions
 
     def record(self, action):
-        self.__rollback_action = action
+        self.__rollback_actions.append(action)
 
     @staticmethod
     def get_instance(redis_connection):

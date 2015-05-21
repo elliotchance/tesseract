@@ -64,3 +64,13 @@ tests:
   rollback_outside_transaction_throws_warning:
     sql: ROLLBACK
     warning: ROLLBACK used after transaction is complete. This will be ignored.
+
+  rollback_multiple_inserts:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - 'INSERT INTO empty {"foo": "baz"}'
+    - ROLLBACK
+    - SELECT * FROM empty
+    result: []
