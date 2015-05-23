@@ -55,8 +55,8 @@ class Table(object):
       table_name (str): The name of the table. This is used to locate the Redis
         key - but the `table_name` is *not* exactly the Redis key.
       redis_connection (redis.StrictRedis): The Redis connection.
-
     """
+
     def __init__(self, redis_connection, table_name):
         """Initialise the base class for the table. You should not use this, use
         one of the subclasses instead.
@@ -85,20 +85,27 @@ class Table(object):
         """
         assert isinstance(lua, str)
 
-        return "redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
-            self.redis_key(),
-            lua,
-            lua
+        lines = (
+            self.lua_get_lua_record(lua),
+            "local record_to_delete = cjson.decode(irecords[1])",
+            "record_to_delete[':xex'] = %d" % self.__xid(),
+            "redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
+                self.redis_key(),
+                lua,
+                lua,
+            ),
+            "redis.call('ZADD', '%s', tostring(%s), cjson.encode(record_to_delete))" % (
+                self.redis_key(),
+                lua,
+            ),
         )
 
+        return '\n'.join(lines)
+
     def lua_add_lua_record(self, lua_variable):
-        from tesseract import connection
-
-        xid = connection.Connection.current_connection().transaction_id
-
         return '\n'.join((
             "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
-            "%s[':xid'] = %d" % (lua_variable, xid),
+            "%s[':xid'] = %d" % (lua_variable, self.__xid()),
             "%s[':xex'] = %d" % (lua_variable, 0),
             "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
                 self.redis_key(),
@@ -106,6 +113,10 @@ class Table(object):
                 lua_variable
             )
         ))
+
+    def __xid(self):
+        from tesseract import connection
+        return connection.Connection.current_connection().transaction_id
 
     def lua_get_lua_record(self, lua):
         """Fetch a record by its ID.
@@ -163,11 +174,8 @@ class Table(object):
         return record[':id']
 
     def __set_record_meta(self, record):
-        from tesseract import connection
-
-        xid = connection.Connection.current_connection().transaction_id
         record[':id'] = self.get_next_record_id()
-        record[':xid'] = xid
+        record[':xid'] = self.__xid()
         record[':xex'] = 0
 
     def lua_iterate(self):
@@ -208,6 +216,11 @@ class Table(object):
         """
         return 'table:%s' % self.table_name
 
+    def drop(self):
+        self.__drop_all_indexes()
+        self.redis.delete(self.redis_key())
+        self.redis.delete(self._redis_record_id_key())
+
     def _redis_record_id_key(self):
         """Get the name of the key that holds the incrementer for the next
         record ID. This may not exist.
@@ -222,15 +235,9 @@ class Table(object):
                 self.redis.hdel('indexes', index_name)
                 self.redis.delete('index:%s' % index_name)
 
-    def drop(self):
-        self.__drop_all_indexes()
-        self.redis.delete(self.redis_key())
-        self.redis.delete(self._redis_record_id_key())
-
 class PermanentTable(Table):
     """Permanent tables must act like SQL tables where changes are always
     consistent.
-
     """
 
     def __init__(self, redis, table_name):
@@ -260,8 +267,8 @@ class TransientTable(Table):
     Attributes:
       next_record_id (int): The next record ID to be used. This will increment
         automatically.
-
     """
+
     def __init__(self, redis):
         Table.__init__(self, redis, self.__random_table_name())
 

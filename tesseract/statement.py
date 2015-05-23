@@ -69,6 +69,9 @@ class Statement(object):
             if record[':xid'] in manager.active_transaction_ids():
                 continue
 
+            if record[':xex'] != 0 and record[':xex'] not in manager.active_transaction_ids():
+                continue
+
             record.pop(':id', None)
             record.pop(':xid', None)
             record.pop(':xex', None)
