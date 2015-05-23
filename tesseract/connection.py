@@ -5,6 +5,7 @@ from tesseract import client
 from tesseract import instance
 from tesseract import parser
 from tesseract import select
+from tesseract import transaction
 
 
 class Connection(threading.Thread):
@@ -16,8 +17,15 @@ class Connection(threading.Thread):
         self.__client_socket = client_socket
         self.connection_id = connection_id
         self.instance = tesseract
-        self.transaction_id = 1
+        manager = transaction.TransactionManager.get_instance(tesseract.redis)
+        self.transaction_id = manager.next_transaction_id()
         self.setName(connection_id)
+
+    def __send(self, data):
+        try:
+            self.__client_socket.send(data)
+        except:
+            self.__client_socket.send(bytes(data, 'UTF-8'))
 
     def run(self):
         self.__setup_no_table()
@@ -27,27 +35,38 @@ class Connection(threading.Thread):
             data = self.__client_socket.recv(1024)
 
             # When data is blank it means the client has disconnected.
-            if data == '':
+            if len(data) == 0:
+                self.__disconnect_client()
                 break
 
             # Decode the JSON.
             try:
                 request = json.loads(data.decode())
-                print("SQL (%d): %s" % (self.connection_id, request['sql'].strip()))
+                self.instance.log("SQL (%d): %s" % (self.connection_id, request['sql'].strip()))
             except ValueError:
-                print("Bad request: %s" % data)
+                self.instance.log("Bad request: %s" % data)
 
                 # The JSON could not be decoded, return an error.
-                self.__client_socket.send('{"success":false,"error":"Not valid JSON"}')
+                self.__send('{"success":false,"error":"Not valid JSON"}')
                 continue
 
             # Process the request.
             result = self.execute(str(request['sql']))
 
             # Send the response.
-            self.__client_socket.send(json.dumps(result))
+            self.__send(json.dumps(result))
 
-            self.transaction_id += 1
+            manager = transaction.TransactionManager.get_instance(self.instance.redis)
+            if not manager.in_transaction():
+                self.transaction_id = manager.next_transaction_id()
+
+    def __disconnect_client(self):
+        manager = transaction.TransactionManager.get_instance(self.instance.redis)
+        if manager.in_transaction():
+            self.instance.log("ROLLBACK (%d)." % self.connection_id)
+            manager.rollback()
+
+        self.instance.log("Client disconnected (%d)." % self.connection_id)
 
     def execute(self, sql):
         """Execute a SQL statement.
@@ -72,12 +91,7 @@ class Connection(threading.Thread):
 
     @staticmethod
     def current_connection():
-        thread = threading.current_thread()
-        if isinstance(thread, Connection):
-            return thread
-
-        from tesseract import test
-        return test.TestConnection.current_connection()
+        return threading.current_thread()
 
     def __execute_statement(self, result):
         return result.statement.execute(result, self.instance)

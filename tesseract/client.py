@@ -11,6 +11,7 @@ class Client:
     it.
 
     Attributes:
+      warnings (list): Retained from the last query.
       _socket (socket.socket): The socket between the client and server.
       _host (str): The server host - this should not include the port.
       _port (int): The server port.
@@ -35,6 +36,7 @@ class Client:
 
         self._host = host
         self._port = port
+        self.warnings = []
         self._connect()
 
     def execute(self, sql):
@@ -62,8 +64,10 @@ class Client:
         assert isinstance(sql, str)
         result = self._send(Protocol.sql_request(sql))
 
+        self.warnings = result['warnings'] if 'warnings' in result else []
+
         if result['success']:
-            return result['data']
+            return result['data'] if 'data' in result else None
 
         raise ClientException(result['error'])
 
@@ -110,8 +114,11 @@ class Client:
         Returns:
           A dict containing the server response.
         """
-        response = self._socket.recv(1024)
+        response = self._socket.recv(1048576)
         return json.loads(response.decode())
+
+    def close(self):
+        self._socket.close()
 
 
 class ClientException(Exception):

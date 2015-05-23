@@ -17,8 +17,8 @@ class SelectStatement(statement.Statement):
           SELECT 1
         Is actually equivalent to:
           SELECT 1 FROM __no_table
-
     """
+
     NO_TABLE = ast.Identifier('__no_table')
 
     def __init__(self, table_name, columns, where=None, order=None, group=None,
@@ -246,8 +246,9 @@ class ExpressionStage(stage.Stage):
         self.columns = columns
 
     def explain(self):
+        expressions = ', '.join([str(col) for col in self.columns])
         return {
-            "description": "Expressions: %s" % ', '.join([str(col) for col in self.columns])
+            "description": "Expressions: %s" % expressions
         }
 
     def compile_lua(self):
@@ -256,7 +257,7 @@ class ExpressionStage(stage.Stage):
 
         # Iterate the page.
         lua.extend([
-            self.input_table.lua_iterate(decode=True),
+            self.input_table.lua_iterate(),
             "local tuple = {}",
         ])
 
@@ -285,7 +286,7 @@ class ExpressionStage(stage.Stage):
 
         lua.extend([
             output_table.lua_add_lua_record('tuple'),
-            "end",
+            self.input_table.lua_end_iterate()
         ])
 
         return (output_table, '\n'.join(lua), offset)
@@ -531,12 +532,12 @@ class LimitStage(stage.Stage):
         # Iterate the page for the desired amount of rows.
         lua.extend([
             "local counter = 0",
-            self.input_table.lua_iterate(decode=True),
+            self.input_table.lua_iterate(),
             "   if %s then" % filter,
             output_table.lua_add_lua_record('row'),
             "   end",
             "   counter = counter + 1",
-            "end",
+            self.input_table.lua_end_iterate(),
         ])
 
         return (output_table, '\n'.join(lua), self.offset)
@@ -577,7 +578,7 @@ class OrderStage(stage.Stage):
             "local duplicate_number = 1",
             "local duplicate_string = 1",
 
-            self.input_table.lua_iterate(decode=True),
+            self.input_table.lua_iterate(),
 
             # The first thing we need to do it get the value that we will be
             # sorting by.
@@ -619,7 +620,7 @@ class OrderStage(stage.Stage):
             "       redis.call('HSET', 'order_string_hash', value, data)",
             "       redis.call('RPUSH', 'order_string', value)",
             "    end",
-            "end",
+            self.input_table.lua_end_iterate(),
         ])
 
         desc = ", 'DESC'" if self.clause.ascending is False else ''
@@ -708,11 +709,11 @@ class WhereStage(stage.Stage):
         where_clause, self.offset, new_args = where_expression.compile_lua(self.offset)
 
         lua.extend([
-            self.input_table.lua_iterate(decode=True),
+            self.input_table.lua_iterate(),
             "    if %s then" % where_clause,
             "        %s" % self.action_on_match(),
             "    end",
-            "end",
+            self.input_table.lua_end_iterate(),
         ])
 
         return (self.output_table, '\n'.join(lua), self.offset)

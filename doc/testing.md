@@ -140,6 +140,44 @@ tests:
     - {"col1": 123}
 ```
 
+### Cleanup (`finally`)
+
+Since all tests are run on the same server instance it is a good idea to clean
+up resources that would cause issues in future runs. For this you can use one or
+more SQL statements in the `finally`:
+
+```yml
+tests:
+  create_notification:
+    sql: CREATE NOTIFICATION foo ON some_table
+    finally: DROP NOTIFICATION foo
+```
+
+Or you can specify multiple statements:
+
+```yml
+tests:
+  multiple_notifications_can_be_fired_from_a_single_select:
+    sql:
+    - CREATE NOTIFICATION foo1 ON some_table WHERE a = "b"
+    - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
+    - 'INSERT INTO some_table {"a": "b"}'
+    notification:
+      - to: foo1
+        with: {"a": "b"}
+      - to: foo2
+        with: {"a": "b"}
+    finally:
+    - DROP NOTIFICATION foo1
+    - DROP NOTIFICATION foo2
+```
+
+It is not nessesary to drop tables or data since they should be created at the
+start of any test that needs them.
+
+**Note:** The `finally` will always run, even on failure.
+
+
 Failures
 --------
 
@@ -256,3 +294,52 @@ tests:
     - 'INSERT INTO some_table {"a": "b"}'
     notification: []
 ```
+
+
+Multiple Clients (`multi`)
+--------------------------
+
+Testing multiple simultaneous connections can be done by using multiple clients:
+
+```yml
+tests:
+  insert_is_isolated:
+    multi:
+      1-a:
+        data: empty
+        sql:
+        - START TRANSACTION
+        - 'INSERT INTO empty {"foo": "bar"}'
+      2-b:
+        sql: SELECT * FROM empty
+        result: []
+```
+
+When `multi` is set the test is split into multiple steps, each of the steps
+must be named with a number (indicating the order) followed by the name of the
+client (when refering to the same client connection in the future).
+
+The above example uses two clients `a` and `b`, but you can use as many as you
+need and also refer to them more then once:
+
+```yml
+tests:
+  so_many_connections:
+    multi:
+      1-bob:
+        sql: INSERT INTO names {"name": "bob"}
+      2-john:
+        sql: INSERT INTO names {"name": "john"}
+      3-bob:
+        sql: DELETE FROM names WHERE name = "bob"
+      4-john:
+        sql: DELETE FROM names WHERE name = "john"
+      5-verify:
+        sql: SELECT * FROM names
+        result: []
+```
+
+In this example we are using 3 clients (`bob`, `john` and `verify`) and reusing
+connections (which is important for transactions).
+
+Each of the steps uses all the same available options as a standalone test.

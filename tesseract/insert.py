@@ -1,8 +1,8 @@
 import json
-import threading
 from tesseract import ast
 from tesseract import client
 from tesseract import index
+from tesseract import instance
 from tesseract import statement
 from tesseract import table
 from tesseract import transaction
@@ -25,6 +25,8 @@ class InsertStatement(statement.Statement):
         )
 
     def execute(self, result, tesseract):
+        assert isinstance(tesseract, instance.Instance)
+
         output_table = table.PermanentTable(tesseract.redis, str(result.statement.table_name))
         data = ast.Expression.to_sql(result.statement.fields)
 

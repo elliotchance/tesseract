@@ -57,11 +57,18 @@ class Statement(object):
 
     def __retrieve_records(self, manager, redis, run):
         from tesseract import table
+        from tesseract import transaction
+
         the_table = table.PermanentTable(redis, str(run.decode()))
         records = []
+        manager = transaction.TransactionManager.get_instance(redis)
 
         for record in redis.zrange(the_table.redis_key(), 0, -1):
             record = json.loads(record.decode())
+
+            if record[':xid'] in manager.active_transaction_ids():
+                continue
+
             record.pop(':id', None)
             record.pop(':xid', None)
             record.pop(':xex', None)

@@ -103,6 +103,6 @@ class Stage(object):
         """
         assert isinstance(lua, list)
 
-        self.lua.append(self.input_table.lua_iterate(decode=True))
+        self.lua.append(self.input_table.lua_iterate())
         self.lua.extend(lua)
-        self.lua.append("end")
+        self.lua.append(self.input_table.lua_end_iterate())

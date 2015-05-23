@@ -41,6 +41,7 @@ from tesseract import ast
 from tesseract import client
 from tesseract import instance
 from tesseract import statement
+from tesseract import transaction
 
 
 class Table(object):
@@ -91,8 +92,14 @@ class Table(object):
         )
 
     def lua_add_lua_record(self, lua_variable):
+        from tesseract import connection
+
+        xid = connection.Connection.current_connection().transaction_id
+
         return '\n'.join((
             "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
+            "%s[':xid'] = %d" % (lua_variable, xid),
+            "%s[':xex'] = %d" % (lua_variable, 0),
             "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
                 self.redis_key(),
                 lua_variable,
@@ -140,7 +147,7 @@ class Table(object):
         """
         assert isinstance(record, dict)
 
-        record[':id'] = self.get_next_record_id()
+        self.__set_record_meta(record)
 
         return "redis.call('ZADD', '%s', '%s', '%s') " % (
             self.redis_key(),
@@ -151,19 +158,20 @@ class Table(object):
     def add_record(self, record):
         assert isinstance(record, dict)
 
-        #manager = TransactionManager.get_instance()
-        #xid = manager.get_current_transaction_id()
-
-        record[':id'] = self.get_next_record_id()
-        record[':xid'] = 0
-        record[':xex'] = 0
+        self.__set_record_meta(record)
         self.redis.zadd(self.redis_key(), record[':id'], json.dumps(record))
         return record[':id']
 
-    def lua_iterate(self, decode=False):
-        """Generate the Lua required to iterate the records in a table.
+    def __set_record_meta(self, record):
+        from tesseract import connection
 
-        NOTE: This will open the loop, but you must provide the Lua `end`.
+        xid = connection.Connection.current_connection().transaction_id
+        record[':id'] = self.get_next_record_id()
+        record[':xid'] = xid
+        record[':xex'] = 0
+
+    def lua_iterate(self):
+        """Generate the Lua required to iterate the records in a table.
 
         For each record read from the page there will be several initialized Lua
         variables:
@@ -172,19 +180,18 @@ class Table(object):
           * `row` - The decoded row (also containing special keys like ':id')
             only if `decode` is `True`.
 
-        Arguments:
-          lua (str): Lua code to be executed for each page.
-          decode (bool, optional): If `True` the row will be parsed and a new
-            variable `row` will be available.
-
+        Note:
+          This will open the loop. You must use lua_end_iterate() to close the
+          loop.
         """
         zrange = "redis.call('ZRANGE', '%s', '0', '-1')" % self.redis_key()
         lua = "for _, data in ipairs(%s) do " % zrange
-
-        if decode:
-            lua += "local row = cjson.decode(data) "
+        lua += "local row = cjson.decode(data) "
 
         return lua
+
+    def lua_end_iterate(self):
+        return "end\n"
 
     def lua_get_next_record_id(self):
         return "redis.call('INCR', '%s')" % self._redis_record_id_key()

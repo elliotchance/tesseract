@@ -83,7 +83,6 @@ tests:
     - START TRANSACTION
     - 'INSERT INTO empty {"foo": "bar"}'
     - COMMIT
-
     - START TRANSACTION
     - 'INSERT INTO empty {"foo": "baz"}'
     - ROLLBACK
@@ -91,3 +90,14 @@ tests:
     - SELECT * FROM empty
     result:
     - {"foo": "bar"}
+
+  insert_is_isolated:
+    multi:
+      1-a:
+        data: empty
+        sql:
+        - START TRANSACTION
+        - 'INSERT INTO empty {"foo": "bar"}'
+      2-b:
+        sql: SELECT * FROM empty
+        result: []

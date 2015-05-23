@@ -17,21 +17,28 @@ class Server(object):
     exclusively handle that connection.
 
     Attributes:
+      is_ready (bool): Indicates is the server is ready and accepting
+        connections.
       __next_connection_id (int, static): The connection ID to be handed to the
         next accepted connection.
       __instance (Instance): The instance.
+      __port (int): The port number to run the server on.
     """
 
     __next_connection_id = 0
 
-    def __init__(self, redis_host=None):
+    def __init__(self, redis_host=None, port=3679):
         """Create the server.
 
         Arguments:
           redis_host (str): The host and optional port for the Redis server.
+          port (int): The port number to run the server on.
         """
         assert redis_host is None or isinstance(redis_host, str)
-        self.__instance = instance.Instance(self, redis_host)
+        assert isinstance(port, int)
+        self.instance = instance.Instance(self, redis_host)
+        self.__port = port
+        self.is_ready = False
 
     def start(self):
         """Create an INET, STREAMing socket for the server socket. Once bound to
@@ -39,31 +46,46 @@ class Server(object):
         from clients.
         """
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__server_socket.bind(('0.0.0.0', 3679))
+        self.__server_socket.bind(('0.0.0.0', self.__port))
         self.__server_socket.listen(5)
 
-        print("Server ready.")
+        self.instance.log("Server ready and listening on port %d." % self.__port)
+        self.is_ready = True
 
-        while True:
+        self.__accept_connections()
+        self.__server_socket.close()
+
+    def __accept_connections(self):
+        """Continuously accept connections until the server is told to stop."""
+        while self.is_ready:
             self.__accept_connection()
 
     def __accept_connection(self):
-        """Accept a connection then spawn off a new thread to handle it. This
-        method is blocking until a connection is made.
+        while self.is_ready:
+            try:
+                self.__try_to_accept_connection()
+            except socket.timeout:
+                pass
+
+    def __try_to_accept_connection(self):
+        """Accept a connection in a one second timeout. If a connection is made
+        a connection will spawn off a new thread to handle it.
+
+        Raises:
+          socket.timeout: If no connection is not accepted in the timeout.
         """
+        self.__server_socket.settimeout(1)
         (client_socket, address) = self.__server_socket.accept()
+        client_socket.settimeout(None)
 
         Server.__next_connection_id += 1
 
         c = connection.Connection(client_socket, Server.__next_connection_id,
-                                  self.__instance)
+                                  self.instance)
         c.start()
 
-        print("Accepted connection (%d)." % Server.__next_connection_id)
+        self.instance.log("Accepted connection (%d)." % Server.__next_connection_id)
 
     def exit(self):
-        print("Server shutting down.")
-        self.__server_socket.close()
-
-    def _publish(self, name, value):
-        self.__instance.redis.publish(name, value)
+        self.instance.log("Server shutting down.")
+        self.is_ready = False
