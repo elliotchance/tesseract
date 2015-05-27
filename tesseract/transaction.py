@@ -93,6 +93,20 @@ class TransactionManager(object):
         assert isinstance(TransactionManager.__instance, TransactionManager)
         return TransactionManager.__instance
 
+    def lua_transaction_info(self):
+        from tesseract import connection
+
+        xids = []
+        for xid in self.active_transaction_ids():
+            xids.append("[%d]=true" % xid)
+
+        xid = connection.Connection.current_connection().transaction_id
+
+        lua = " local xids = {%s} " % ' ,'.join(xids)
+        lua += "local xid = %s " % xid
+
+        return lua
+
     def __transaction_id(self):
         from tesseract import connection
         return connection.Connection.current_connection().transaction_id

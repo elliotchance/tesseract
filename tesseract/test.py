@@ -63,7 +63,7 @@ class YAMLTestCase(unittest.TestCase):
             global s
             s = server.Server(port=port)
             s.instance.publish = self.publish
-            s.instance.log = lambda _: 0
+            #s.instance.log = lambda _: 0
 
             thread = threading.Thread(target=s.start)
             thread.start()

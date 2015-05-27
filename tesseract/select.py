@@ -172,7 +172,7 @@ class SelectStatement(statement.Statement):
 
         return False
 
-    def __compile_where(self, expression, redis, result, stages):
+    def __compile_from_and_where(self, expression, redis, result, stages):
         """When compiling the WHERE clause we need to do a few things:
 
         1. Verify the WHERE clause is not impossible. This is when the
@@ -182,16 +182,19 @@ class SelectStatement(statement.Statement):
            there is.
 
         3. Otherwise we fall back to a full table scan.
-
         """
-        if expression.where:
+        if str(expression.table_name) == str(SelectStatement.NO_TABLE):
+            stages.add(NoTableStage)
+        elif expression.where:
             if expression.where.signature() == '@I = @Vn':
-                stages.add(ImpossibleWhereStage, ())
-                return
-
-            index_found = self.__find_index(expression, redis, result, stages)
-            if not index_found:
-                stages.add(WhereStage, (expression.where,))
+                stages.add(ImpossibleWhereStage)
+            else:
+                index_found = self.__find_index(expression, redis, result, stages)
+                if not index_found:
+                    stages.add(table.FullTableScan, (expression.table_name,))
+                    stages.add(WhereStage, (expression.where,))
+        else:
+            stages.add(table.FullTableScan, (expression.table_name,))
 
     def __compile_group(self, expression, stages):
         if expression.group or expression.contains_aggregate():
@@ -220,7 +223,7 @@ class SelectStatement(statement.Statement):
 
         stages = stage.StageManager(redis_connection)
 
-        self.__compile_where(expression, redis_connection, result, stages)
+        self.__compile_from_and_where(expression, redis_connection, result, stages)
         self.__compile_group(expression, stages)
         self.__compile_order(expression, stages)
         self.__compile_columns(expression, stages)
@@ -689,6 +692,7 @@ class OrderStage(stage.Stage):
 
         return (output_table, '\n'.join(lua), self.offset)
 
+
 class WhereStage(stage.Stage):
     def __init__(self, input_table, offset, redis, where):
         stage.Stage.__init__(self, input_table, offset, redis)
@@ -720,3 +724,16 @@ class WhereStage(stage.Stage):
 
     def action_on_match(self):
         return self.output_table.lua_add_lua_record('row')
+
+
+class NoTableStage(stage.Stage):
+    def explain(self):
+        return {
+            "description": "No table used"
+        }
+
+    def compile_lua(self):
+        output_table = table.TransientTable(self.redis)
+        lua = "local dummy = {} " + output_table.lua_add_lua_record('dummy')
+
+        return (output_table, lua, self.offset)

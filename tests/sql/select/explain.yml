@@ -4,49 +4,55 @@ tests:
   parser_explain:
     sql: EXPLAIN SELECT * FROM foo
 
+  explain_no_table:
+    sql: EXPLAIN SELECT 123
+    result:
+    - {"description": "No table used"}
+    - {"description": "Expressions: 123"}
+
   explain_simple:
     sql: EXPLAIN SELECT * FROM foo
     result:
-    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Full table scan of 'foo'"}
 
   explain_order:
     sql: EXPLAIN SELECT * FROM bar ORDER BY foo
     result:
-    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Full table scan of 'bar'"}
     - {"description": "Sorting by foo (ASC)"}
 
   explain_order_desc:
     sql: EXPLAIN SELECT * FROM bar ORDER BY foo DESC
     result:
-    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Full table scan of 'bar'"}
     - {"description": "Sorting by foo (DESC)"}
 
   explain_expression:
     sql: EXPLAIN SELECT foo, bar + 1 FROM baz
     result:
-    - {"description": "Full scan of table 'baz'"}
+    - {"description": "Full table scan of 'baz'"}
     - {"description": "Expressions: foo, bar + 1"}
 
   explain_group:
     sql: EXPLAIN SELECT * FROM bar GROUP BY foo
     result:
-    - {"description": "Full scan of table 'bar'"}
+    - {"description": "Full table scan of 'bar'"}
     - {"description": "Grouping by foo"}
 
   explain_where:
     sql: EXPLAIN SELECT * FROM foo WHERE bar = "baz"
     result:
-    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Full table scan of 'foo'"}
     - {"description": "Filter: bar = \"baz\""}
 
   explain_limit:
     sql: EXPLAIN SELECT * FROM foo LIMIT 10
     result:
-    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Full table scan of 'foo'"}
     - {"description": "LIMIT 10"}
 
   explain_offset:
     sql: EXPLAIN SELECT * FROM foo OFFSET 15
     result:
-    - {"description": "Full scan of table 'foo'"}
+    - {"description": "Full table scan of 'foo'"}
     - {"description": "OFFSET 15"}

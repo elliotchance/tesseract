@@ -10,5 +10,5 @@ tests:
     - DROP INDEX foo
     - EXPLAIN SELECT * FROM mytable WHERE a = 1
     result:
-    - {'description': "Full scan of table 'mytable'"}
+    - {'description': "Full table scan of 'mytable'"}
     - {'description': 'Filter: a = 1'}

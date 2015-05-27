@@ -70,7 +70,7 @@ EXPLAIN SELECT * FROM contacts WHERE first_name = 'Bob'
 
 ```json
 [
-    {"description": "Full scan of table 'contacts'"}
+    {"description": "Full table scan of 'contacts'"}
     {"description": "Filter: first_name = \"Bob\""}
 ]
 ```

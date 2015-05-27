@@ -57,24 +57,25 @@ class Statement(object):
 
     def __retrieve_records(self, manager, redis, run):
         from tesseract import table
-        from tesseract import transaction
 
         the_table = table.PermanentTable(redis, str(run.decode()))
         records = []
-        manager = transaction.TransactionManager.get_instance(redis)
 
         for record in redis.zrange(the_table.redis_key(), 0, -1):
             record = json.loads(record.decode())
 
-            if record[':xid'] in manager.active_transaction_ids():
-                continue
-
-            if record[':xex'] != 0 and record[':xex'] not in manager.active_transaction_ids():
-                continue
-
+            # This should certainly be in here because all tables (permanent or
+            # transient) need to be unique and so they are all entered with a
+            # row ID. Even though this isn't actually used in almost all cases.
             record.pop(':id', None)
+
+            # These are some cases where the statement plan is so small that the
+            # transactional information makes it through. Rather than making the
+            # plan more complicated to add extra steps to rip it out lets just
+            # clean up these now.
             record.pop(':xid', None)
             record.pop(':xex', None)
+
             records.append(record)
 
         return records

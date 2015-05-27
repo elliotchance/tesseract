@@ -24,7 +24,7 @@ class StageManager(object):
         self.stages = []
         self.redis = redis_connection
 
-    def add(self, stage_class, args):
+    def add(self, stage_class, args=()):
         assert isinstance(stage_class, object)
         assert isinstance(args, (list, tuple))
 
@@ -34,8 +34,9 @@ class StageManager(object):
         })
 
     def compile_lua(self, offset, table_name):
-        lua = ''
         from tesseract import table
+
+        lua = ''
         input_table = table.PermanentTable(self.redis, str(table_name))
         for stage_details in self.stages:
             stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
@@ -49,15 +50,7 @@ class StageManager(object):
         offset = 0
         steps = []
 
-        from tesseract import index
-        from tesseract import select
         from tesseract import table
-
-        if len(self.stages) == 0 or self.stages[0]['class'] != index.IndexStage and \
-            self.stages[0]['class'] != select.ImpossibleWhereStage:
-            steps.append({
-                "description": "Full scan of table '%s'" % table_name
-            })
 
         input_table = table.PermanentTable(self.redis, str(table_name))
         for stage_details in self.stages:

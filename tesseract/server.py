@@ -46,6 +46,7 @@ class Server(object):
         from clients.
         """
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__server_socket.bind(('0.0.0.0', self.__port))
         self.__server_socket.listen(5)
 

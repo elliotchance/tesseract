@@ -32,3 +32,11 @@ tests:
     as: SELECT abs(-1)
     result:
     - {"col1": 1}
+
+  empty_sql_is_not_allowed:
+    sql: ""
+    error: Empty SQL request.
+
+  whitespace_sql_is_not_allowed:
+    sql: "  "
+    error: Empty SQL request.

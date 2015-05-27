@@ -158,6 +158,12 @@ class IndexManager(object):
     def __index_value(self, data, field, index):
         row = json.loads(data.decode())
 
+        try:
+            row[field]
+        except KeyError:
+            # Missing values are to be treated as null.
+            row[field] = None
+
         if row[field] is None or isinstance(row[field], (int, float, bool)):
             index.add_record(row[field], row[':id'])
         else:

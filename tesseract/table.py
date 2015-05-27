@@ -40,6 +40,7 @@ import redis
 from tesseract import ast
 from tesseract import client
 from tesseract import instance
+from tesseract import stage
 from tesseract import statement
 from tesseract import transaction
 
@@ -85,19 +86,25 @@ class Table(object):
         """
         assert isinstance(lua, str)
 
+        manager = transaction.TransactionManager.get_instance(self.redis)
+
         lines = (
             self.lua_get_lua_record(lua),
             "local record_to_delete = cjson.decode(irecords[1])",
-            "record_to_delete[':xex'] = %d" % self.__xid(),
-            "redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
+
+            manager.lua_transaction_info(),
+            "if row_is_visible(record_to_delete, xid, xids) then",
+            "  record_to_delete[':xex'] = %d" % self.__xid(),
+            "  redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
                 self.redis_key(),
                 lua,
                 lua,
             ),
-            "redis.call('ZADD', '%s', tostring(%s), cjson.encode(record_to_delete))" % (
+            "  redis.call('ZADD', '%s', tostring(%s), cjson.encode(record_to_delete))" % (
                 self.redis_key(),
                 lua,
             ),
+            "end",
         )
 
         return '\n'.join(lines)
@@ -212,7 +219,6 @@ class Table(object):
 
         Returns:
           str
-
         """
         return 'table:%s' % self.table_name
 
@@ -224,7 +230,6 @@ class Table(object):
     def _redis_record_id_key(self):
         """Get the name of the key that holds the incrementer for the next
         record ID. This may not exist.
-
         """
         return 'table:%s:rowid' % self.table_name
 
@@ -234,6 +239,7 @@ class Table(object):
             if str(self.redis.hget('indexes', index_name).decode()).startswith(prefix):
                 self.redis.hdel('indexes', index_name)
                 self.redis.delete('index:%s' % index_name)
+
 
 class PermanentTable(Table):
     """Permanent tables must act like SQL tables where changes are always
@@ -282,6 +288,17 @@ class TransientTable(Table):
     def __del__(self):
         self.drop()
 
+    def lua_add_lua_record(self, lua_variable):
+        return '\n'.join((
+            "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
+            "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
+                self.redis_key(),
+                lua_variable,
+                lua_variable
+            )
+        ))
+
+
 class DropTableStatement(statement.Statement):
     """`DROP TABLE` statement."""
 
@@ -301,3 +318,32 @@ class DropTableStatement(statement.Statement):
         table.drop()
 
         return client.Protocol.successful_response()
+
+
+class FullTableScan(stage.Stage):
+    def __init__(self, input_table, offset, redis, table_name):
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert isinstance(table_name, ast.Identifier)
+        self.table_name = table_name
+        self.output_table = TransientTable(redis)
+
+    def explain(self):
+        return {
+            "description": "Full table scan of '%s'" % self.table_name
+        }
+
+    def compile_lua(self):
+        manager = transaction.TransactionManager.get_instance(self.redis)
+
+        lua = [
+            self.input_table.lua_iterate(),
+            manager.lua_transaction_info(),
+            "if row_is_visible(row, xid, xids) then",
+            "row[':xid'] = nil",
+            "row[':xex'] = nil",
+            self.output_table.lua_add_lua_record('row'),
+            "end",
+            self.input_table.lua_end_iterate(),
+        ]
+
+        return (self.output_table, '\n'.join(lua), self.offset)

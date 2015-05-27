@@ -24,20 +24,9 @@ class DeleteStatement(statement.Statement):
 
         return sql
 
-    def __drop_table(self, redis, result):
-        # Delete the whole table.
-        the_table = table.PermanentTable(redis, str(result.statement.table_name))
-        the_table.drop()
-
-        return client.Protocol.successful_response()
-
     def execute(self, result, tesseract):
         assert isinstance(result.statement, DeleteStatement)
         assert isinstance(tesseract, instance.Instance)
-
-        # If there is no WHERE clause we just drop the whole table.
-        if not result.statement.where:
-            return self.__drop_table(tesseract.redis, result)
 
         stages = stage.StageManager(tesseract.redis)
         stages.add(DeleteStage, (result.statement.where,))
@@ -46,11 +35,12 @@ class DeleteStatement(statement.Statement):
         return self.run(tesseract.redis, result.statement.table_name, [], lua,
                         [], result)
 
+
 class DeleteStage(select.WhereStage):
     """The `DeleteStage` works much like the `WhereStage` except when it comes
     across a matching record (or all records if no `WHERE` clause is provided)
     then the record will be removed.
-
     """
+
     def action_on_match(self):
         return self.input_table.lua_delete_record("row[':id']")

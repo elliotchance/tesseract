@@ -115,3 +115,15 @@ tests:
         sql: SELECT * FROM one_record
         result:
         - {"a": "b"}
+
+  delete_is_isolated:
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - DELETE FROM one_record
+      2-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "b"}

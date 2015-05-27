@@ -28,7 +28,6 @@ class Instance:
         self.reset_warnings()
 
     def publish(self, name, value):
-        print("ARRRG")
         self.redis.publish(name, value)
 
     def log(self, message):

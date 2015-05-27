@@ -42,9 +42,16 @@ class Connection(threading.Thread):
             # Decode the JSON.
             try:
                 request = json.loads(data.decode())
-                self.instance.log("SQL (%d): %s" % (self.connection_id, request['sql'].strip()))
+                sql = request['sql'].strip()
+
+                if len(sql) == 0:
+                    self.instance.log("Empty SQL request (%d): %s" % (self.connection_id, data))
+                    self.__send('{"success":false,"error":"Empty SQL request."}')
+                    continue
+
+                self.instance.log("SQL (%d): %s" % (self.connection_id, sql))
             except ValueError:
-                self.instance.log("Bad request: %s" % data)
+                self.instance.log("Bad request (%d): %s" % (self.connection_id, data))
 
                 # The JSON could not be decoded, return an error.
                 self.__send('{"success":false,"error":"Not valid JSON"}')
