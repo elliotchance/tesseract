@@ -63,7 +63,7 @@ class YAMLTestCase(unittest.TestCase):
             global s
             s = server.Server(port=port)
             s.instance.publish = self.publish
-            #s.instance.log = lambda _: 0
+            s.instance.log = lambda _: 0
 
             thread = threading.Thread(target=s.start)
             thread.start()
@@ -204,12 +204,12 @@ class TestGenerator(object):
         self.__write("    self.warnings = []\n\n", 3)
 
         if 'multi' in test:
-            clients = set([title.split('-')[1] for title in test['multi']])
+            clients = sorted(set([title.split('-')[1] for title in test['multi']]))
 
             for client in clients:
                 self.__write("connection_%s = self.get_client(%d)\n" % (client, port), 4)
 
-            for step in test['multi']:
+            for step in sorted(test['multi']):
                 client_name = step.split('-')[1]
                 self.__write("\n")
                 self.__write("connection = connection_%s\n" % client_name, 4)

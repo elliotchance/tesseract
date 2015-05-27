@@ -94,6 +94,9 @@ tests:
     - {"foo": "bar"}
 
   insert_is_isolated:
+    comment: |
+      A record INSERTed should not be visible to another client. However, when
+      the transaction is COMMITed it should be immediately visible.
     multi:
       1-a:
         data: empty
@@ -103,6 +106,12 @@ tests:
       2-b:
         sql: SELECT * FROM empty
         result: []
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM empty
+        result:
+        - {"foo": "bar"}
 
   delete_where_is_isolated:
     multi:
@@ -115,6 +124,11 @@ tests:
         sql: SELECT * FROM one_record
         result:
         - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result: []
 
   delete_is_isolated:
     multi:
@@ -127,3 +141,26 @@ tests:
         sql: SELECT * FROM one_record
         result:
         - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result: []
+
+  update_is_isolated:
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "c"
+      2-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "c"}
