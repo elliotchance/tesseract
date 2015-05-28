@@ -1,6 +1,64 @@
 """An index is used to speed up lookup operations. You can expect that these
-work exactly the same as any other RDBMS. See each class for further details
-about implementation and examples.
+work exactly the same as any other RDBMS.
+
+Lets run through an example with a table called "mytable". The preceding number
+is the record ID which the index references and is non-linear on purpose so that
+we don't get confused later::
+
+    10. {"x": 123}
+    11. {"x": true}
+    15. {"x": "foo"}
+    17. {}
+    20. {"x": 123}
+    23. {"x": 57}
+
+The index is created like::
+
+    CREATE INDEX myindex ON mytable (x)
+
+Unlike most other database systems we need to index different data types in the
+same index. To achieve this we need to separate numbers from non-numbers and
+maintain a separate index for each respectively.
+
+Lets look at the numbers first. The numbers index is sorted set that uses the
+score as the value (could be an integer or float) and value as the record ID::
+
+    57  -> "23"
+    123 -> "10"
+    123 -> "20"
+
+For the non-numbers index which could contain NULLs, booleans, strings or even
+arrays and objects (more on arrays and objects later) we also use a sorted set
+but the roles are reversed with the score containing the record ID and the value
+is a string.
+
+Now we run into the first minor problem. Redis requires all values in a sorted
+set to be unique. This is not an issue for the numbers index since the record ID
+is unique in all cases but is is a problem for the non-numbers index.
+
+To get around this we add the record ID to the end of the string::
+
+    11 -> "T:11"
+    15 -> "Sfoo:15"
+    17 -> "N:17"
+
+The first character is the type::
+
+    N null
+    T true
+    F false
+    S string (followed by the actual string)
+
+The indexes are named with as "index:mytable:myindex:number" and
+"index:mytable:myindex:nonnumber". The table name is kept in the key because an
+index can only apply to a single table.
+
+Now that we know how indexes are stored we can request back records. The first
+and most important step is to determine if the value we are looking up is a
+number or a non-number then use the appropriate index.
+
+In the case of a number we can use the Redis ZRANGEBYSCORE command, and for
+non-numbers we can use the ZRANGEBYLEX on the non-number index.
 """
 
 import json
@@ -160,68 +218,7 @@ class IndexManager(object):
 
 
 class Index(object):
-    """Lets run through an example with a table called "mytable". The preceding
-    number is the record ID which the index references and is non-linear on
-    purpose so that we don't get confused later.
-
-        10. {"x": 123}
-        11. {"x": true}
-        15. {"x": "foo"}
-        17. {}
-        20. {"x": 123}
-        23. {"x": 57}
-
-    The index is created like:
-
-        CREATE INDEX myindex ON mytable (x)
-
-    Unlike most other database systems we need to index different data types in
-    the same index. To achieve this we need to separate numbers from non-numbers
-    and maintain a separate index for each respectively.
-
-    Lets look at the numbers first. The numbers index is sorted set that uses
-    the score as the value (could be an integer or float) and value as the
-    record ID.
-
-        57  -> "23"
-        123 -> "10"
-        123 -> "20"
-
-    For the non-numbers index which could contain NULLs, booleans, strings or
-    even arrays and objects (more on arrays and objects later) we also use a
-    sorted set but the roles are reversed with the score containing the record
-    ID and the value is a string.
-
-    Now we run into the first minor problem. Redis requires all values in a
-    sorted set to be unique. This is not an issue for the numbers index since
-    the record ID is unique in all cases but is is a problem for the non-numbers
-    index.
-
-    To get around this we add the record ID to the end of the string:
-
-        11 -> "T:11"
-        15 -> "Sfoo:15"
-        17 -> "N:17"
-
-    The first character is the type:
-
-        N null
-        T true
-        F false
-        S string (followed by the actual string)
-
-    The indexes are named with as "index:mytable:myindex:number" and
-    "index:mytable:myindex:nonnumber". The table name is kept in the key because
-    an index can only apply to a single table.
-
-    Now that we know how indexes are stored we can request back records. The
-    first and most important step is to determine if the value we are looking up
-    is a number or a non-number then use the appropriate index.
-
-    In the case of a number we can use the Redis ZRANGEBYSCORE command, and for
-    non-numbers we can use the ZRANGEBYLEX on the non-number index.
-
-    Attributes:
+    """Attributes:
       TYPE_NULL (str): Used as the prefix for `null` values in the nonnumber
         index.
       TYPE_TRUE (str): Used as the prefix for `true` values in the nonnumber

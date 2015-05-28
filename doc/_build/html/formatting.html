@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Formatting &mdash; tesseract 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tesseract 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="Syntax" href="sql-update.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> tesseract
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sql-reference.html">SQL Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sql-create-index.html">CREATE INDEX</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sql-create-index.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sql-create-index.html#overview">Overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id5">}</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id10">]</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id17">]</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sql-create-notification.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-create-notification.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-delete.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-index.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-notification.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-table.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-insert.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-insert.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-select.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-update.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#running-the-server">Running the Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Formatting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic">Basic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sql-examples">SQL Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#syntax-descriptions">Syntax Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tables">Tables</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">tesseract</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Formatting</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/formatting.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="formatting">
+<h1>Formatting<a class="headerlink" href="#formatting" title="Permalink to this headline">¶</a></h1>
+<p>The tesseract manual is written in reStructuredText and processed with Sphinx.
+This document does not intend to outline how the documentation is generated.
+Only to provide a style guidelines and samples that are used through the rest of
+the manual.</p>
+<p>There are some general rules to follow:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Keep all documentation to 80 columns unless it cannot be avoided (for
+example, long tables or code snippets).</li>
+<li>The documentation here is intended to be easily read and maintained. Do not
+use fancy features that make the reStructuredText less readable simply to
+make the result HTML look more pretty.</li>
+</ul>
+</div></blockquote>
+<div class="section" id="basic">
+<h2>Basic<a class="headerlink" href="#basic" title="Permalink to this headline">¶</a></h2>
+<p>Always H1 for first level headings and always use an underlined heading rather
+than hashes:</p>
+<div class="highlight-python"><div class="highlight"><pre>Heading 1
+=========
+
+Heading 2
+---------
+
+Heading 3
+^^^^^^^^^
+</pre></div>
+</div>
+<p>Each heading of any strength should have two blank lines above it (unless it is
+the first line of the file.)</p>
+</div>
+<div class="section" id="sql-examples">
+<h2>SQL Examples<a class="headerlink" href="#sql-examples" title="Permalink to this headline">¶</a></h2>
+<p>SQL examples should be used in fenced blocks and not include the following
+semi-colon:</p>
+<div class="highlight-txt"><div class="highlight"><pre>.. code-block:: sql
+
+   SELECT foo FROM bar
+</pre></div>
+</div>
+<div class="highlight-sql"><div class="highlight"><pre><span class="k">SELECT</span> <span class="n">foo</span> <span class="k">FROM</span> <span class="n">bar</span>
+</pre></div>
+</div>
+<p>If you would like to show the result of the SQL it must be in a separate block
+for JSON:</p>
+<div class="highlight-txt"><div class="highlight"><pre>.. code-block:: json
+
+   {&quot;foo&quot;: &quot;bar&quot;}
+</pre></div>
+</div>
+<div class="highlight-json"><div class="highlight"><pre><span class="p">{</span><span class="nt">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="syntax-descriptions">
+<h2>Syntax Descriptions<a class="headerlink" href="#syntax-descriptions" title="Permalink to this headline">¶</a></h2>
+<p>When describing SQL syntax use a SQL block:</p>
+<div class="highlight-txt"><div class="highlight"><pre>.. code-block:: sql
+
+   SELECT &lt;some_columns&gt;
+   FROM &lt;table&gt;
+</pre></div>
+</div>
+<div class="highlight-sql"><div class="highlight"><pre><span class="k">SELECT</span> <span class="o">&lt;</span><span class="n">some_columns</span><span class="o">&gt;</span>
+<span class="k">FROM</span> <span class="o">&lt;</span><span class="k">table</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>For each of the placeholders use a definition style with a blank line between
+each definition:</p>
+<div class="highlight-txt"><div class="highlight"><pre>some_columns
+  Lots of nice description here.
+
+table
+  Even more wonderful information!
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>some_columns</dt>
+<dd>Lots of nice description here.</dd>
+<dt>table</dt>
+<dd>Even more wonderful information!</dd>
+</dl>
+</div>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<p>Notes are meant to stand out from other text and contain important information.</p>
+<div class="highlight-txt"><div class="highlight"><pre>.. highlights::
+
+This is important information.
+</pre></div>
+</div>
+<blockquote class="highlights">
+<div>This is important information.</div></blockquote>
+</div>
+<div class="section" id="tables">
+<h2>Tables<a class="headerlink" href="#tables" title="Permalink to this headline">¶</a></h2>
+<p>There are two types of table syntax that make the table as small as possible
+around the text or type to span as much space as possible. Always use the
+greater span syntax:</p>
+<div class="highlight-txt"><div class="highlight"><pre>.. table::
+
+   =========  =============
+   full span  syntax
+   =========  =============
+   for        tables
+   with       multiple rows
+   =========  =============
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">full span</th>
+<th class="head">syntax</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>for</td>
+<td>tables</td>
+</tr>
+<tr class="row-odd"><td>with</td>
+<td>multiple rows</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="sql-update.html" class="btn btn-neutral" title="Syntax" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Elliot Chance.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

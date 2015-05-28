@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Syntax &mdash; tesseract 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tesseract 1.0.0 documentation" href="index.html"/>
+        <link rel="up" title="SQL Reference" href="sql-reference.html"/>
+        <link rel="next" title="Syntax" href="sql-update.html"/>
+        <link rel="prev" title="Syntax" href="sql-insert.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> tesseract
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sql-reference.html">SQL Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sql-create-index.html">CREATE INDEX</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sql-create-index.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sql-create-index.html#overview">Overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id5">}</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id10">]</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sql-create-index.html#id17">]</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sql-create-notification.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-create-notification.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-delete.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-index.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-notification.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-drop-table.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-insert.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-insert.html#examples">Examples</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-update.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#running-the-server">Running the Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sql-reference.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="formatting.html">Formatting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#basic">Basic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#sql-examples">SQL Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#syntax-descriptions">Syntax Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#tables">Tables</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">tesseract</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="sql-reference.html">SQL Reference</a> &raquo;</li>
+      
+    <li>Syntax</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/sql-select.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <p>% SELECT</p>
+<p><cite>SELECT</cite> is used to receive data.</p>
+<div class="section" id="syntax">
+<h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">`sql</span>
+<span class="pre">[</span> <span class="pre">EXPLAIN</span> <span class="pre">]</span>
+<span class="pre">SELECT</span> <span class="pre">&lt;column_definitions&gt;</span>
+<span class="pre">[</span> <span class="pre">FROM</span> <span class="pre">&lt;table_name&gt;</span> <span class="pre">]</span>
+<span class="pre">[</span> <span class="pre">WHERE</span> <span class="pre">&lt;condition&gt;</span> <span class="pre">]</span>
+<span class="pre">[</span> <span class="pre">GROUP</span> <span class="pre">BY</span> <span class="pre">&lt;group_field&gt;</span> <span class="pre">]</span>
+<span class="pre">[</span> <span class="pre">ORDER</span> <span class="pre">BY</span> <span class="pre">&lt;order_field&gt;</span> <span class="pre">]</span>
+<span class="pre">[</span> <span class="pre">LIMIT</span> <span class="pre">&lt;limit&gt;</span> <span class="pre">]</span>
+<span class="pre">`</span></code></p>
+<dl class="docutils">
+<dt>EXPLAIN</dt>
+<dd><dl class="first last docutils">
+<dt>: If the <cite>EXPLAIN</cite> keyword is present the SQL query is not actually run - but</dt>
+<dd>rather the query plan (the internal steps required to carry out the task)
+are returned. This is very useful for debugging slow queries and otherwise
+examining what tesseract is doing with a particular query.</dd>
+</dl>
+</dd>
+<dt>column_definitions</dt>
+<dd><dl class="first last docutils">
+<dt>: This can be an asterisk (<cite>*</cite>) to represent that the entire object should be</dt>
+<dd>retrieved without modification or a list of expressions.</dd>
+</dl>
+</dd>
+<dt>table_name</dt>
+<dd><dl class="first last docutils">
+<dt>: The table name to fetch the objects from. If the table does not exist (i.e.</dt>
+<dd><p class="first">has no records) then no records will be returned since tables only come into
+existence when they have objects added to them.</p>
+<p>You may omit the table just to parse expressions that do no need a table
+like:</p>
+<p class="last"><code class="docutils literal"><span class="pre">`sql</span>
+<span class="pre">SELECT</span> <span class="pre">3</span> <span class="pre">+</span> <span class="pre">4</span>
+<span class="pre">`</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt>condition</dt>
+<dd>: A filter expression.</dd>
+<dt>group_field</dt>
+<dd>: Rows will be collapsed into groups of distinct values of this field.</dd>
+<dt>order_field</dt>
+<dd><dl class="first last docutils">
+<dt>: This can be any field you wish to sort by. If field does not exist in a</dt>
+<dd><p class="first">given record it will be sorted as if the value were <cite>null</cite>.</p>
+<p>There are two modifiers for a column; <cite>ASC</cite> and <cite>DESC</cite> which represent
+<a href="#id1"><span class="problematic" id="id2">**</span></a>asc**ending and <a href="#id3"><span class="problematic" id="id4">**</span></a>desc**ending respectively. If no sort order is specified
+then <cite>ASC</cite> is assumed.</p>
+<p>When data is sorted it is separated into four types:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Booleans. Explicit <cite>true</cite> and <cite>false</cite>.</li>
+<li>Numbers. Integers and floating point, not including strings that look
+like numbers like <cite>&#8220;123&#8221;</cite>.</li>
+<li>Strings.</li>
+<li>Nulls.</li>
+</ul>
+</div></blockquote>
+<p>Data will sorted by type, then value in the same order as above. That is to
+say:</p>
+<blockquote class="last">
+<div><ul class="simple">
+<li>Any number is considered greater than a boolean.</li>
+<li>Any string is considered greater than a number.</li>
+<li><cite>null</cite> is considered to be greater than any non-<cite>null</cite> value.</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>limit</dt>
+<dd><dl class="first last docutils">
+<dt>: Limit the amount of records to be returned. This is performed after all</dt>
+<dd><p class="first">operations on the sets are finished (such as ordering and grouping).</p>
+<p>If you specify a <cite>LIMIT</cite> higher than the total number of records it will be
+the same as not specifying the limit at all (all records). Alternatively you
+can use <cite>LIMIT ALL</cite> to return all records.</p>
+<p>You may also skip rows before the limit with <cite>OFFSET</cite>:</p>
+<p><code class="docutils literal"><span class="pre">`sql</span>
+<span class="pre">SELECT</span> <span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">bla</span> <span class="pre">LIMIT</span> <span class="pre">20</span> <span class="pre">OFFSET</span> <span class="pre">10</span>
+<span class="pre">`</span></code></p>
+<p>This will skip the first 10 rows and return a maximum of 20 rows - the limit
+is exclusive of the offset.</p>
+<p><cite>LIMIT</cite> is optional like <cite>OFFSET</cite>:</p>
+<p><code class="docutils literal"><span class="pre">`sql</span>
+<span class="pre">SELECT</span> <span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">bla</span> <span class="pre">OFFSET</span> <span class="pre">10</span>
+<span class="pre">`</span></code></p>
+<p>If the offset is larger than the available rows then no rows will be
+returned.</p>
+<p class="last">&gt; It is important to note that all the rows up to the <cite>LIMIT</cite> + the <cite>OFFSET</cite>
+&gt; must be calculated internally so using a large <cite>OFFSET</cite> can be expensive.
+&gt; In some cases all records of the entire set must be calculated before the
+&gt; limit can be applied - such as when there is an <cite>ORDER BY</cite> or <cite>GROUP BY</cite>
+&gt; clauses.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sql-update.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sql-insert.html" class="btn btn-neutral" title="Syntax" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Elliot Chance.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
