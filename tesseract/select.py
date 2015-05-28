@@ -116,6 +116,28 @@ class SelectStatement(statement.Statement):
             manager
         )
 
+    @staticmethod
+    def is_to_value(e):
+        if e.right.value == 'null':
+            return [ast.Value(None)]
+        if e.right.value == 'true':
+            return [ast.Value(True)]
+        if e.right.value == 'false':
+            return [ast.Value(False)]
+
+        return []
+
+    def __index_matches(self, stages, rule, index_name, expression, redis):
+        # noinspection PyCallingNonCallable
+        looking_for = rule['index_name'](expression.where)
+        if redis.hget('indexes', index_name).decode() == looking_for:
+            # noinspection PyCallingNonCallable
+            args = rule['args'](expression.where)
+            if len(args) > 0:
+                args.insert(0, index_name)
+                stages.add(index.IndexStage, args)
+                return True
+
     def __find_index(self, expression, redis, result, stages):
         """Try and find an index that can be used for the WHERE expression. If
         and index is found it is added to the query plan.
@@ -123,32 +145,7 @@ class SelectStatement(statement.Statement):
         Returns:
           If an index was found True is returned, else False.
         """
-        def is_to_value(e):
-            if e.right.value == 'null':
-                return [ast.Value(None)]
-            if e.right.value == 'true':
-                return [ast.Value(True)]
-            if e.right.value == 'false':
-                return [ast.Value(False)]
-
-            return []
-
-        tn = result.statement.table_name
-        rules = {
-            '^@I = @V.$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.left),
-                'args': lambda e: [e.right],
-            },
-            '^@V. = @I$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.right),
-                'args': lambda e: [e.left],
-            },
-            '^@I IS @V.$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.left),
-                'args': is_to_value,
-            },
-        }
-
+        rules = self.__index_rules(result.statement.table_name)
         signature = expression.where.signature()
         rule = None
         for r in rules.keys():
@@ -160,17 +157,26 @@ class SelectStatement(statement.Statement):
             index_manager = index.IndexManager.get_instance(redis)
             indexes = index_manager.get_indexes_for_table(str(result.statement.table_name))
             for index_name in indexes:
-                # noinspection PyCallingNonCallable
-                looking_for = rules[rule]['index_name'](expression.where)
-                if redis.hget('indexes', index_name).decode() == looking_for:
-                    # noinspection PyCallingNonCallable
-                    args = rules[rule]['args'](expression.where)
-                    if len(args) > 0:
-                        args.insert(0, index_name)
-                        stages.add(index.IndexStage, args)
-                        return True
+                if self.__index_matches(stages, rules[rule], index_name, expression, redis):
+                    return True
 
         return False
+
+    def __index_rules(self, tn):
+        return {
+            '^@I = @V.$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': lambda e: [e.right],
+            },
+            '^@V. = @I$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.right),
+                'args': lambda e: [e.left],
+            },
+            '^@I IS @V.$': {
+                'index_name': lambda e: '%s.%s' % (tn, e.left),
+                'args': self.is_to_value,
+            },
+        }
 
     def __compile_from_and_where(self, expression, redis, result, stages):
         """When compiling the WHERE clause we need to do a few things:
