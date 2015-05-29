@@ -31,8 +31,8 @@ Overview
 
 .. highlights::
 
-   For those already comfortable with SQL and indexes you need not read must more
-   beyond this point. Indexes are intended to work exactly the same way in
+   For those already comfortable with SQL and indexes you need not read must
+   more beyond this point. Indexes are intended to work exactly the same way in
    tesseract.
 
 Each index will require space proportional to the amount of data that is in the
