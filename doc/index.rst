@@ -22,7 +22,9 @@ written in Python and uses an
    sql-reference
    engine
    testing
+   changelog
    formatting
+   aggregate-functions
 
 
 Installation

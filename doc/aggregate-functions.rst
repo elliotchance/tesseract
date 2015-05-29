@@ -6,7 +6,7 @@ may be zero values).
 
 
 ``AVG()`` -- Average
-------------------
+--------------------
 
 ```sql
 avg(<number>)
@@ -25,24 +25,24 @@ When the argument is `*` it will count all records without needing to provide
 any value.
 
 
-`MAX()` -- Maximum value
-========================
+``MAX()`` -- Maximum value
+--------------------------
 
 ```sql
 max(<number>)
 ```
 
 
-`MIN()` -- Minimum value
-========================
+``MIN()`` -- Minimum value
+--------------------------
 
 ```sql
 min(<number>)
 ```
 
 
-`SUM()` -- Total
-================
+``SUM()`` -- Total
+------------------
 
 ```sql
 sum(<number>)
