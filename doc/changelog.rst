@@ -1,9 +1,6 @@
 Changelog
 =========
 
-.. toctree::
-   :maxdepth: 2
-
 
 v1.0.0-alpha3 (Comet)
 ---------------------

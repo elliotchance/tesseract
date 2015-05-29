@@ -1,8 +1,6 @@
 CREATE INDEX
 ============
 
-.. autoclass:: tesseract.index.CreateIndexStatement
-
 ``CREATE INDEX`` creates a mixed type index on a single column of a table.
 
 Index are used to vastly improve performance when fetching data. By creating

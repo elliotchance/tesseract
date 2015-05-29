@@ -1,36 +1,37 @@
-% Mathematical Functions
+Mathematical Functions
+======================
 
-To comply with the SQL standard in all cases when a `null` is passed as an
-argument to any function below the result of the expression will be `null`.
-Values that are missing are treated as `null` values.
+To comply with the SQL standard in all cases when a ``null`` is passed as an
+argument to any function below the result of the expression will be ``null``.
+Values that are missing are treated as ``null`` values.
 
 
-`ABS()` -- Absolute value
-=========================
+``ABS()`` -- Absolute value
+---------------------------
 
 Return the absolute value (positive value) of a number.
 
     abs(<number>)
 
 
-`CEIL()` -- Round up
-====================
+``CEIL()`` -- Round up
+----------------------
 
 Round up to the next whole number.
 
     ceil(<number>)
 
 
-`COS()` -- Cosine
-=================
+``COS()`` -- Cosine
+-------------------
 
 Calculates the cosine of an angle. 
 
     cos(<number>)
 
 
-`FLOOR()` -- Round down
-=======================
+``FLOOR()`` -- Round down
+-------------------------
 
 Remove the fractional part of a number. This is often refered to as truncating a
 number.
@@ -38,16 +39,16 @@ number.
     floor(<number>)
 
 
-`SIN()` -- Sine
-===============
+``SIN()`` -- Sine
+-----------------
 
 Calculates the sine of an angle. 
 
     sin(<number>)
 
 
-`SQRT()` -- Square root
-=======================
+``SQRT()`` -- Square root
+-------------------------
 
 Calculates the square root of a number. 
 
@@ -58,8 +59,8 @@ If the number is negative an error will be thrown:
     Cannot calculate square root with negative number -17
 
 
-`TAN()` -- Tangent
-==================
+``TAN()`` -- Tangent
+--------------------
 
 Calculates the tangent of an angle. 
 

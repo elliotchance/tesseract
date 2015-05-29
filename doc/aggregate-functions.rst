@@ -8,18 +8,18 @@ may be zero values).
 ``AVG()`` -- Average
 --------------------
 
-```sql
-avg(<number>)
-```
+.. code-block:: sql
+
+   avg(<number>)
 
 
 ``COUNT()`` -- Count records
 ----------------------------
 
-```sql
-count(*)
-count(<any>)
-```
+.. code-block:: sql
+
+   count(*)
+   count(<any>)
 
 When the argument is `*` it will count all records without needing to provide
 any value.
@@ -28,22 +28,22 @@ any value.
 ``MAX()`` -- Maximum value
 --------------------------
 
-```sql
-max(<number>)
-```
+.. code-block:: sql
+
+   max(<number>)
 
 
 ``MIN()`` -- Minimum value
 --------------------------
 
-```sql
-min(<number>)
-```
+.. code-block:: sql
+
+   min(<number>)
 
 
 ``SUM()`` -- Total
 ------------------
 
-```sql
-sum(<number>)
-```
+.. code-block:: sql
+
+   sum(<number>)

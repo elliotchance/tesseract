@@ -20,11 +20,11 @@ written in Python and uses an
    :maxdepth: 2
 
    sql-reference
+   functions-operators
    engine
    testing
    changelog
    formatting
-   aggregate-functions
 
 
 Installation
