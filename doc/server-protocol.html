@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Server Protocol</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+
+<div id="main-outer-box">
+
+<div id="my-header">
+  <a href="index.html">tesseract</a>
+</div>
+
+<div id="trunk-box">
+
+<div id="nav-pane">
+<p>Top-level docs &amp; dirs:</p>
+<ul><li><a href="SQL Reference/toc.html">SQL Reference/</a></li><li><a href="Expressions/toc.html">Expressions/</a></li><li><a href="testing.html">Testing</a></li><li><a href="formatting.html">Formatting</a></li><li><b>Server Protocol</b></li></ul>
+</div>
+
+<div id="center-box">
+
+<div id="header-nav-bar">
+<a href="./formatting.html">← prev</a> | next → &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/server-protocol.html</b> &nbsp; &nbsp; (<a href="server-protocol-printable.html">printable version</a>)<br/>
+
+</div>
+
+<div id="content">
+<div id="header">
+<h1 class="title">Server Protocol</h1>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#connect"><span class="toc-section-number">1</span> Connect</a></li>
+<li><a href="#request"><span class="toc-section-number">2</span> Request</a></li>
+<li><a href="#response"><span class="toc-section-number">3</span> Response</a></li>
+</ul>
+</div>
+<p>The server protocol used by tesseract is pure JSON. This makes it very easy for any language or system to interact with - even <code>telnet</code> if you don’t mind typing the JSON.</p>
+<h1 id="connect"><span class="header-section-number">1</span> Connect</h1>
+<p>There is currently no authentication required for connecting. So simply knowing the host and port is sufficient for making a connection.</p>
+<p>It is a plain TCP connection that normally runs on port 3679.</p>
+<h1 id="request"><span class="header-section-number">2</span> Request</h1>
+<p>The request is a JSON object:</p>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;sql&quot;</span><span class="fu">:</span> <span class="st">&quot;SELECT 1 + 2&quot;</span>
+<span class="fu">}</span></code></pre>
+<h1 id="response"><span class="header-section-number">3</span> Response</h1>
+<p>If the response is successful:</p>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="fu">{</span>
+      <span class="dt">&quot;col1&quot;</span><span class="fu">:</span> <span class="dv">3</span>
+    <span class="fu">}</span>
+  <span class="ot">]</span>
+<span class="fu">}</span></code></pre>
+<p>If the response is an error:</p>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span>
+  <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="st">&quot;Oh noes!&quot;</span>
+<span class="fu">}</span></code></pre>
+<p>Warnings are not considered a failure, so a prudent client should check to see if the <code>warnings</code> is present in the response:</p>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="fu">{</span>
+      <span class="dt">&quot;col1&quot;</span><span class="fu">:</span> <span class="dv">3</span>
+    <span class="fu">}</span>
+  <span class="ot">]</span><span class="fu">,</span>
+  <span class="dt">&quot;warnings&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="st">&quot;Take note...&quot;</span>
+  <span class="ot">]</span>
+<span class="fu">}</span></code></pre>
+
+</div> <!-- content -->
+
+<div id="footer-nav-bar">
+<a href="./formatting.html">← prev</a> | next → &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/server-protocol.html</b> &nbsp; &nbsp; (<a href="server-protocol-printable.html">printable version</a>)<br/>
+
+</div>
+
+</div> <!-- center-box -->
+</div> <!-- trunk-box -->
+
+<div id="my-footer">
+MIT Licence
+<br/>
+<a href="server-protocol.md">Pandoc-Markdown source for this page</a><br/>
+(Docs processed by
+<a href="http://www.unexpected-vortices.com/sw/rippledoc/index.html">Rippledoc</a>.)
+</div> <!-- my-footer -->
+
+</div> <!-- main-outer-box -->
+</body>
+</html>

@@ -1,4 +1,0 @@
-Indexing
-========
-
-.. automodule:: tesseract.index

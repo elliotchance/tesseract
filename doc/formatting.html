@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Formatting</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+
+<div id="main-outer-box">
+
+<div id="my-header">
+  <a href="index.html">tesseract</a>
+</div>
+
+<div id="trunk-box">
+
+<div id="nav-pane">
+<p>Top-level docs &amp; dirs:</p>
+<ul><li><a href="SQL Reference/toc.html">SQL Reference/</a></li><li><a href="Expressions/toc.html">Expressions/</a></li><li><a href="testing.html">Testing</a></li><li><b>Formatting</b></li><li><a href="server-protocol.html">Server Protocol</a></li></ul>
+</div>
+
+<div id="center-box">
+
+<div id="header-nav-bar">
+<a href="./testing.html">← prev</a> | <a href="./server-protocol.html">next →</a> &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/formatting.html</b> &nbsp; &nbsp; (<a href="formatting-printable.html">printable version</a>)<br/>
+
+</div>
+
+<div id="content">
+<div id="header">
+<h1 class="title">Formatting</h1>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#basic"><span class="toc-section-number">1</span> Basic</a></li>
+<li><a href="#sql-examples"><span class="toc-section-number">2</span> SQL Examples</a></li>
+<li><a href="#syntax-descriptions"><span class="toc-section-number">3</span> Syntax Descriptions</a></li>
+<li><a href="#notes"><span class="toc-section-number">4</span> Notes</a></li>
+<li><a href="#tables"><span class="toc-section-number">5</span> Tables</a></li>
+</ul>
+</div>
+<p>The tesseract manual is written in Markdown and processed with Rippledoc and Pandoc. This document does not intend to outline how the documentation is generated. Only to provide a style guidelines and samples that are used through the rest of the manual.</p>
+<p>You may use all the features of Markdown and any features specifically supported by Pandoc. However, in all cases you must follow these rules wherever approproate:</p>
+<ul>
+<li><p>Keep all documentation to 80 columns unless it cannot be avoided (for example, long tables or code snippets).</p></li>
+<li><p>The documentation here is intended to be easily read and maintained. Do no use fancy features that make the Markdown less readable simply to make the result HTML look more pretty.</p></li>
+</ul>
+<h1 id="basic"><span class="header-section-number">1</span> Basic</h1>
+<p>Always H1 for first level headings and always use an underlined heading rather than hashes:</p>
+<pre><code>Heading 1
+=========
+
+Heading 2
+---------</code></pre>
+<p>If you have to goto the thrid level then include the hashes on <em>both</em> sides of the heading:</p>
+<pre><code>### Heading 3 ###</code></pre>
+<p>Each heading of any strength should have two blank lines above it (unless it is the first line of the file.)</p>
+<h1 id="sql-examples"><span class="header-section-number">2</span> SQL Examples</h1>
+<p>SQL examples should be used in fenced blocks and not include the following semi-colon:</p>
+<pre><code>```sql
+SELECT foo FROM bar
+```</code></pre>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> foo <span class="kw">FROM</span> bar</code></pre>
+<p>If you would like to show the result of the SQL it must be in a separate fenced block for JSON:</p>
+<pre><code>```json
+{&quot;foo&quot;: &quot;bar&quot;}
+```</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span><span class="dt">&quot;foo&quot;</span><span class="fu">:</span> <span class="st">&quot;bar&quot;</span><span class="fu">}</span></code></pre>
+<h1 id="syntax-descriptions"><span class="header-section-number">3</span> Syntax Descriptions</h1>
+<p>When describing SQL syntax use a SQL fenced block:</p>
+<pre><code>```sql
+SELECT &lt;some_columns&gt;
+FROM &lt;table&gt;
+```</code></pre>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> &lt;some_columns&gt;
+<span class="kw">FROM</span> &lt;table&gt;</code></pre>
+<p>For each of the placeholders use a definition style with a blank line between each definition:</p>
+<pre><code>some_columns
+  : Lots of nice decription here.
+
+table
+  : Even more wonderful information!</code></pre>
+<dl>
+<dt>some_columns</dt>
+<dd>Lots of nice decription here.
+</dd>
+<dt>table</dt>
+<dd>Even more wonderful information!
+</dd>
+</dl>
+<h1 id="notes"><span class="header-section-number">4</span> Notes</h1>
+<p>Notes are meant to stand out from other text and contain important information.</p>
+<pre><code>&gt; This is important information.</code></pre>
+<blockquote>
+<p>This is important information.</p>
+</blockquote>
+<h1 id="tables"><span class="header-section-number">5</span> Tables</h1>
+<p>There are two types of table syntax that make the table as small as possible around the text or type to span as much space as possible. Always use the greater span syntax:</p>
+<pre><code>---------  -------------
+full span  syntax
+---------  -------------
+for        tables
+with       multiple rows
+---------  -------------</code></pre>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">full span</th>
+<th align="left">syntax</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">for with</td>
+<td align="left">tables multiple rows</td>
+</tr>
+</tbody>
+</table>
+
+</div> <!-- content -->
+
+<div id="footer-nav-bar">
+<a href="./testing.html">← prev</a> | <a href="./server-protocol.html">next →</a> &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/formatting.html</b> &nbsp; &nbsp; (<a href="formatting-printable.html">printable version</a>)<br/>
+
+</div>
+
+</div> <!-- center-box -->
+</div> <!-- trunk-box -->
+
+<div id="my-footer">
+MIT Licence
+<br/>
+<a href="formatting.md">Pandoc-Markdown source for this page</a><br/>
+(Docs processed by
+<a href="http://www.unexpected-vortices.com/sw/rippledoc/index.html">Rippledoc</a>.)
+</div> <!-- my-footer -->
+
+</div> <!-- main-outer-box -->
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>tesseract</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+
+<div id="main-outer-box">
+
+<div id="my-header">
+  <a href="index.html">tesseract</a>
+</div>
+
+<div id="trunk-box">
+
+<div id="nav-pane">
+<p>Top-level docs &amp; dirs:</p>
+<ul><li><a href="SQL Reference/toc.html">SQL Reference/</a></li><li><a href="Expressions/toc.html">Expressions/</a></li><li><a href="testing.html">Testing</a></li><li><a href="formatting.html">Formatting</a></li><li><a href="server-protocol.html">Server Protocol</a></li></ul>
+</div>
+
+<div id="center-box">
+
+<div id="header-nav-bar">
+← prev | <a href="./SQL Reference/create-notification.html">next →</a> &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/index.html</b> &nbsp; &nbsp; (<a href="index-printable.html">printable version</a>)<br/>
+
+</div>
+
+<div id="content">
+<div id="header">
+<h1 class="title">tesseract</h1>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#installation"><span class="toc-section-number">1</span> Installation</a></li>
+<li><a href="#running-the-server"><span class="toc-section-number">2</span> Running the Server</a></li>
+<li><a href="#examples"><span class="toc-section-number">3</span> Examples</a></li>
+</ul>
+</div>
+<p><a href="https://travis-ci.org/elliotchance/tesseract"><img src="https://travis-ci.org/elliotchance/tesseract.svg?branch=master" alt="Build Status" /></a> <a href="https://coveralls.io/r/elliotchance/tesseract?branch=master"><img src="https://coveralls.io/repos/elliotchance/tesseract/badge.svg?branch=master" alt="Coverage Status" /></a> <a href="https://scrutinizer-ci.com/g/elliotchance/tesseract/?branch=master"><img src="https://scrutinizer-ci.com/g/elliotchance/tesseract/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality" /></a></p>
+<p><strong>tesseract</strong> is a SQL object database with Redis as the backend, think of it like a document store that you run SQL statements against.</p>
+<p>Since it is backed by Redis and queries are compiled to Lua it makes running complex queries on complex data very fast (all considered). The entire server is written in Python and uses an <a href="server-protocol.html">extremely simply client protocol</a>.</p>
+<h1 id="installation"><span class="header-section-number">1</span> Installation</h1>
+<p>Since tesseract is very alpha I have not uploaded releases yet to <code>pip</code> so the easiest way get it is to clone out the repo and run off the stable <code>master</code> branch.</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/elliotchance/tesseract.git</code></pre>
+<h1 id="running-the-server"><span class="header-section-number">2</span> Running the Server</h1>
+<p>You must have Redis running locally on the standard port. If not, run:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">redis-server</span> <span class="kw">&amp;</span></code></pre>
+<p>Then start the tesseract server. It’s not wise to run it in the background so you can pay attension to errors and crashes during this wonderful time of testing.</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">bin/tesseract</span></code></pre>
+<p>Remember that if you pull the latest changes for tesseract you will have to restart the server for those changes to take effect. Simply CTRL+C and run the command above again.</p>
+<h1 id="examples"><span class="header-section-number">3</span> Examples</h1>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">insert</span> <span class="kw">into</span> people {
+  <span class="ot">&quot;first_name&quot;</span>: <span class="ot">&quot;Bob&quot;</span>,
+  <span class="ot">&quot;last_name&quot;</span>: <span class="ot">&quot;Smith&quot;</span>,
+  <span class="ot">&quot;children&quot;</span>: [ <span class="ot">&quot;Sally&quot;</span>, <span class="ot">&quot;Bob Jnr.&quot;</span> ]
+};
+
+<span class="kw">insert</span> <span class="kw">into</span> people {
+  <span class="ot">&quot;first_name&quot;</span>: <span class="ot">&quot;John&quot;</span>,
+  <span class="ot">&quot;last_name&quot;</span>: <span class="ot">&quot;Williams&quot;</span>,
+  <span class="ot">&quot;children&quot;</span>: [ <span class="ot">&quot;Bill&quot;</span> ]
+};
+         
+<span class="kw">select</span> * <span class="kw">from</span> people;</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;first_name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;last_name&quot;</span><span class="fu">:</span><span class="st">&quot;Smith&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;children&quot;</span><span class="fu">:</span><span class="ot">[</span>
+         <span class="st">&quot;Sally&quot;</span><span class="ot">,</span>
+         <span class="st">&quot;Bob Jnr.&quot;</span>
+      <span class="ot">]</span>
+   <span class="fu">}</span><span class="ot">,</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;first_name&quot;</span><span class="fu">:</span><span class="st">&quot;John&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;last_name&quot;</span><span class="fu">:</span><span class="st">&quot;Williams&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;children&quot;</span><span class="fu">:</span><span class="ot">[</span>
+         <span class="st">&quot;Bill&quot;</span>
+      <span class="ot">]</span>
+   <span class="fu">}</span>
+<span class="ot">]</span></code></pre>
+<p>OK, great, nothing special there. Let’s just dive straight into it:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">select</span> first_name || <span class="st">&#39; &#39;</span> || last_name <span class="kw">as</span> name,
+    children,
+    len(children) <span class="kw">as</span> total
+<span class="kw">from</span> people
+<span class="kw">where</span> first_name <span class="kw">like</span> <span class="ot">&quot;B%&quot;</span>;</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob Smith&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;children&quot;</span><span class="fu">:</span><span class="ot">[</span>
+         <span class="st">&quot;Sally&quot;</span><span class="ot">,</span>
+         <span class="st">&quot;Bob Jnr.&quot;</span>
+      <span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;total&quot;</span><span class="fu">:</span><span class="dv">2</span>
+   <span class="fu">}</span>
+<span class="ot">]</span></code></pre>
+<p>Since we are dealing with objects (that may contain several levels) and not simple rows, we can focus queries to subitems:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">select</span> *
+<span class="kw">from</span> people.children <span class="kw">as</span> <span class="kw">child</span>
+<span class="kw">order</span> <span class="kw">by</span> <span class="kw">child</span>;</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;child&quot;</span><span class="fu">:</span><span class="st">&quot;Bill&quot;</span>
+   <span class="fu">}</span><span class="ot">,</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;child&quot;</span><span class="fu">:</span><span class="st">&quot;Bob Jnr.&quot;</span>
+   <span class="fu">}</span><span class="ot">,</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;child&quot;</span><span class="fu">:</span><span class="st">&quot;Sally&quot;</span>
+   <span class="fu">}</span>
+<span class="ot">]</span></code></pre>
+<p>Unless otherwise specified you will always get an array of objects. However, you can specify a custom <code>rownum</code>:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">select</span> first_name + <span class="ot">&quot; &quot;</span> + last_name <span class="kw">as</span> <span class="kw">rownum</span>, children
+<span class="kw">from</span> people;</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+   <span class="dt">&quot;Bob Smith&quot;</span><span class="fu">:{</span>
+      <span class="dt">&quot;children&quot;</span><span class="fu">:</span><span class="ot">[</span>
+         <span class="st">&quot;Sally&quot;</span><span class="ot">,</span>
+         <span class="st">&quot;Bob Jnr.&quot;</span>
+      <span class="ot">]</span><span class="fu">,</span>
+   <span class="fu">},</span>
+   <span class="dt">&quot;John Williams&quot;</span><span class="fu">:{</span>
+      <span class="dt">&quot;children&quot;</span><span class="fu">:</span><span class="ot">[</span>
+         <span class="st">&quot;Bill&quot;</span>
+      <span class="ot">]</span>
+   <span class="fu">}</span>
+<span class="fu">}</span></code></pre>
+<p>Here are some more complex examples:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">insert</span> <span class="kw">into</span> customer
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">123</span>, <span class="ot">&quot;name&quot;</span>: <span class="ot">&quot;Bob the Builder&quot;</span>};
+<span class="kw">insert</span> <span class="kw">into</span> item
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">100</span>, <span class="ot">&quot;name&quot;</span>: <span class="ot">&quot;Wood&quot;</span>},
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">101</span>, <span class="ot">&quot;name&quot;</span>: <span class="ot">&quot;Hammer&quot;</span>},
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">102</span>, <span class="ot">&quot;name&quot;</span>: <span class="ot">&quot;Nails&quot;</span>};
+<span class="kw">insert</span> <span class="kw">into</span> <span class="kw">order</span>
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">456</span>, <span class="ot">&quot;customer_id&quot;</span>: <span class="dv">123</span>, <span class="ot">&quot;items&quot;</span>: [<span class="dv">101</span>, <span class="dv">102</span>]},
+    {<span class="ot">&quot;id&quot;</span>: <span class="dv">789</span>, <span class="ot">&quot;customer_id&quot;</span>: <span class="dv">123</span>, <span class="ot">&quot;items&quot;</span>: [<span class="dv">100</span>]};</code></pre>
+<p>If we did a SQL-like join:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">select</span> *
+<span class="kw">from</span> customer
+<span class="kw">join</span> <span class="kw">order</span> <span class="kw">on</span> customer.id = order.customer_id
+<span class="kw">join</span> items <span class="kw">on</span> item.id = <span class="kw">each</span>(order.items);</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;customer_id&quot;</span><span class="fu">:</span><span class="dv">123</span><span class="fu">,</span>
+      <span class="dt">&quot;customer_name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob the Builder&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;order_id&quot;</span><span class="fu">:</span><span class="dv">456</span><span class="fu">,</span>
+      <span class="dt">&quot;items&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="dv">101</span><span class="ot">,</span> <span class="dv">102</span><span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;item_id&quot;</span><span class="fu">:</span><span class="dv">101</span><span class="fu">,</span>
+      <span class="dt">&quot;item_name&quot;</span><span class="fu">:</span><span class="st">&quot;Hammer&quot;</span>
+   <span class="fu">}</span><span class="ot">,</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;customer_id&quot;</span><span class="fu">:</span><span class="dv">123</span><span class="fu">,</span>
+      <span class="dt">&quot;customer_name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob the Builder&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;order_id&quot;</span><span class="fu">:</span><span class="dv">456</span><span class="fu">,</span>
+      <span class="dt">&quot;items&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="dv">101</span><span class="ot">,</span> <span class="dv">102</span><span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;item_id&quot;</span><span class="fu">:</span><span class="dv">102</span><span class="fu">,</span>
+      <span class="dt">&quot;item_name&quot;</span><span class="fu">:</span><span class="st">&quot;Nails&quot;</span>
+   <span class="fu">}</span><span class="ot">,</span>
+   <span class="fu">{</span>
+      <span class="dt">&quot;customer_id&quot;</span><span class="fu">:</span><span class="dv">123</span><span class="fu">,</span>
+      <span class="dt">&quot;customer_name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob the Builder&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;order_id&quot;</span><span class="fu">:</span><span class="dv">789</span><span class="fu">,</span>
+      <span class="dt">&quot;items&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="dv">100</span><span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;item_id&quot;</span><span class="fu">:</span><span class="dv">100</span><span class="fu">,</span>
+      <span class="dt">&quot;item_name&quot;</span><span class="fu">:</span><span class="st">&quot;Wood&quot;</span>
+   <span class="fu">}</span><span class="ot">,</span>
+<span class="ot">]</span></code></pre>
+<p>The results that come back are not in a very good format for traversing. In most cases you will want a more hierarchical response. The most basic way to handle this is with sub-selects:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">select</span> <span class="kw">id</span> <span class="kw">as</span> <span class="kw">rownum</span>, name, (
+      <span class="kw">select</span> order.id <span class="kw">as</span> <span class="kw">rownum</span>, (
+         <span class="kw">select</span> * <span class="kw">from</span> item <span class="kw">where</span> <span class="kw">id</span> <span class="kw">in</span> order.items
+      ) <span class="kw">as</span> items
+      <span class="kw">where</span> order.customer_id = customer.id
+   ) <span class="kw">as</span> orders
+<span class="kw">from</span> customer;</code></pre>
+<pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+   <span class="dt">&quot;123&quot;</span><span class="fu">:{</span>
+      <span class="dt">&quot;name&quot;</span><span class="fu">:</span><span class="st">&quot;Bob the Builder&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;orders&quot;</span><span class="fu">:{</span>
+         <span class="dt">&quot;456&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Hammer&quot;</span><span class="ot">,</span> <span class="st">&quot;Nails&quot;</span><span class="ot">]</span><span class="fu">},</span>
+         <span class="dt">&quot;789&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Wood&quot;</span><span class="ot">]</span><span class="fu">}</span>
+      <span class="fu">}</span>
+   <span class="fu">}</span>
+<span class="fu">}</span></code></pre>
+
+</div> <!-- content -->
+
+<div id="footer-nav-bar">
+← prev | <a href="./SQL Reference/create-notification.html">next →</a> &nbsp; &nbsp; <a href="toc.html">Top-level ToC</a> &nbsp; &nbsp; <b>/index.html</b> &nbsp; &nbsp; (<a href="index-printable.html">printable version</a>)<br/>
+
+</div>
+
+</div> <!-- center-box -->
+</div> <!-- trunk-box -->
+
+<div id="my-footer">
+MIT Licence
+<br/>
+<a href="index.md">Pandoc-Markdown source for this page</a><br/>
+(Docs processed by
+<a href="http://www.unexpected-vortices.com/sw/rippledoc/index.html">Rippledoc</a>.)
+</div> <!-- my-footer -->
+
+</div> <!-- main-outer-box -->
+</body>
+</html>

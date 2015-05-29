@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Testing</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles-printable.css" type="text/css" />
+</head>
+<body>
+<div id="header">
+<h1 class="title">Testing</h1>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#basic-test-sql"><span class="toc-section-number">0.1</span> Basic Test (<code>sql</code>)</a><ul>
+<li><a href="#result-result"><span class="toc-section-number">0.1.1</span> Result (<code>result</code>)</a></li>
+<li><a href="#result-in-any-order-result-unordered"><span class="toc-section-number">0.1.2</span> Result in Any Order (<code>result-unordered</code>)</a></li>
+<li><a href="#parser-as"><span class="toc-section-number">0.1.3</span> Parser (<code>as</code>)</a></li>
+<li><a href="#ignoring-the-parser-parse"><span class="toc-section-number">0.1.4</span> Ignoring the Parser (<code>parse</code>)</a></li>
+<li><a href="#commenting-comment"><span class="toc-section-number">0.1.5</span> Commenting (<code>comment</code>)</a></li>
+<li><a href="#repeating-tests-repeat"><span class="toc-section-number">0.1.6</span> Repeating Tests (<code>repeat</code>)</a></li>
+</ul></li>
+<li><a href="#failures"><span class="toc-section-number">0.2</span> Failures</a><ul>
+<li><a href="#expecting-errors-error"><span class="toc-section-number">0.2.1</span> Expecting Errors (<code>error</code>)</a></li>
+<li><a href="#expecting-warnings-warning"><span class="toc-section-number">0.2.2</span> Expecting Warnings (<code>warning</code>)</a></li>
+</ul></li>
+<li><a href="#data-sets-data"><span class="toc-section-number">0.3</span> Data Sets (<code>data</code>)</a><ul>
+<li><a href="#randomizing-data-data-randomized"><span class="toc-section-number">0.3.1</span> Randomizing Data (<code>data-randomized</code>)</a></li>
+</ul></li>
+<li><a href="#verifying-notifications"><span class="toc-section-number">0.4</span> Verifying Notifications</a></li>
+</ul>
+</div>
+<h2 id="basic-test-sql"><span class="header-section-number">0.1</span> Basic Test (<code>sql</code>)</h2>
+<p>Tesseract generates tests from YAML files. This makes it very easy to read, maintain and organise.</p>
+<p>These files can be found in the <code>tests</code> directory. The most simple file may look like:</p>
+<pre class="yml"><code>tests:
+  my_test:
+    sql: SELECT 1 + 2
+    result:
+    - {&quot;col1&quot;: 3}</code></pre>
+<p>In the example above we have created one test called <code>my_test</code> that will run the SQL statement and confirm that the server returns one row containing that exact data.</p>
+<h3 id="result-result"><span class="header-section-number">0.1.1</span> Result (<code>result</code>)</h3>
+<p>Specify the expected output of the last <code>sql</code> statement. The data returned from the server must be exacly the same (including order) as the <code>result</code> items.</p>
+<h3 id="result-in-any-order-result-unordered"><span class="header-section-number">0.1.2</span> Result in Any Order (<code>result-unordered</code>)</h3>
+<p>If the order in which the records isn’t imporant or is unpredictable you can use <code>result-unordered</code> instead of <code>result</code>.</p>
+<pre class="yml"><code>tests:
+  two_columns:
+    data: table1
+    sql: &quot;SELECT foo, foo * 2 FROM table1&quot;
+    result-unordered:
+    - {&quot;foo&quot;: 123, &quot;col2&quot;: 246}
+    - {&quot;foo&quot;: 124, &quot;col2&quot;: 248}
+    - {&quot;foo&quot;: 125, &quot;col2&quot;: 250}</code></pre>
+<h3 id="parser-as"><span class="header-section-number">0.1.3</span> Parser (<code>as</code>)</h3>
+<p>All tests that contain a <code>sql</code> attribute will be run through the parser and the statement will be rendered. This rendered statement is expected to be the same as this <code>sql</code> value. If you expect a different rendered string then you specify what the result should be through <code>as</code>:</p>
+<pre class="yml"><code>tests:
+  alternate_operator:
+    sql: &#39;SELECT null != 123&#39;
+    as: &#39;SELECT null &lt;&gt; 123&#39;
+    result:
+    - {&quot;col1&quot;: null}</code></pre>
+<h3 id="ignoring-the-parser-parse"><span class="header-section-number">0.1.4</span> Ignoring the Parser (<code>parse</code>)</h3>
+<p>Sometimes the SQL rendered from the SQL provided is not predictable, so we have to disable the parser test:</p>
+<pre><code>tests:
+  json_object_with_two_elements:
+    sql: &#39;SELECT {&quot;foo&quot;: &quot;bar&quot;, &quot;baz&quot;: 123}&#39;
+    parse: false
+    result:
+    - {&quot;col1&quot;: {&quot;foo&quot;: &quot;bar&quot;, &quot;baz&quot;: 123}}</code></pre>
+<h3 id="commenting-comment"><span class="header-section-number">0.1.5</span> Commenting (<code>comment</code>)</h3>
+<p>Test can have an optional comment, this is preferred over using YAML inline comments so that comments can be injected is creating reports in the future.</p>
+<pre class="yml"><code>tests:
+  my_test:
+    comment: Test everything!
+    sql: &#39;SELECT 123&#39;</code></pre>
+<h3 id="repeating-tests-repeat"><span class="header-section-number">0.1.6</span> Repeating Tests (<code>repeat</code>)</h3>
+<p>If a test lacks some predictability or you need to test the outcome multiple times for another reason you can use the <code>repeat</code>. This will still generate one test but it will loop through the <code>repeat</code> many times.</p>
+<pre class="yml"><code>tests:
+  my_test:
+    sql: &#39;SELECT 123&#39;
+    repeat: 20
+    result:
+    - {&quot;col1&quot;: 123}</code></pre>
+<h2 id="failures"><span class="header-section-number">0.2</span> Failures</h2>
+<h3 id="expecting-errors-error"><span class="header-section-number">0.2.1</span> Expecting Errors (<code>error</code>)</h3>
+<p>Use the <code>error</code> to test for an expected error:</p>
+<pre class="yml"><code>tests:
+  incompatible_types:
+    sql: SELECT false AND 3.5
+    error: No such operator boolean AND number.</code></pre>
+<p>Errors will be raised by the parser or by executing the SQL statement(s).</p>
+<h3 id="expecting-warnings-warning"><span class="header-section-number">0.2.2</span> Expecting Warnings (<code>warning</code>)</h3>
+<p>You can assert one or more warnings are raised:</p>
+<pre class="yml"><code>tests:
+  json_object_duplicate_item_raises_warning:
+    sql: &#39;SELECT {&quot;foo&quot;: &quot;bar&quot;, &quot;foo&quot;: &quot;baz&quot;}&#39;
+    as: &#39;SELECT {&quot;foo&quot;: &quot;baz&quot;}&#39;
+    warning: Duplicate key &quot;foo&quot;, using last value.
+
+  multiple_warnings_can_be_raised:
+    sql: &#39;SELECT {&quot;foo&quot;: &quot;bar&quot;, &quot;foo&quot;: &quot;baz&quot;, &quot;foo&quot;: &quot;bax&quot;}&#39;
+    as: &#39;SELECT {&quot;foo&quot;: &quot;bax&quot;}&#39;
+    warning:
+    - Duplicate key &quot;foo&quot;, using last value.
+    - Duplicate key &quot;foo&quot;, using last value.</code></pre>
+<h2 id="data-sets-data"><span class="header-section-number">0.3</span> Data Sets (<code>data</code>)</h2>
+<p>It is common that you will want to test against an existing data fixture. Instead of inserting the data you need manually you can use fixtures:</p>
+<pre class="yml"><code>data:
+  table1:
+  - {&quot;foo&quot;: 125}
+  - {&quot;foo&quot;: 124}
+  - {&quot;foo&quot;: 123}
+
+tests:
+  where:
+    data: table1
+    sql: SELECT * FROM table1 WHERE foo = 124
+    result:
+    - {&quot;foo&quot;: 124}</code></pre>
+<h3 id="randomizing-data-data-randomized"><span class="header-section-number">0.3.1</span> Randomizing Data (<code>data-randomized</code>)</h3>
+<p>For some tests you may want to randomize the order in which the records are loaded in. It is often used in conjunction with <code>repeat</code>.</p>
+<pre class="yml"><code>data:
+  table1:
+  - {&quot;foo&quot;: 125}
+  - {&quot;foo&quot;: 124}
+  - {&quot;foo&quot;: 123}</code></pre>
+<h2 id="verifying-notifications"><span class="header-section-number">0.4</span> Verifying Notifications</h2>
+<p>When under test all notifications throughout the entire test case will be recorded. They can be asserted after all the SQL is executed. To test for a single notification:</p>
+<pre class="yml"><code>tests:
+  notification_will_be_fired_for_insert:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table
+    - &#39;INSERT INTO some_table {&quot;a&quot;: &quot;b&quot;}&#39;
+    notification:
+      to: foo
+      with: {&quot;a&quot;: &quot;b&quot;}</code></pre>
+<p>If you need to assert more than one notification:</p>
+<pre class="yml"><code>tests:
+  multiple_notifications_can_be_fired_from_a_single_select:
+    sql:
+    - CREATE NOTIFICATION foo1 ON some_table WHERE a = &quot;b&quot;
+    - CREATE NOTIFICATION foo2 ON some_table WHERE a = &quot;b&quot;
+    - &#39;INSERT INTO some_table {&quot;a&quot;: &quot;b&quot;}&#39;
+    notification:
+      -
+        to: foo1
+        with: {&quot;a&quot;: &quot;b&quot;}
+      -
+        to: foo2
+        with: {&quot;a&quot;: &quot;b&quot;}</code></pre>
+<p>Or validate that no notifications have been fired:</p>
+<pre class="yml"><code>tests:
+  notification_will_respect_where_clause:
+    sql:
+    - CREATE NOTIFICATION foo ON some_table WHERE a = &quot;c&quot;
+    - &#39;INSERT INTO some_table {&quot;a&quot;: &quot;b&quot;}&#39;
+    notification: []</code></pre>
+</body>
+</html>
