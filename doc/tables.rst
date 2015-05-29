@@ -1,0 +1,4 @@
+Tables
+======
+
+.. automodule:: tesseract.table

@@ -2,3 +2,4 @@ coveralls
 pyyaml
 nose
 pygments
+Sphinx
