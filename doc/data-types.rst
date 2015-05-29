@@ -12,8 +12,8 @@ There are six distinct data types in tesseract:
 
 
 To allow tesseract to be more confomitive to the SQL standard it uses the same
-meaning for the value of ``null``. In short, all operations using the value ``null``
-will also return ``null``:
+meaning for the value of ``null``. In short, all operations using the value
+``null`` will also return ``null``:
 
 .. code-block:: sql
 
