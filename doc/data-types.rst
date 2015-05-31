@@ -33,9 +33,9 @@ other scripting languages:
 
 .. code-block:: sql
 
-SELECT 0 = false
+   SELECT 0 = false
 
-.. code-block:: txt
+.. code-block::
 
    Error: No such operator number = boolean.
 
@@ -44,8 +44,8 @@ numbers do not mean the same thing:
 
 .. code-block:: sql
 
-SELECT "123" = 123
+   SELECT "123" = 123
 
-.. code-block:: txt
+.. code-block::
 
    Error: No such operator string = number.

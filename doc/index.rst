@@ -17,7 +17,7 @@ written in Python and uses an
 [extremely simply client protocol](server-protocol.html).
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    sql-reference
    functions-operators
@@ -247,11 +247,3 @@ this is with sub-selects:
          }
       }
    }
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

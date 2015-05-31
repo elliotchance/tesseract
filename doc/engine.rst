@@ -5,4 +5,5 @@ Engine
 
    indexing
    tables
+   transactions
    server-protocol
