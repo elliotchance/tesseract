@@ -25,3 +25,8 @@ Compatibility
 -------------
 
 The SQL standard only specifies the two forms ``COMMIT`` and ``COMMIT WORK``.
+
+See Also
+--------
+
+ * :ref:`transactions`

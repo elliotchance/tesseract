@@ -31,3 +31,8 @@ Compatibility
 
 The SQL standard only specifies the two forms ``ROLLBACK`` and
 ``ROLLBACK WORK``.
+
+See Also
+--------
+
+ * :ref:`transactions`

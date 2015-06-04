@@ -3,6 +3,7 @@ Engine
 
 .. toctree::
 
+   grouping
    indexing
    tables
    transactions
