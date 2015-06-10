@@ -92,6 +92,10 @@ class Table(object):
             "local record_to_delete = cjson.decode(irecords[1])",
 
             manager.lua_transaction_info(),
+            "if row_is_locked(record_to_delete, xid, xids) then",
+            "  error('Transaction failed. Will ROLLBACK.')",
+            "end",
+
             "if row_is_visible(record_to_delete, xid, xids) then",
             "  record_to_delete[':xex'] = %d" % self.__xid(),
             "  redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (

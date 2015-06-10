@@ -23,6 +23,10 @@ class Statement(object):
         try:
             run = redis_connection.eval(lua, 0, table_name, *args)
         except Exception as e:
+            from tesseract import transaction
+            manager = transaction.TransactionManager.get_instance(redis_connection)
+            manager.rollback()
+
             return self.__lua_error(e)
 
         records = self.__retrieve_records(manager, redis_connection, run)

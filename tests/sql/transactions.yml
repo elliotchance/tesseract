@@ -164,3 +164,25 @@ tests:
         sql: SELECT * FROM one_record
         result:
         - {"a": "c"}
+
+  updates_run_into_each_other:
+    comment: |
+      The same record is held by a transaction colliding should cause the most
+      recent transaction to ROLLBACK.
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "c"
+      2-b:
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "d"
+        error: Transaction failed. Will ROLLBACK.
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "c"}

@@ -1,6 +1,10 @@
-"""This module handles SQL transactions. A transaction is a block of work that
-will not be visible until a ``COMMIT`` has been issued. Or alternatively a
-``ROLLBACK`` issued will completely undo any changes for the entire block.
+"""
+Overview
+--------
+
+A transaction is a block of work that will not be visible until a ``COMMIT``
+has been issued. Or alternatively a ``ROLLBACK`` issued will completely undo any
+changes for the entire block.
 
 Tesseract uses a `MVCC`_ (Multiversion Concurrency Control) methodology for
 record visibility. There is a lot of information on how MVCC works so for the
@@ -10,6 +14,9 @@ Most people that have used a database before expect "autocommit" where any
 statement that is not explicitly in a transaction is automatically committed.
 This is different to what the SQL standard states where ``START TRANSACTION`` is
 implicit but the ``COMMIT`` is not.
+
+Internals
+---------
 
 Following on, rather than surrounding every non-explicit transaction with a
 ``START TRANSACTION`` and ``COMMIT`` we define two states; in or not in a
@@ -30,6 +37,23 @@ A record is visible only when all the following are true:
 
   1. The ``xid`` is not in the active transactions.
   2. The ``xex`` is ``0`` OR ``xex`` is not in the active transactions.
+
+Collisions
+----------
+
+One implicit limitation of transactions is that a connection must see the same
+database state, no matter how long it has been running or how many modifications
+to the databases have been made. But at the same time it must guarantee that
+multiple transactions are editing the most recent version of rows (updating an
+expired row would have the changes lost).
+
+At the moment tesseract handles collisions by simply throwing the error::
+
+    Transaction failed. Will ROLLBACK.
+
+For the transaction that does not hold the lock for the row. This is crude
+solution as we should wait for that lock to be released but that's an
+improvement for another day.
 
 .. _MVCC: http://en.wikipedia.org/wiki/Multiversion_concurrency_control
 """

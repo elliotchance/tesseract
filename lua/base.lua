@@ -58,3 +58,8 @@ local function row_is_visible(row, xid, xids)
     -- If none of the conditions above match then the row is visible.
     return true
 end
+
+local function row_is_locked(row, xid, xids)
+    -- The record is expired and another transaction holds it.
+    return row[':xex'] ~= 0 and xids[row[':xex']]
+end
