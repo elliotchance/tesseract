@@ -49,9 +49,9 @@ The first character is the type::
     F false
     S string (followed by the actual string)
 
-The indexes are named with as "index:mytable:myindex:number" and
-"index:mytable:myindex:nonnumber". The table name is kept in the key because an
-index can only apply to a single table.
+The indexes are named with as ``index:mytable:myindex:number`` and
+``index:mytable:myindex:nonnumber``. The table name is kept in the key because
+an index can only apply to a single table.
 
 Now that we know how indexes are stored we can request back records. The first
 and most important step is to determine if the value we are looking up is a
@@ -64,8 +64,8 @@ non-numbers we can use the ZRANGEBYLEX on the non-number index.
 import json
 import redis
 from tesseract import ast
-from tesseract import client
 from tesseract import instance
+from tesseract import protocol
 from tesseract import stage
 from tesseract import statement
 from tesseract import table
@@ -426,7 +426,7 @@ class CreateIndexStatement(statement.Statement):
             str(result.statement.field)
         )
 
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()
 
 class DropIndexStatement(statement.Statement):
     """`DROP INDEX` statement."""
@@ -444,7 +444,7 @@ class DropIndexStatement(statement.Statement):
 
         manager = IndexManager(tesseract.redis)
         manager.drop_index(str(result.statement.index_name))
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()
 
 class IndexStage(stage.Stage):
     def __init__(self, input_table, offset, redis, index_name, value):

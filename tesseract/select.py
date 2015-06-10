@@ -1,9 +1,9 @@
 import re
 import redis
 from tesseract import ast
-from tesseract import client
 from tesseract import group
 from tesseract import index
+from tesseract import protocol
 from tesseract import stage
 from tesseract import statement
 from tesseract import table
@@ -105,7 +105,7 @@ class SelectStatement(statement.Statement):
         if select.explain:
             tesseract.redis.delete('explain')
             explain = manager.explain(select.table_name)
-            return client.Protocol.successful_response(explain)
+            return protocol.Protocol.successful_response(explain)
 
         return self.run(
             tesseract.redis,

@@ -21,25 +21,24 @@ stored:
    (such as when records are removed the IDs will also be removed forever.)
 
 2. Each of the records includes a secret key that contains the record ID. For
-   example the following record:
+   example the following record::
 
-   123 -> {"foo": "bar"}
+       123 -> {"foo": "bar"}
 
-   Is actually stored internally as:
+   Is actually stored internally as::
 
-   123 -> {":id": 123, "foo": "bar"}
+       123 -> {":id": 123, "foo": "bar"}
 
    This guarantees that the records are unique and also means that the scores do
    not need to be retrieved when records are iterated.
-
 """
 
 import json
 import random
 import redis
 from tesseract import ast
-from tesseract import client
 from tesseract import instance
+from tesseract import protocol
 from tesseract import stage
 from tesseract import statement
 from tesseract import transaction
@@ -317,7 +316,7 @@ class DropTableStatement(statement.Statement):
         table = PermanentTable(tesseract.redis, str(result.statement.table_name))
         table.drop()
 
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()
 
 
 class FullTableScan(stage.Stage):

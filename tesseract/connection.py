@@ -1,9 +1,9 @@
 import json
 import socket
 import threading
-from tesseract import client
 from tesseract import instance
 from tesseract import parser
+from tesseract import protocol
 from tesseract import select
 from tesseract import transaction
 
@@ -92,7 +92,7 @@ class Connection(threading.Thread):
         # We could not parse the SQL, so return the error message in the
         # response.
         except RuntimeError as e:
-            return client.Protocol.failed_response(str(e))
+            return protocol.Protocol.failed_response(str(e))
 
         return self.__execute_statement(result)
 

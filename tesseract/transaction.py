@@ -1,38 +1,41 @@
 """This module handles SQL transactions. A transaction is a block of work that
-will not be visible until a COMMIT has been issued. Or alternatively a ROLLBACK
-issued will completely undo any changes for the entire block.
+will not be visible until a ``COMMIT`` has been issued. Or alternatively a
+``ROLLBACK`` issued will completely undo any changes for the entire block.
 
-Tesseract uses a MVCC (Multiversion Concurrency Control) methodology for record
-visibility. There is a lot of information on how MVCC works so for the purpose
-of the following example I will cover the important bits.
+Tesseract uses a `MVCC`_ (Multiversion Concurrency Control) methodology for
+record visibility. There is a lot of information on how MVCC works so for the
+purpose of the following example I will cover the important bits.
 
 Most people that have used a database before expect "autocommit" where any
 statement that is not explicitly in a transaction is automatically committed.
-This is different to what the SQL standard states where START TRANSACTION is
-implicit but the COMMIT is not.
+This is different to what the SQL standard states where ``START TRANSACTION`` is
+implicit but the ``COMMIT`` is not.
 
 Following on, rather than surrounding every non-explicit transaction with a
-START TRANSACTION and COMMIT we define two states; in or not in a transaction.
+``START TRANSACTION`` and ``COMMIT`` we define two states; in or not in a
+transaction.
 
-Each connection maintains its current transaction ID. The `TransactionManager`
+Each connection maintains its current transaction ID. The ``TransactionManager``
 maintains a set of all the transaction ID for all the connections that are
 explicitly in a transaction. Another way to look at it is when we say "in a
 transaction" we mean the current connection's transaction ID is in this set.
 
 Each record has two special properties (amongst others) - prefixed with a colon:
 
-  * `xid`: The transaction ID when the record was created.
-  * `xex`: The transaction ID when the record was deleted. This will be `0`
+  * ``xid``: The transaction ID when the record was created.
+  * ``xex``: The transaction ID when the record was deleted. This will be ``0``
     initially.
 
 A record is visible only when all the following are true:
 
-  1. The `xid` is not in the active transactions.
-  2. The `xex` is `0` OR `xex` is not in the active transactions.
+  1. The ``xid`` is not in the active transactions.
+  2. The ``xex`` is ``0`` OR ``xex`` is not in the active transactions.
+
+.. _MVCC: http://en.wikipedia.org/wiki/Multiversion_concurrency_control
 """
 
 import redis
-from tesseract import client
+from tesseract import protocol
 from tesseract import statement
 
 
@@ -136,7 +139,7 @@ class StartTransactionStatement(statement.Statement):
         else:
             manager.start_transaction()
 
-        return client.Protocol.successful_response(warnings=warnings)
+        return protocol.Protocol.successful_response(warnings=warnings)
 
 
 class CommitTransactionStatement(statement.Statement):
@@ -153,7 +156,7 @@ class CommitTransactionStatement(statement.Statement):
             warnings = ['COMMIT used after transaction is complete. '
                         'This will be ignored.']
 
-        return client.Protocol.successful_response(warnings=warnings)
+        return protocol.Protocol.successful_response(warnings=warnings)
 
 
 class RollbackTransactionStatement(statement.Statement):
@@ -170,4 +173,4 @@ class RollbackTransactionStatement(statement.Statement):
             warnings = ['ROLLBACK used after transaction is complete. '
                         'This will be ignored.']
 
-        return client.Protocol.successful_response(warnings=warnings)
+        return protocol.Protocol.successful_response(warnings=warnings)

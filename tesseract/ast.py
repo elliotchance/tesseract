@@ -377,7 +377,9 @@ class IsExpression(BinaryExpression):
         BinaryExpression.__init__(self, value, operator, type, function)
 
     def __str__(self):
-        return '%s %s %s' % (str(self.left), self.operator, self.right.value)
+        right = self.right
+        assert isinstance(right, Value)
+        return '%s %s %s' % (str(self.left), self.operator, right.value)
 
     def signature(self):
         return '%s %s %s' % (
@@ -429,7 +431,9 @@ class InExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, operator, right, function)
 
     def __str__(self):
-        items = [str(item) for item in self.right.value]
+        right = self.right
+        assert isinstance(right, Value)
+        items = [str(item) for item in right.value]
         return '%s %s (%s)' % (str(self.left), self.operator, ', '.join(items))
 
 
@@ -444,11 +448,13 @@ class BetweenExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, operator, right, function)
 
     def __str__(self):
+        right = self.right
+        assert isinstance(right, Value)
         return '%s %s %s AND %s' % (
             str(self.left),
             self.operator,
-            str(self.right.value[0]),
-            str(self.right.value[1])
+            str(right.value[0]),
+            str(right.value[1])
         )
 
 

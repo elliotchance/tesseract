@@ -28,5 +28,5 @@ written in Python and uses an
    engine
    testing
    changelog
-   formatting
    faq
+   appendix

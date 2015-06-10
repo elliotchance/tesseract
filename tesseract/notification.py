@@ -1,6 +1,6 @@
 from tesseract import ast
-from tesseract import client
 from tesseract import instance
+from tesseract import protocol
 from tesseract import statement
 
 
@@ -29,7 +29,7 @@ class CreateNotificationStatement(statement.Statement):
 
     def notification_already_exists(self, notification_name):
         message = "Notification '%s' already exists." % notification_name
-        return client.Protocol.failed_response(message)
+        return protocol.Protocol.failed_response(message)
 
     def execute(self, result, tesseract):
         assert isinstance(result.statement, CreateNotificationStatement)
@@ -41,7 +41,7 @@ class CreateNotificationStatement(statement.Statement):
 
         tesseract.notifications[notification_name] = result.statement
 
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()
 
 class DropNotificationStatement(statement.Statement):
     """`DROP NOTIFICATION` statement."""
@@ -55,7 +55,7 @@ class DropNotificationStatement(statement.Statement):
 
     def __no_such_notification(self, notification_name):
         error = "No such notification '%s'." % notification_name
-        return client.Protocol.failed_response(error)
+        return protocol.Protocol.failed_response(error)
 
     def execute(self, result, tesseract):
         assert isinstance(result.statement, DropNotificationStatement)
@@ -70,4 +70,4 @@ class DropNotificationStatement(statement.Statement):
         # Remove the notification.
         tesseract.notifications.pop(notification_name, None)
 
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()

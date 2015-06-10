@@ -2,7 +2,7 @@ import json
 import os
 import redis
 from tesseract import ast
-from tesseract import client
+from tesseract import protocol
 from tesseract import stage
 
 
@@ -26,7 +26,7 @@ class Statement(object):
             return self.__lua_error(e)
 
         records = self.__retrieve_records(manager, redis_connection, run)
-        return client.Protocol.successful_response(records, warnings)
+        return protocol.Protocol.successful_response(records, warnings)
 
     def __load_lua_dependency(self, operator):
         here = os.path.dirname(os.path.realpath(__file__))
@@ -53,7 +53,7 @@ class Statement(object):
         message = str(e)
         message = message[message.rfind(':') + 1:].strip()
 
-        return client.Protocol.failed_response(message)
+        return protocol.Protocol.failed_response(message)
 
     def __retrieve_records(self, manager, redis, run):
         from tesseract import table

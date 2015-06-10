@@ -1,6 +1,6 @@
 import json
 from tesseract import ast
-from tesseract import client
+from tesseract import protocol
 from tesseract import index
 from tesseract import instance
 from tesseract import statement
@@ -56,7 +56,7 @@ class InsertStatement(statement.Statement):
             result
         )
 
-        return client.Protocol.successful_response()
+        return protocol.Protocol.successful_response()
 
     def __publish_notification(self, data, notification, publish, redis):
         notification_name = str(notification.notification_name)
