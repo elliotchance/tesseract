@@ -15,6 +15,7 @@ statement that is not explicitly in a transaction is automatically committed.
 This is different to what the SQL standard states where ``START TRANSACTION`` is
 implicit but the ``COMMIT`` is not.
 
+
 Internals
 ---------
 
@@ -38,6 +39,7 @@ A record is visible only when all the following are true:
   1. The ``xid`` is not in the active transactions.
   2. The ``xex`` is ``0`` OR ``xex`` is not in the active transactions.
 
+
 Collisions
 ----------
 
@@ -55,7 +57,17 @@ For the transaction that does not hold the lock for the row. This is crude
 solution as we should wait for that lock to be released but that's an
 improvement for another day.
 
+
+Deadlocks
+---------
+
+A `deadlock`_ should be impossible given that a transaction will immediately
+fail and ``ROLLBACK``. When we have a scheduler for transactions then this will
+be a legitimate concern.
+
+
 .. _MVCC: http://en.wikipedia.org/wiki/Multiversion_concurrency_control
+.. _deadlock: http://en.wikipedia.org/wiki/Deadlock
 """
 
 import redis
