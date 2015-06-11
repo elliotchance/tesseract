@@ -85,17 +85,15 @@ introduce and index on the ``first_name``:
 
    CREATE INDEX contacts_first_name ON contacts (first_name)
    
-.. highlights::
+Since indexes names must be globally unique it is a good idea (and often common
+practice) to put the table name and column name as the index name for both
+clarity and avoiding naming collisions.
 
-   Since indexes names must be globally unique it is a good idea (and often
-   common practice) to put the table name and column name as the index name for
-   both clarity and avoiding naming collisions.
+By creating the index it will store all the ``first_name``\ s in a separate
+place, in a special order/structure and will automaitcally maintain this index
+with every modification.
 
-By creating the index it will store all the `first_name`s in a separate place,
-in a special order/structure and will automaitcally maintain this index with
-every modification.
-
-Now we can run the same `EXPLAIN`:
+Now we can run the same ``EXPLAIN``:
 
 .. code-block:: sql
 

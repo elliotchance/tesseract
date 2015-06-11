@@ -35,7 +35,7 @@ other scripting languages:
 
    SELECT 0 = false
 
-.. code-block::
+.. code-block:: none
 
    Error: No such operator number = boolean.
 
@@ -46,6 +46,6 @@ numbers do not mean the same thing:
 
    SELECT "123" = 123
 
-.. code-block::
+.. code-block:: none
 
    Error: No such operator string = number.
