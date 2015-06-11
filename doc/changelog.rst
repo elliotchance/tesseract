@@ -129,8 +129,8 @@ supported.
 .. _EXPLAIN: https://tesseractdb.readthedocs.org/en/latest/sql-select.html
 
 
-v1.0.0-alpha4 (D...)
---------------------
+v1.0.0-alpha4 (Dark Matter)
+---------------------------
 
 The focus of this release was on supporting *transactions*.
 
