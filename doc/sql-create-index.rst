@@ -74,7 +74,7 @@ to carry out the SQL:
 .. code-block:: json
 
    [
-       {"description": "Full scan of table 'contacts'"}
+       {"description": "Full table scan of 'contacts'"}
        {"description": "Filter: first_name = \"Bob\""}
    ]
 

@@ -4,6 +4,8 @@ tesseract server.
 
 import json
 import socket
+from tesseract import protocol
+from tesseract import transaction
 
 
 class Client:
@@ -11,6 +13,7 @@ class Client:
     it.
 
     Attributes:
+      warnings (list): Retained from the last query.
       _socket (socket.socket): The socket between the client and server.
       _host (str): The server host - this should not include the port.
       _port (int): The server port.
@@ -35,6 +38,7 @@ class Client:
 
         self._host = host
         self._port = port
+        self.warnings = []
         self._connect()
 
     def execute(self, sql):
@@ -60,10 +64,12 @@ class Client:
           client.ClientException: Could not parse SQL. Error at or near: FOO
         """
         assert isinstance(sql, str)
-        result = self._send(Protocol.sql_request(sql))
+        result = self._send(protocol.Protocol.sql_request(sql))
+
+        self.warnings = result['warnings'] if 'warnings' in result else []
 
         if result['success']:
-            return result['data']
+            return result['data'] if 'data' in result else None
 
         raise ClientException(result['error'])
 
@@ -99,7 +105,10 @@ class Client:
           request (dict): The request.
         """
         assert isinstance(request, dict)
-        self._socket.send(bytes(json.dumps(request), 'UTF-8'))
+        try:
+            self._socket.send(bytes(json.dumps(request), 'UTF-8'))
+        except TypeError:
+            self._socket.send(json.dumps(request))
 
     def _read_response(self):
         """Wait on the response from the server.
@@ -107,50 +116,13 @@ class Client:
         Returns:
           A dict containing the server response.
         """
-        response = self._socket.recv(1024)
+        response = self._socket.recv(1048576)
         return json.loads(response.decode())
+
+    def close(self):
+        self._socket.close()
+
 
 class ClientException(Exception):
     """Thrown when an error is returned from the tesseract server."""
     pass
-
-class Protocol:
-    """This class handles the basic protocols that tesseract uses to communicate
-    with the server. You can read how the protocol works in the documentation
-    under Appendix > Server Protocol.
-    """
-
-    @staticmethod
-    def successful_response(data=None, warnings=None):
-        # If there is no data to be returned (for instance a `DELETE` statement)
-        # then you should provide `None`.
-        assert data is None or isinstance(data, list), '%r' % data
-
-        # Warning are of course optional.
-        assert warnings is None or isinstance(warnings, list), '%r' % warnings
-
-        # Build the response.
-        response = {
-            "success": True
-        }
-        if data is not None:
-            response['data'] = data
-        if warnings is not None:
-            response['warnings'] = warnings
-
-        return response
-
-    @staticmethod
-    def failed_response(error):
-        assert isinstance(error, str)
-        return {
-            "success": False,
-            "error": error
-        }
-
-    @staticmethod
-    def sql_request(sql):
-        assert isinstance(sql, str)
-        return {
-            "sql": sql,
-        }

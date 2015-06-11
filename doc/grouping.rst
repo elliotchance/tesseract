@@ -1,0 +1,4 @@
+Grouping
+========
+
+.. automodule:: tesseract.group

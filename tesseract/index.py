@@ -49,9 +49,9 @@ The first character is the type::
     F false
     S string (followed by the actual string)
 
-The indexes are named with as "index:mytable:myindex:number" and
-"index:mytable:myindex:nonnumber". The table name is kept in the key because an
-index can only apply to a single table.
+The indexes are named with as ``index:mytable:myindex:number`` and
+``index:mytable:myindex:nonnumber``. The table name is kept in the key because
+an index can only apply to a single table.
 
 Now that we know how indexes are stored we can request back records. The first
 and most important step is to determine if the value we are looking up is a
@@ -62,8 +62,13 @@ non-numbers we can use the ZRANGEBYLEX on the non-number index.
 """
 
 import json
-from redis import StrictRedis
-from tesseract.table import PermanentTable
+import redis
+from tesseract import ast
+from tesseract import instance
+from tesseract import protocol
+from tesseract import stage
+from tesseract import statement
+from tesseract import table
 
 
 class IndexManager(object):
@@ -78,29 +83,29 @@ class IndexManager(object):
     INDEXES_KEY = 'indexes'
 
     @staticmethod
-    def get_instance(redis):
+    def get_instance(redis_connection):
         """This is the correct way to get the instance of the IndexManager. It
         is not guaranteed to be a singleton but it may hold some state that
         allows caching to be more effective.
 
         Arguments:
-          redis (StrictRedis): The Redis connection.
+          redis_connection (redis.StrictRedis): The Redis connection.
 
         Returns:
           A new or existing instance of IndexManager.
         """
-        assert isinstance(redis, StrictRedis)
-        return IndexManager(redis)
+        assert isinstance(redis_connection, redis.StrictRedis)
+        return IndexManager(redis_connection)
 
-    def __init__(self, redis):
+    def __init__(self, redis_connection):
         """Internal use only. Use the static method get_instance() to get the
         IndexManager instance.
 
         Arguments:
-          redis (StrictRedis): The Redis connection.
+          redis_connection (redis.StrictRedis): The Redis connection.
         """
-        assert isinstance(redis, StrictRedis)
-        self._redis = redis
+        assert isinstance(redis_connection, redis.StrictRedis)
+        self._redis = redis_connection
 
     def get_indexes_for_table(self, table_name):
         """Fetch all the indexes for a single table.
@@ -201,15 +206,21 @@ class IndexManager(object):
         values to index.
         """
         index = Index(self._redis, table_name, index_name, field)
-        table = PermanentTable(self._redis, table_name)
+        the_table = table.PermanentTable(self._redis, table_name)
 
-        for data in self._redis.zrange(table.redis_key(), 0, -1):
+        for data in self._redis.zrange(the_table.redis_key(), 0, -1):
             self.__index_value(data, field, index)
 
         return index
 
     def __index_value(self, data, field, index):
         row = json.loads(data.decode())
+
+        try:
+            row[field]
+        except KeyError:
+            # Missing values are to be treated as null.
+            row[field] = None
 
         if row[field] is None or isinstance(row[field], (int, float, bool)):
             index.add_record(row[field], row[':id'])
@@ -239,22 +250,22 @@ class Index(object):
     TYPE_FALSE = 'F'
     TYPE_STRING = 'S'
 
-    def __init__(self, redis, table_name, index_name, field_name):
+    def __init__(self, redis_connection, table_name, index_name, field_name):
         """Initialise a handle to an index. The index does not need to exist and
         can be manipulated in any case.
 
         Arguments:
-          redis (StrictRedis):
+          redis_connection (reids.StrictRedis): The Redis connection.
           table_name (str): The name of the table.
           index_name (str): The name of the index.
           field_name (str): The name of the field that is indexed.
         """
-        assert isinstance(redis, StrictRedis)
+        assert isinstance(redis_connection, redis.StrictRedis)
         assert isinstance(table_name, str)
         assert isinstance(index_name, str)
         assert isinstance(field_name, str)
 
-        self._redis = redis
+        self._redis = redis_connection
         self.table_name = table_name
         self.index_name = index_name
         self.field_name = field_name
@@ -384,3 +395,93 @@ class Index(object):
             return self.TYPE_FALSE
 
         return self.TYPE_STRING
+
+class CreateIndexStatement(statement.Statement):
+    """`CREATE INDEX` statement."""
+
+    def __init__(self, index_name, table_name, field):
+        assert isinstance(index_name, ast.Identifier)
+        assert isinstance(table_name, ast.Identifier)
+        assert isinstance(field, ast.Identifier)
+
+        self.index_name = index_name
+        self.table_name = table_name
+        self.field = field
+
+    def __str__(self):
+        return "CREATE INDEX %s ON %s (%s)" % (
+            self.index_name,
+            self.table_name,
+            self.field
+        )
+
+    def execute(self, result, tesseract):
+        assert isinstance(result.statement, CreateIndexStatement)
+        assert isinstance(tesseract, instance.Instance)
+
+        manager = IndexManager(tesseract.redis)
+        manager.create_index(
+            str(result.statement.index_name),
+            str(result.statement.table_name),
+            str(result.statement.field)
+        )
+
+        return protocol.Protocol.successful_response()
+
+class DropIndexStatement(statement.Statement):
+    """`DROP INDEX` statement."""
+
+    def __init__(self, index_name):
+        assert isinstance(index_name, ast.Identifier)
+        self.index_name = index_name
+
+    def __str__(self):
+        return "DROP INDEX %s" % self.index_name
+
+    def execute(self, result, tesseract):
+        assert isinstance(result.statement, DropIndexStatement)
+        assert isinstance(tesseract, instance.Instance)
+
+        manager = IndexManager(tesseract.redis)
+        manager.drop_index(str(result.statement.index_name))
+        return protocol.Protocol.successful_response()
+
+class IndexStage(stage.Stage):
+    def __init__(self, input_table, offset, redis, index_name, value):
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert isinstance(index_name, str)
+        assert isinstance(value, ast.Value)
+
+        self.index_name = index_name
+        self.value = value
+
+    def explain(self):
+        if self.value.value is None:
+            description = 'null'
+        else:
+            description = 'value %s' % self.value
+
+        return {
+            "description": "Index lookup using %s for %s" % (
+                self.index_name,
+                description
+            )
+        }
+
+    def compile_lua(self):
+        lua = []
+        output_table = table.TransientTable(self.redis)
+        index_manager = IndexManager(self.redis)
+        index = index_manager.get_index(self.index_name)
+        the_table = table.PermanentTable(self.redis, index.table_name)
+
+        lua.extend([
+            "local records = %s" % index.lua_lookup_exact(self.value.value),
+            "for _, data in ipairs(records) do",
+            the_table.lua_get_lua_record('data'),
+            "local row = cjson.decode(irecords[1])",
+            output_table.lua_add_lua_record('row'),
+            "end",
+        ])
+
+        return (output_table, '\n'.join(lua), self.offset)

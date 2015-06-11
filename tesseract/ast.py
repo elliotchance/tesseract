@@ -1,9 +1,8 @@
 """This file contains all the objects that make up the AST (Abstract Syntax
 Tree) when the SQL is parsed.
-
 """
 
-class Expression:
+class Expression(object):
     """A base class for all expressions."""
 
     @staticmethod
@@ -378,7 +377,9 @@ class IsExpression(BinaryExpression):
         BinaryExpression.__init__(self, value, operator, type, function)
 
     def __str__(self):
-        return '%s %s %s' % (str(self.left), self.operator, self.right.value)
+        right = self.right
+        assert isinstance(right, Value)
+        return '%s %s %s' % (str(self.left), self.operator, right.value)
 
     def signature(self):
         return '%s %s %s' % (
@@ -430,7 +431,9 @@ class InExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, operator, right, function)
 
     def __str__(self):
-        items = [str(item) for item in self.right.value]
+        right = self.right
+        assert isinstance(right, Value)
+        items = [str(item) for item in right.value]
         return '%s %s (%s)' % (str(self.left), self.operator, ', '.join(items))
 
 
@@ -445,11 +448,13 @@ class BetweenExpression(BinaryExpression):
         BinaryExpression.__init__(self, left, operator, right, function)
 
     def __str__(self):
+        right = self.right
+        assert isinstance(right, Value)
         return '%s %s %s AND %s' % (
             str(self.left),
             self.operator,
-            str(self.right.value[0]),
-            str(self.right.value[1])
+            str(right.value[0]),
+            str(right.value[1])
         )
 
 
@@ -471,202 +476,9 @@ class GroupExpression(Expression):
         return self.value.is_aggregate()
 
 
-class Statement:
-    """Represents a SQL statement."""
-    pass
-
-
-class CreateNotificationStatement(Statement):
-    """`CREATE NOTIFICATION` statement.
-
-    """
-    def __init__(self, notification_name, table_name, where=None):
-        assert isinstance(notification_name, Identifier)
-        assert isinstance(table_name, Identifier)
-        assert where is None or isinstance(where, Expression)
-
-        self.notification_name = notification_name
-        self.table_name = table_name
-        self.where = where
-
-    def __str__(self):
-        sql = "CREATE NOTIFICATION %s ON %s" % (
-            self.notification_name,
-            self.table_name
-        )
-
-        if self.where:
-            sql += ' WHERE %s' % str(self.where)
-
-        return sql
-
-
-class DeleteStatement(Statement):
-    """`DELETE` statement.
-
-    """
-    def __init__(self, table_name, where=None):
-        assert isinstance(table_name, Identifier)
-        assert where is None or isinstance(where, Expression)
-
-        self.table_name = table_name
-        self.where = where
-
-    def __str__(self):
-        sql = "DELETE FROM %s" % self.table_name
-
-        if self.where:
-            sql += " WHERE %s" % str(self.where)
-
-        return sql
-
-
-class DropNotificationStatement(Statement):
-    """`DROP NOTIFICATION` statement.
-
-    """
-    def __init__(self, notification_name):
-        assert isinstance(notification_name, Identifier)
-        self.notification_name = notification_name
-
-    def __str__(self):
-        return "DROP NOTIFICATION %s" % self.notification_name
-
-
-class InsertStatement(Statement):
-    """`INSERT` statement.
-
-    """
-    def __init__(self, table_name, fields):
-        assert isinstance(table_name, Identifier)
-        assert isinstance(fields, dict)
-
-        self.table_name = table_name
-        self.fields = fields
-
-    def __str__(self):
-        return "INSERT INTO %s %s" % (
-            self.table_name,
-            Expression.to_sql(self.fields)
-        )
-
-
-class SelectStatement(Statement):
-    """`SELECT` statement.
-
-    Attributes:
-      NO_TABLE (Identifier, static) - is used when no table is provided. So
-        this:
-          SELECT 1
-        Is actually equivalent to:
-          SELECT 1 FROM __no_table
-
-    """
-    NO_TABLE = Identifier('__no_table')
-
-    def __init__(self, table_name, columns, where=None, order=None, group=None,
-                 explain=False, limit=None):
-        assert isinstance(table_name, Identifier)
-        assert isinstance(columns, list)
-        assert where is None or isinstance(where, Expression)
-        assert order is None or isinstance(order, OrderByClause)
-        assert group is None or isinstance(group, Identifier)
-        assert limit is None or isinstance(limit, LimitClause)
-        assert group is None or isinstance(group, Identifier)
-        assert isinstance(explain, bool)
-
-        self.table_name = table_name
-        self.where = where
-        self.columns = columns
-        self.order = order
-        self.group = group
-        self.limit = limit
-        self.explain = explain
-
-    def __limit_to_sql(self):
-        if self.limit:
-            return ' %s' % self.limit
-
-        return ''
-
-    def __order_to_sql(self):
-        if self.order:
-            return ' %s' % self.order
-
-        return ''
-
-    def __group_to_sql(self):
-        if self.group:
-            return ' GROUP BY %s' % self.group
-
-        return ''
-
-    def __where_to_sql(self):
-        if self.where:
-            return ' WHERE %s' % self.where
-
-        return ''
-
-    def __table_to_sql(self):
-        if self.table_name != SelectStatement.NO_TABLE:
-            return " FROM %s" % self.table_name
-
-        return ''
-
-    def __str__(self):
-        r = 'EXPLAIN ' if self.explain else ''
-        r += "SELECT %s" % ', '.join([str(col) for col in self.columns])
-        r += self.__table_to_sql()
-        r += self.__where_to_sql()
-        r += self.__group_to_sql()
-        r += self.__order_to_sql()
-        r += self.__limit_to_sql()
-
-        return r
-
-    def contains_aggregate(self):
-        """Tests if any of the expressions in the `SELECT` clause contain
-        aggregate expressions.
-
-        """
-        for col in self.columns:
-            if col.is_aggregate():
-                return True
-
-        return False
-
-
-class UpdateStatement(Statement):
-    """`UPDATE` statement.
-
-    """
-    def __init__(self, table_name, columns, where):
-        assert isinstance(table_name, Identifier)
-        assert isinstance(columns, list)
-        assert where is None or isinstance(where, Expression)
-
-        self.table_name = table_name
-        self.columns = columns
-        self.where = where
-
-    def __str__(self):
-        sql = "UPDATE %s SET " % self.table_name
-
-        columns = []
-        for column in self.columns:
-            columns.append("%s = %s" % (column[0], column[1]))
-        sql += ', '.join(columns)
-
-        if self.where:
-            sql += ' WHERE %s' % self.where
-
-        return sql
-
-
 class OrderByClause:
-    """An `ORDER BY` to be used with `SELECT`.
+    """An `ORDER BY` to be used with `SELECT`."""
 
-    """
     def __init__(self, field_name, ascending):
         assert isinstance(field_name, Identifier)
         assert ascending is None or isinstance(ascending, bool)
@@ -684,52 +496,6 @@ class OrderByClause:
         return 'ORDER BY %s%s' % (self.field_name, direction)
 
 
-class CreateIndexStatement(Statement):
-    """`CREATE INDEX` statement.
-
-    """
-    def __init__(self, index_name, table_name, field):
-        assert isinstance(index_name, Identifier)
-        assert isinstance(table_name, Identifier)
-        assert isinstance(field, Identifier)
-
-        self.index_name = index_name
-        self.table_name = table_name
-        self.field = field
-
-    def __str__(self):
-        return "CREATE INDEX %s ON %s (%s)" % (
-            self.index_name,
-            self.table_name,
-            self.field
-        )
-
-
-class DropTableStatement(Statement):
-    """`DROP TABLE` statement.
-
-    """
-    def __init__(self, table_name):
-        assert isinstance(table_name, Identifier)
-
-        self.table_name = table_name
-
-    def __str__(self):
-        return "DROP TABLE %s" % self.table_name
-
-
-class DropIndexStatement(Statement):
-    """`DROP INDEX` statement.
-
-    """
-    def __init__(self, index_name):
-        assert isinstance(index_name, Identifier)
-        self.index_name = index_name
-
-    def __str__(self):
-        return "DROP INDEX %s" % self.index_name
-
-
 class LimitClause:
     """A `LIMIT` clause to be used with a `SELECT` statement.
 
@@ -737,7 +503,6 @@ class LimitClause:
       ALL (Value, static) - is used to represent the SQL `LIMIT ALL`. Even
         though this is the same as having no limit it must be rendered out
         exactly as it came in.
-
     """
     ALL = Value(1000000000)
 

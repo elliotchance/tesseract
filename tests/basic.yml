@@ -1,5 +1,8 @@
-# This file contains tests about the general parser or those who do not fit into
-# any specific category.
+comment: |
+  This file contains tests about the general parser or those who do not fit into
+  any specific category.
+
+tags: parser
 
 tests:
   sql_is_not_case_sensitive:
@@ -29,3 +32,11 @@ tests:
     as: SELECT abs(-1)
     result:
     - {"col1": 1}
+
+  empty_sql_is_not_allowed:
+    sql: ""
+    error: Empty SQL request.
+
+  whitespace_sql_is_not_allowed:
+    sql: "  "
+    error: Empty SQL request.

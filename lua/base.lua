@@ -43,3 +43,23 @@ local function f(row, path)
 
     return row[path]
 end
+
+local function row_is_visible(row, xid, xids)
+    -- The record was created in active transaction that is not our own.
+    if xids[row[':xid']] and row[':xid'] ~= xid then
+        return false
+    end
+
+    -- The record is expired and no transaction holds it.
+    if row[':xex'] ~= 0 and not xids[row[':xex']] then
+        return false
+    end
+
+    -- If none of the conditions above match then the row is visible.
+    return true
+end
+
+local function row_is_locked(row, xid, xids)
+    -- The record is expired and another transaction holds it.
+    return row[':xex'] ~= 0 and xids[row[':xex']]
+end

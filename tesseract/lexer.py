@@ -9,8 +9,10 @@ sql_keywords = (
     'ALL',
     'AND',
     'ASC',
+    'BEGIN',
     'BETWEEN',
     'BY',
+    'COMMIT',
     'CREATE',
     'DELETE',
     'DESC',
@@ -32,11 +34,15 @@ sql_keywords = (
     'ON',
     'OR',
     'ORDER',
+    'ROLLBACK',
     'SELECT',
     'SET',
+    'START',
     'TABLE',
+    'TRANSACTION',
     'UPDATE',
     'WHERE',
+    'WORK',
 )
 
 operators = (

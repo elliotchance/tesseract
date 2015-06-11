@@ -1,3 +1,5 @@
+tags: index select
+
 data:
   table1:
   - {"x": 123}

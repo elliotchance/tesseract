@@ -1,3 +1,6 @@
+tags: index
+
 tests:
   parser_create_index:
     sql: CREATE INDEX foo ON bar (baz)
+    finally: DROP INDEX foo

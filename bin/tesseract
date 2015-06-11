@@ -3,10 +3,18 @@
 import sys
 from os.path import dirname
 
+import signal
+
+
 # This is to allow the server to be run before its installed properly.
 sys.path.append(dirname(__file__) + "/..")
 
 # Start up the server.
 from tesseract.server import Server
 server = Server()
+
+def signal_handler(signal, frame):
+    server.exit()
+signal.signal(signal.SIGINT, signal_handler)
+
 server.start()

@@ -1,56 +1,358 @@
-"""This module converts the YAML tests in the tests/ directory into python
-tests.
+"""
+Basic Test (`sql`)
+------------------
+
+Tesseract generates tests from YAML files. This makes it very easy to read,
+maintain and organise.
+
+These files can be found in the ``tests`` directory. The most simple file may
+look like:
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       sql: SELECT 1 + 2
+       result:
+       - {"col1": 3}
+
+In the example above we have created one test called ``my_test`` that will run
+the SQL statement and confirm that the server returns one row containing that
+exact data.
+
+Result (`result`)
+^^^^^^^^^^^^^^^^^
+
+Specify the expected output of the last ``sql`` statement. The data returned
+from the server must be exactly the same (including order) as the ``result``
+items.
+
+Result in Any Order (`result-unordered`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the order in which the records isn't important or is unpredictable you can
+use ``result-unordered`` instead of ``result``.
+
+.. code-block:: yaml
+
+   tests:
+     two_columns:
+       data: table1
+       sql: "SELECT foo, foo * 2 FROM table1"
+       result-unordered:
+       - {"foo": 123, "col2": 246}
+       - {"foo": 124, "col2": 248}
+       - {"foo": 125, "col2": 250}
+
+Parser (`as`)
+^^^^^^^^^^^^^
+
+All tests that contain a ``sql`` attribute will be run through the parser and
+the statement will be rendered. This rendered statement is expected to be the
+same as this ``sql`` value. If you expect a different rendered string then you
+specify what the result should be through ``as``:
+
+.. code-block:: yaml
+
+   tests:
+     alternate_operator:
+       sql: 'SELECT null != 123'
+       as: 'SELECT null <> 123'
+       result:
+       - {"col1": null}
+
+Ignoring the Parser (`parse`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sometimes the SQL rendered from the SQL provided is not predictable, so we have
+to disable the parser test:
+
+.. code-block:: yaml
+
+   tests:
+     json_object_with_two_elements:
+       sql: 'SELECT {"foo": "bar", "baz": 123}'
+       parse: false
+       result:
+       - {"col1": {"foo": "bar", "baz": 123}}
+
+Commenting (`comment`)
+^^^^^^^^^^^^^^^^^^^^^^
+
+Test can have an optional comment, this is preferred over using YAML inline
+comments so that comments can be injected is creating reports in the future.
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       comment: Test everything!
+       sql: 'SELECT 123'
+
+This is also used at the root of the document to comment on the entire test
+suite like:
+
+.. code-block:: yaml
+
+   comment: |
+     This file is responsible for stuff.
+
+   tests:
+     my_test:
+       comment: Test everything!
+       sql: 'SELECT 123'
+
+Tags (`tags`)
+^^^^^^^^^^^^^
+
+``tags`` can be set at the file level which means that all tests in the file
+have the same tag:
+
+.. code-block:: yaml
+
+   comment: |
+     All the tests are for 'foo'.
+
+   tags: foo
+
+   tests:
+     ...
+
+If you need multiple tags you can separate them with spaces:
+
+.. code-block:: yaml
+
+   tags: bar foo
+
+It is not required, but it is good practice to keep the tags sorted
+alphabetically.
+
+Tags are defined in ``tags.yml``. While also not required for tags to be defined
+here is is good practice to leave a description.
+
+Repeating Tests (`repeat`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a test lacks some predictability or you need to test the outcome multiple
+times for another reason you can use the ``repeat``. This will still generate
+one test but it will loop through the ``repeat`` many times.
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       sql: 'SELECT 123'
+       repeat: 20
+       result:
+       - {"col1": 123}
+
+Failures
+--------
+
+Expecting Errors (`error`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the ``error`` to test for an expected error:
+
+.. code-block:: yaml
+
+   tests:
+     incompatible_types:
+       sql: SELECT false AND 3.5
+       error: No such operator boolean AND number.
+
+Errors will be raised by the parser or by executing the SQL statement(s).
+
+Expecting Warnings (`warning`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can assert one or more warnings are raised:
+
+.. code-block:: yaml
+
+   tests:
+     json_object_duplicate_item_raises_warning:
+       sql: 'SELECT {"foo": "bar", "foo": "baz"}'
+       as: 'SELECT {"foo": "baz"}'
+       warning: Duplicate key "foo", using last value.
+
+     multiple_warnings_can_be_raised:
+       sql: 'SELECT {"foo": "bar", "foo": "baz", "foo": "bax"}'
+       as: 'SELECT {"foo": "bax"}'
+       warning:
+       - Duplicate key "foo", using last value.
+       - Duplicate key "foo", using last value.
+
+Data Sets (`data`)
+------------------
+
+It is common that you will want to test against an existing data fixture.
+Instead of inserting the data you need manually you can use fixtures:
+
+.. code-block:: yaml
+
+   data:
+     table1:
+     - {"foo": 125}
+     - {"foo": 124}
+     - {"foo": 123}
+
+   tests:
+     where:
+       data: table1
+       sql: SELECT * FROM table1 WHERE foo = 124
+       result:
+       - {"foo": 124}
+
+Randomizing Data (`data-randomized`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For some tests you may want to randomize the order in which the records are
+loaded in. It is often used in conjunction with ``repeat``.
+
+.. code-block:: yaml
+
+   data:
+     table1:
+     - {"foo": 125}
+     - {"foo": 124}
+     - {"foo": 123}
+
+
+Verifying Notifications
+-----------------------
+
+When under test all notifications throughout the entire test case will be
+recorded. They can be asserted after all the SQL is executed. To test for a
+single notification:
+
+.. code-block:: yaml
+
+   tests:
+     notification_will_be_fired_for_insert:
+       sql:
+       - CREATE NOTIFICATION foo ON some_table
+       - 'INSERT INTO some_table {"a": "b"}'
+       notification:
+         to: foo
+         with: {"a": "b"}
+
+If you need to assert more than one notification:
+
+.. code-block:: yaml
+
+   tests:
+     multiple_notifications_can_be_fired_from_a_single_select:
+       sql:
+       - CREATE NOTIFICATION foo1 ON some_table WHERE a = "b"
+       - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
+       - 'INSERT INTO some_table {"a": "b"}'
+       notification:
+         - to: foo1
+           with: {"a": "b"}
+         - to: foo2
+           with: {"a": "b"}
+
+Or validate that no notifications have been fired:
+
+.. code-block:: yaml
+
+   tests:
+     notification_will_respect_where_clause:
+       sql:
+       - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
+       - 'INSERT INTO some_table {"a": "b"}'
+       notification: []
 """
 
 import glob
-import os
 import random
+import threading
 import time
-from unittest import TestCase
+import unittest
+import sys
 import yaml
 import json
-from os import listdir
+import os
 import re
 
+# A random port number that the server will run on. Is is important that this is
+# different each time the suite is created so that subsequent runs do not give
+# the dreaded "Address already in use.". However, it is not safe to run multiple
+# suites at the same time.
+port = random.randint(1000, 10000)
+notifications = []
+tests_run = 0
+total_tests = 0
+s = None
 
-class YAMLTestCase(TestCase):
+try:
+    with open('tests_cache/total_tests', 'r') as f:
+        total_tests = int(f.read())
+except:
+    pass
+
+class YAMLTestCase(unittest.TestCase):
     """The base TestCase for all YAML tests."""
 
     def setUp(self):
-        TestCase.setUp(self)
-        self.notifications = []
+        unittest.TestCase.setUp(self)
         self.table_name = ''.join(
             random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)
         )
 
-    def publish(self, name, value):
-        self.notifications.append({'to': name, 'with': json.loads(value)})
+    def tearDown(self):
+        global tests_run, s
+        tests_run += 1
+        if tests_run == total_tests:
+            s.exit()
 
-    def load_table(self, table_name, records, randomize=False):
-        self.server._execute('DROP TABLE %s' % table_name)
+        unittest.TestCase.tearDown(self)
+
+    def publish(self, name, value):
+        global notifications
+        notifications.append({'to': name, 'with': json.loads(value)})
+
+    def get_client(self, port):
+        from tesseract import client
+        from tesseract import server
+
+        try:
+            return client.Client(port=port)
+        except:
+            global s
+            s = server.Server(port=port)
+            s.instance.publish = self.publish
+            s.instance.log = lambda _: 0
+
+            thread = threading.Thread(target=s.start)
+            thread.start()
+
+            while not s.is_ready:
+                time.sleep(0.01)
+
+            return client.Client(port=port)
+
+    def load_table(self, connection, table_name, records, randomize=False):
+        connection.execute('DROP TABLE %s' % table_name)
 
         if randomize:
             random.shuffle(records)
 
         for record in records:
             sql = 'INSERT INTO %s %s' % (table_name, json.dumps(record))
-            self.server._execute(sql)
-
-    def begin_iteration(self):
-        import tesseract.server
-        self.warnings = []
-        self.server = tesseract.server.Server()
-        self.server._publish = self.publish
+            connection.execute(sql)
 
     def assert_result_unordered(self, expected):
-        a = sorted([json.dumps(r, sort_keys=True) for r in self.result['data']])
+        a = sorted([json.dumps(r, sort_keys=True) for r in self.result])
         b = sorted([json.dumps(r, sort_keys=True) for r in expected])
         self.assertEqual('\n'.join(a), '\n'.join(b))
 
     def assert_notifications(self, expected):
-        self.assertEqual(len(self.notifications), len(expected))
+        global notifications
+        self.assertEqual(len(notifications), len(expected))
         for n in expected:
-            self.assertTrue(n in self.notifications)
+            self.assertTrue(n in notifications)
 
     def assert_parser(self, sql, sql_as=None):
         from tesseract import parser
@@ -59,43 +361,39 @@ class YAMLTestCase(TestCase):
             sql = sql_as
         self.assertEquals(sql, str(result.statement))
 
-    def execute(self, sql, must_succeed=False):
-        result = self.server._execute(sql)
+    def execute(self, connection, sql, must_succeed=False):
+        from tesseract import client
+        assert isinstance(connection, client.Client)
 
-        if 'error' not in result:
-            result['error'] = None
+        try:
+            self.result = connection.execute(sql)
+            self.warnings = connection.warnings
+        except Exception as e:
+            self.error = str(e)
+            if must_succeed:
+                self.fail(self.error)
 
-        if 'data' not in result:
-            result['data'] = None
-
-        if must_succeed:
-            self.assertTrue(result['success'], msg=result['error'])
-
-        # Catch all the warnings along the way
-        if 'warnings' in result and isinstance(result['warnings'], list):
-            self.warnings.extend(result['warnings'])
-
-        self.result = result
-
-    def assert_success(self, sql):
-        self.execute(sql, must_succeed=True)
+    def assert_success(self, connection, sql):
+        self.execute(connection, sql, must_succeed=True)
 
     def assert_result(self, expected):
-        self.assertEqual(self.result['data'], expected)
+        self.assertEqual(self.result, expected)
 
     def assert_error(self, message):
-        self.assertFalse(self.result['success'], msg=self.result['error'])
-        self.assertEquals(self.result['error'], message)
+        self.assertEquals(self.error, message)
 
     def assert_warnings(self, warnings):
         if not isinstance(warnings, list):
             warnings = [warnings]
-        self.assertEqual(self.warnings, warnings)
+
+        self.assertEqual(self.warnings, [w.strip() for w in warnings])
+
 
 class TestGenerator(object):
     def __init__(self):
         self.total_tests = 0
         self.__start = time.time()
+        self.exclude = []
 
     def clean_all(self):
         """Clean out the cache before we generate all the tests."""
@@ -113,7 +411,7 @@ class TestGenerator(object):
         """
         assert isinstance(path, str)
 
-        for file in listdir(path):
+        for file in os.listdir(path):
             file_path = '%s/%s' % (path, file)
             if os.path.isdir(file_path):
                 self.process_folder(file_path)
@@ -131,6 +429,14 @@ class TestGenerator(object):
         tests_file = yaml.load(open(file, 'r'))
         safe_name = file[6:-4].replace('/', '_')
         self.__out = open('tests_cache/test_%s.py' % safe_name, 'w')
+
+        if 'tests' not in tests_file:
+            return
+
+        if 'tags' in tests_file:
+            match = list(set(tests_file['tags'].split(' ')) & set(self.exclude))
+            if match:
+                return
 
         self.__write_header(safe_name)
         self.__render_data(tests_file)
@@ -153,23 +459,56 @@ class TestGenerator(object):
             test['repeat'] = 1
 
         self.__write("for repeat in range(0, %d):\n" % test['repeat'], 2)
-        self.__write("    self.begin_iteration()\n", 2)
+        self.__write("try:\n", 3)
+        self.__write("    test.notifications = []\n", 3)
+        self.__write("    self.warnings = []\n\n", 3)
 
+        if 'multi' in test:
+            clients = sorted(set([title.split('-')[1] for title in test['multi']]))
+
+            for client in clients:
+                self.__write("connection_%s = self.get_client(%d)\n" % (client, port), 4)
+
+            for step in sorted(test['multi']):
+                client_name = step.split('-')[1]
+                self.__write("\n")
+                self.__write("connection = connection_%s\n" % client_name, 4)
+                self.__render_single_test(test['multi'][step])
+
+            self.__write("finally:\n", 3)
+            for client in clients:
+                self.__write("connection_%s.close()\n" % client, 4)
+            self.__write("\n")
+        else:
+            self.__write("connection = self.get_client(%d)\n" % port, 4)
+            self.__render_single_test(test)
+            self.__write("finally:\n", 3)
+            self.__perform_finally(test)
+            self.__write("connection.close()\n", 4)
+
+        self.__write("\n")
+
+    def __perform_finally(self, test):
+        if 'finally' not in test:
+            test['finally'] = []
+        if not isinstance(test['finally'], list):
+            test['finally'] = [test['finally']]
+
+        for f in test['finally']:
+            self.__write("self.execute(connection, %s)\n" % self.__escape(f), 4)
+
+    def __render_single_test(self, test):
         self.__load_data_for_test(test)
         self.__generate_parser_test(test)
 
-        # Convert a single SQL into a list if we have to.
         if not isinstance(test['sql'], list):
             test['sql'] = [test['sql']]
 
         self.__execute_each_sql_statement(test)
-
         self.__check_error(test)
         self.__check_result(test)
         self.__check_warnings(test)
         self.__check_notifications(test)
-
-        self.__write("\n")
 
     def __check_notifications(self, test):
         """Check notifications."""
@@ -178,28 +517,28 @@ class TestGenerator(object):
                 test['notification'] = [test['notification']]
 
             notifications = json.dumps(test['notification'])
-            self.__write("self.assert_notifications(%s)\n" % notifications, 3)
+            self.__write("self.assert_notifications(%s)\n" % notifications, 4)
 
     def __check_warnings(self, test):
         """If there are warnings we need to assert those at the end."""
         if 'warning' in test:
             warnings = json.dumps(test['warning'])
-            self.__write("self.assert_warnings(%s)\n" % warnings, 3)
+            self.__write("self.assert_warnings(%s)\n" % warnings, 4)
 
     def __check_result(self, test):
         """Test the output of the last SQL statement."""
         if 'result' in test:
             line = "self.assert_result(%s)\n" % test['result']
-            self.__write(line, 3)
+            self.__write(line, 4)
 
         if 'result-unordered' in test:
-            self.__write("self.assert_result_unordered(%s)\n" % test['result-unordered'], 3)
+            self.__write("self.assert_result_unordered(%s)\n" % test['result-unordered'], 4)
 
     def __check_error(self, test):
         """An error must be asserted after the last SQL statement."""
         if 'error' in test:
             line = "self.assert_error(%s)\n" % self.__escape(test['error'])
-            self.__write(line, 3)
+            self.__write(line, 4)
 
     def __execute_each_sql_statement(self, test):
         """Execute each SQL statement and make sure that it passes."""
@@ -209,9 +548,9 @@ class TestGenerator(object):
             # Every statement must pass except for the last one if this is an
             # error test
             if 'error' in test and i == len(test['sql']) - 1:
-                self.__write("self.execute(%s)\n" % self.__escape(sql), 3)
+                self.__write("self.execute(connection, %s)\n" % self.__escape(sql), 4)
             else:
-                self.__write("self.assert_success(%s)\n" % self.__escape(sql), 3)
+                self.__write("self.assert_success(connection, %s)\n" % self.__escape(sql), 4)
 
     def __generate_parser_test(self, test):
         """We only generate a parser test if there is only one SQL statement
@@ -220,12 +559,12 @@ class TestGenerator(object):
         single_sql = not isinstance(test['sql'], list)
         if single_sql and 'error' not in test and 'parse' not in test:
             if 'as' in test:
-                self.__write("self.assert_parser(\n", 3)
-                self.__write("    %s,\n" % self.__escape(test['sql']), 3)
-                self.__write("    %s\n" % self.__escape(test['as']), 3)
-                self.__write(")\n", 3)
+                self.__write("self.assert_parser(\n", 4)
+                self.__write("    %s,\n" % self.__escape(test['sql']), 4)
+                self.__write("    %s\n" % self.__escape(test['as']), 4)
+                self.__write(")\n", 4)
             else:
-                self.__write("self.assert_parser(%s)\n" % self.__escape(test['sql']), 3)
+                self.__write("self.assert_parser(%s)\n" % self.__escape(test['sql']), 4)
 
     def __write(self, line, indent=0):
         assert isinstance(indent, int)
@@ -236,16 +575,16 @@ class TestGenerator(object):
     def __load_data_for_test(self, test):
         """Load any data sets if needed for the test."""
         if 'data' in test:
-            self.__write("self.load_table('%s', self.TABLE_%s)\n" % (
+            self.__write("self.load_table(connection, '%s', self.TABLE_%s)\n" % (
                 test['data'],
                 test['data'].upper()
-            ), 3)
+            ), 4)
 
         if 'data-randomized' in test:
-            self.__write("self.load_table('%s', self.TABLE_%s, randomize=True)\n" % (
+            self.__write("self.load_table(connection, '%s', self.TABLE_%s, randomize=True)\n" % (
                 test['data-randomized'],
                 test['data-randomized'].upper()
-            ), 3)
+            ), 4)
 
     def __render_data(self, tests_file):
         if 'data' in tests_file:
@@ -256,11 +595,12 @@ class TestGenerator(object):
                 self.__write("    ]\n\n")
 
     def __write_header(self, safe_name):
-        self.__write("import tesseract.parser as parser\n")
-        self.__write("from tesseract.test import YAMLTestCase\n\n")
+        self.__write("from tesseract import parser\n")
+        self.__write("from tesseract import client\n")
+        self.__write("from tesseract import test\n\n")
 
         title = safe_name.replace('_', ' ').title().replace(' ', '')
-        self.__write("class Test%s(YAMLTestCase):\n" % title)
+        self.__write("class Test%s(test.YAMLTestCase):\n" % title)
 
     def __escape(self, string):
         # SQL statement can contain `%foo%` where `foo` is the name of the
@@ -286,91 +626,17 @@ class TestGenerator(object):
 
         return sql
 
-class YAMLTestCase(TestCase):
-    """The base TestCase for all YAML tests."""
-
-    def setUp(self):
-        TestCase.setUp(self)
-        self.notifications = []
-        self.table_name = ''.join(
-            random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)
-        )
-
-    def publish(self, name, value):
-        self.notifications.append({'to': name, 'with': json.loads(value)})
-
-    def load_table(self, table_name, records, randomize=False):
-        self.server._execute('DROP TABLE %s' % table_name)
-
-        if randomize:
-            random.shuffle(records)
-
-        for record in records:
-            sql = 'INSERT INTO %s %s' % (table_name, json.dumps(record))
-            self.server._execute(sql)
-
-    def begin_iteration(self):
-        import tesseract.server
-        self.warnings = []
-        self.server = tesseract.server.Server()
-        self.server._publish = self.publish
-
-    def assert_result_unordered(self, expected):
-        a = sorted([json.dumps(r, sort_keys=True) for r in self.result['data']])
-        b = sorted([json.dumps(r, sort_keys=True) for r in expected])
-        self.assertEqual('\n'.join(a), '\n'.join(b))
-
-    def assert_notifications(self, expected):
-        self.assertEqual(len(self.notifications), len(expected))
-        for n in expected:
-            self.assertTrue(n in self.notifications)
-
-    def assert_parser(self, sql, sql_as=None):
-        from tesseract import parser
-        result = parser.parse(sql)
-        if sql_as:
-            sql = sql_as
-        self.assertEquals(sql, str(result.statement))
-
-    def execute(self, sql, must_succeed=False):
-        result = self.server._execute(sql)
-
-        if 'error' not in result:
-            result['error'] = None
-
-        if 'data' not in result:
-            result['data'] = None
-
-        if must_succeed:
-            self.assertTrue(result['success'], msg=result['error'])
-
-        # Catch all the warnings along the way
-        if 'warnings' in result and isinstance(result['warnings'], list):
-            self.warnings.extend(result['warnings'])
-
-        self.result = result
-
-    def assert_success(self, sql):
-        self.execute(sql, must_succeed=True)
-
-    def assert_result(self, expected):
-        self.assertEqual(self.result['data'], expected)
-
-    def assert_error(self, message):
-        self.assertFalse(self.result['success'], msg=self.result['error'])
-        self.assertEquals(self.result['error'], message)
-
-    def assert_warnings(self, warnings):
-        if not isinstance(warnings, list):
-            warnings = [warnings]
-        self.assertEqual(self.warnings, warnings)
 
 if __name__ == "__main__":
     generator = TestGenerator()
     generator.clean_all()
+    generator.exclude = [e[1:] for e in sys.argv[1:]]
     generator.process_folder('tests')
 
     print('%d tests generated in %f seconds.' % (
         generator.total_tests,
         generator.elapsed_time()
     ))
+
+    with open('tests_cache/total_tests', 'w') as f:
+        f.write(str(generator.total_tests))

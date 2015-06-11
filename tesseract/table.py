@@ -21,25 +21,30 @@ stored:
    (such as when records are removed the IDs will also be removed forever.)
 
 2. Each of the records includes a secret key that contains the record ID. For
-   example the following record:
+   example the following record::
 
-   123 -> {"foo": "bar"}
+       123 -> {"foo": "bar"}
 
-   Is actually stored internally as:
+   Is actually stored internally as::
 
-   123 -> {":id": 123, "foo": "bar"}
+       123 -> {":id": 123, "foo": "bar"}
 
    This guarantees that the records are unique and also means that the scores do
    not need to be retrieved when records are iterated.
-
 """
 
 import json
 import random
-from redis import StrictRedis
+import redis
+from tesseract import ast
+from tesseract import instance
+from tesseract import protocol
+from tesseract import stage
+from tesseract import statement
+from tesseract import transaction
 
 
-class Table:
+class Table(object):
     """The base functionality of a table.
 
     Methods with the `lua_` prefix do not actually perform anything on the
@@ -49,20 +54,20 @@ class Table:
     Attributes:
       table_name (str): The name of the table. This is used to locate the Redis
         key - but the `table_name` is *not* exactly the Redis key.
-      redis (StrictRedis): The Redis connection.
-
+      redis_connection (redis.StrictRedis): The Redis connection.
     """
-    def __init__(self, redis, table_name):
+
+    def __init__(self, redis_connection, table_name):
         """Initialise the base class for the table. You should not use this, use
         one of the subclasses instead.
 
         Arguments:
-          redis (StrictRedis): The Redis connection.
+          redis_connection (redis.StrictRedis): The Redis connection.
           table_name (str): The name of the table.
         """
-        assert isinstance(redis, StrictRedis)
+        assert isinstance(redis_connection, redis.StrictRedis)
         assert isinstance(table_name, str)
-        self.redis = redis
+        self.redis = redis_connection
         self.table_name = table_name
 
     def lua_delete_record(self, lua):
@@ -80,21 +85,48 @@ class Table:
         """
         assert isinstance(lua, str)
 
-        return "redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
-            self.redis_key(),
-            lua,
-            lua
+        manager = transaction.TransactionManager.get_instance(self.redis)
+
+        lines = (
+            self.lua_get_lua_record(lua),
+            "local record_to_delete = cjson.decode(irecords[1])",
+
+            manager.lua_transaction_info(),
+            "if row_is_locked(record_to_delete, xid, xids) then",
+            "  error('Transaction failed. Will ROLLBACK.')",
+            "end",
+
+            "if row_is_visible(record_to_delete, xid, xids) then",
+            "  record_to_delete[':xex'] = %d" % self.__xid(),
+            "  redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
+                self.redis_key(),
+                lua,
+                lua,
+            ),
+            "  redis.call('ZADD', '%s', tostring(%s), cjson.encode(record_to_delete))" % (
+                self.redis_key(),
+                lua,
+            ),
+            "end",
         )
+
+        return '\n'.join(lines)
 
     def lua_add_lua_record(self, lua_variable):
         return '\n'.join((
             "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
+            "%s[':xid'] = %d" % (lua_variable, self.__xid()),
+            "%s[':xex'] = %d" % (lua_variable, 0),
             "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
                 self.redis_key(),
                 lua_variable,
                 lua_variable
             )
         ))
+
+    def __xid(self):
+        from tesseract import connection
+        return connection.Connection.current_connection().transaction_id
 
     def lua_get_lua_record(self, lua):
         """Fetch a record by its ID.
@@ -133,11 +165,10 @@ class Table:
 
         Returns:
           str Lua code.
-
         """
         assert isinstance(record, dict)
 
-        record[':id'] = self.get_next_record_id()
+        self.__set_record_meta(record)
 
         return "redis.call('ZADD', '%s', '%s', '%s') " % (
             self.redis_key(),
@@ -148,14 +179,17 @@ class Table:
     def add_record(self, record):
         assert isinstance(record, dict)
 
-        record[':id'] = self.get_next_record_id()
+        self.__set_record_meta(record)
         self.redis.zadd(self.redis_key(), record[':id'], json.dumps(record))
         return record[':id']
 
-    def lua_iterate(self, decode=False):
-        """Generate the Lua required to iterate the records in a table.
+    def __set_record_meta(self, record):
+        record[':id'] = self.get_next_record_id()
+        record[':xid'] = self.__xid()
+        record[':xex'] = 0
 
-        NOTE: This will open the loop, but you must provide the Lua `end`.
+    def lua_iterate(self):
+        """Generate the Lua required to iterate the records in a table.
 
         For each record read from the page there will be several initialized Lua
         variables:
@@ -164,19 +198,18 @@ class Table:
           * `row` - The decoded row (also containing special keys like ':id')
             only if `decode` is `True`.
 
-        Arguments:
-          lua (str): Lua code to be executed for each page.
-          decode (bool, optional): If `True` the row will be parsed and a new
-            variable `row` will be available.
-
+        Note:
+          This will open the loop. You must use lua_end_iterate() to close the
+          loop.
         """
         zrange = "redis.call('ZRANGE', '%s', '0', '-1')" % self.redis_key()
         lua = "for _, data in ipairs(%s) do " % zrange
-
-        if decode:
-            lua += "local row = cjson.decode(data) "
+        lua += "local row = cjson.decode(data) "
 
         return lua
+
+    def lua_end_iterate(self):
+        return "end\n"
 
     def lua_get_next_record_id(self):
         return "redis.call('INCR', '%s')" % self._redis_record_id_key()
@@ -189,14 +222,17 @@ class Table:
 
         Returns:
           str
-
         """
         return 'table:%s' % self.table_name
+
+    def drop(self):
+        self.__drop_all_indexes()
+        self.redis.delete(self.redis_key())
+        self.redis.delete(self._redis_record_id_key())
 
     def _redis_record_id_key(self):
         """Get the name of the key that holds the incrementer for the next
         record ID. This may not exist.
-
         """
         return 'table:%s:rowid' % self.table_name
 
@@ -207,15 +243,10 @@ class Table:
                 self.redis.hdel('indexes', index_name)
                 self.redis.delete('index:%s' % index_name)
 
-    def drop(self):
-        self.__drop_all_indexes()
-        self.redis.delete(self.redis_key())
-        self.redis.delete(self._redis_record_id_key())
 
 class PermanentTable(Table):
     """Permanent tables must act like SQL tables where changes are always
     consistent.
-
     """
 
     def __init__(self, redis, table_name):
@@ -245,8 +276,8 @@ class TransientTable(Table):
     Attributes:
       next_record_id (int): The next record ID to be used. This will increment
         automatically.
-
     """
+
     def __init__(self, redis):
         Table.__init__(self, redis, self.__random_table_name())
 
@@ -259,3 +290,63 @@ class TransientTable(Table):
 
     def __del__(self):
         self.drop()
+
+    def lua_add_lua_record(self, lua_variable):
+        return '\n'.join((
+            "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
+            "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
+                self.redis_key(),
+                lua_variable,
+                lua_variable
+            )
+        ))
+
+
+class DropTableStatement(statement.Statement):
+    """`DROP TABLE` statement."""
+
+    def __init__(self, table_name):
+        assert isinstance(table_name, ast.Identifier)
+
+        self.table_name = table_name
+
+    def __str__(self):
+        return "DROP TABLE %s" % self.table_name
+
+    def execute(self, result, tesseract):
+        assert isinstance(result.statement, DropTableStatement)
+        assert isinstance(tesseract, instance.Instance)
+
+        table = PermanentTable(tesseract.redis, str(result.statement.table_name))
+        table.drop()
+
+        return protocol.Protocol.successful_response()
+
+
+class FullTableScan(stage.Stage):
+    def __init__(self, input_table, offset, redis, table_name):
+        stage.Stage.__init__(self, input_table, offset, redis)
+        assert isinstance(table_name, ast.Identifier)
+        self.table_name = table_name
+        self.output_table = TransientTable(redis)
+
+    def explain(self):
+        return {
+            "description": "Full table scan of '%s'" % self.table_name
+        }
+
+    def compile_lua(self):
+        manager = transaction.TransactionManager.get_instance(self.redis)
+
+        lua = [
+            self.input_table.lua_iterate(),
+            manager.lua_transaction_info(),
+            "if row_is_visible(row, xid, xids) then",
+            "row[':xid'] = nil",
+            "row[':xex'] = nil",
+            self.output_table.lua_add_lua_record('row'),
+            "end",
+            self.input_table.lua_end_iterate(),
+        ]
+
+        return (self.output_table, '\n'.join(lua), self.offset)

@@ -6,43 +6,41 @@ Arithmetic
 ----------
 
 
-Addition:
+Addition::
 
     a + b
 
-Subtraction:
+Subtraction::
 
     a - b
 
-Multiplication:
+Multiplication::
 
     a * b
 
-Division:
+Division::
 
     a / b
 
-Modulo (remainder):
+Modulo (remainder)::
 
     a % b
 
-Power:
+Power::
 
     a ^ b
 
 ``a`` and ``b`` must be ``null`` or ``number``.
 
 
-Comparison
-----------
-
-
 Equality
-^^^^^^^^
+--------
+
+Equality::
 
     a = b
 
-For inequality:
+For inequality::
 
     a != b
     a <> b
@@ -78,7 +76,7 @@ exactly the same element in the same order:
 
 .. code-block:: sql
 
-SELECT [1, 2] = [2, 1]
+   SELECT [1, 2] = [2, 1]
 
 .. code-block:: json
 
@@ -110,21 +108,21 @@ Inequality has all the same rules but in reverse.
 
 
 Greater or Less Than
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
-Greater than:
+Greater than::
 
     a > b
 
-Greater than or equal to:
+Greater than or equal to::
 
     a >= b
 
-Less than:
+Less than::
 
     a < b
 
-Less than or equal to:
+Less than or equal to::
 
     a <= b
 
@@ -140,20 +138,22 @@ When comparing strings it follows the same rules as how Lua compares strings.
 Concatenation
 -------------
 
+Concatenation::
+
     a || b
     
 Will concatenate the string representations of both sides. For example
 ``3 || 5`` is ``35``. Special values will be converted as follows:
 
---------  ---------------------
-Value     String Representation
---------  ---------------------
-``null``  ``""``
+.. table::
 
-``true``  ``"true"``
-
-``false`` ``"false"``
---------  ---------------------
+   =========  =====================
+   Value      String Representation
+   =========  =====================
+   ``null``   ``""``
+   ``true``   ``"true"``
+   ``false``  ``"false"``
+   =========  =====================
 
 You cannot concatenate arrays or objects on either or both sides.
 
@@ -164,37 +164,41 @@ Logical
 For all logical operations ``a`` and ``b`` are only allowed to be ``null`` or
 ``boolean``.
 
-Logical AND:
+Logical AND::
 
     a AND b
 
 Results:
 
--------  -------  -------
-AND      ``true``   ``false``
--------  -------  -------
-``true``   ``true``   ``false``
+.. table::
 
-``false``  ``false``  ``false``
--------  -------  -------
+   =========  =========  =========
+   AND        ``true``   ``false``
+   =========  =========  =========
+   ``true``   ``true``   ``false``
+   ``false``  ``false``  ``false``
+   =========  =========  =========
 
-Logical OR:
+Logical OR::
 
     a OR b
 
 Results:
 
--------  -------  -------
-OR       ``true``   ``false``
--------  -------  -------
-``true``   ``true``   ``true``
+.. table::
 
-``false``  ``true``   ``false``
--------  -------  -------
+   =========  =========  =========
+   OR         ``true``   ``false``
+   =========  =========  =========
+   ``true``   ``true``   ``true``
+   ``false``  ``true``   ``false``
+   =========  =========  =========
 
 
 Regular Expressions
 -------------------
+
+Regular Expressions::
 
     value LIKE regex
     value NOT LIKE regex
@@ -203,13 +207,14 @@ Regular Expressions
 
 ``regex`` uses the SQL rules for ``LIKE`` expressions.
 
----------  ------------------------------
-Character  Description
----------  ------------------------------
-``.``        Match any single character.
+.. table::
 
-``%``        Match zero or more characters.
----------  ------------------------------
+   =========  ==============================
+   Character  Description
+   =========  ==============================
+   ``.``      Match any single character.
+   ``%``      Match zero or more characters.
+   =========  ==============================
 
 
 Examples
@@ -217,13 +222,11 @@ Examples
 
 Test if a string starts with another string:
 
-
 .. code-block:: sql
 
    SELECT "Bob Smith" LIKE "Bob %"
 
 Test if a string ends with another string:
-
 
 .. code-block:: sql
 
@@ -233,7 +236,7 @@ Test if a string ends with another string:
 Checking Types
 --------------
 
-The following can be used to test the types of a value:
+The following can be used to test the types of a value::
 
     value IS null
     value IS true
@@ -244,7 +247,7 @@ The following can be used to test the types of a value:
     value IS array
     value IS object
 
-Each of the combinations can be used with ``NOT`` like:
+Each of the combinations can be used with ``NOT`` like::
 
     value IS NOT boolean
     
@@ -255,7 +258,7 @@ convention on case.
 Set Membership
 --------------
 
-To test the existence of a value in a set:
+To test the existence of a value in a set::
 
     a IN (b1, b2, ...)
     a NOT IN (b1, b2, ...)
@@ -272,12 +275,12 @@ values.
 Containment
 -----------
 
-To test if a value sits between two other values (inclusive):
+To test if a value sits between two other values (inclusive)::
 
     a BETWEEN b AND c
     a NOT BETWEEN b AND c
 
-Is exactly equivalent to:
+Is exactly equivalent to::
 
     a >= b AND a <= c
     a < b OR a > c
@@ -289,32 +292,22 @@ be ``null``.
 Operator Precedence
 -------------------
 
-----------------  --------------  --------------------------------
-Operator/Element  Associativity   Description
-----------------  --------------  --------------------------------
-``-``               right           unary minus
- 
-``^``               left            exponentiation
- 
-``*`` ``/`` ``%``       left            multiplication, division, modulo
- 
-``+`` ``-``           left            addition, subtraction
- 
-``IS``                              test for ``true``, ``false``, ``null``
- 
-``IN``                              set membership
- 
-``BETWEEN``                         containment
- 
-``LIKE`` ``ILIKE``                    string pattern  matching
+.. table::
 
-``<`` ``>``                           less than, greater than
-
-``=``               right           equality, assignment
-
-``NOT``             right           logical negation
-
-``AND``             left            logical conjunction
-
-``OR``              left            logical disjunction
-----------------  --------------  --------------------------------
+   ==================  =============  ======================================
+   Operator/Element    Associativity  Description
+   ==================  =============  ======================================
+   ``-``               right          unary minus
+   ``^``               left           exponentiation
+   ``*`` ``/`` ``%``   left           multiplication, division, modulo
+   ``+`` ``-``         left           addition, subtraction
+   ``IS``                             test for ``true``, ``false``, ``null``
+   ``IN``                             set membership
+   ``BETWEEN``                        containment
+   ``LIKE`` ``ILIKE``                 string pattern  matching
+   ``<`` ``>``                        less than, greater than
+   ``=``               right          equality, assignment
+   ``NOT``             right          logical negation
+   ``AND``             left           logical conjunction
+   ``OR``              left           logical disjunction
+   ==================  =============  ======================================

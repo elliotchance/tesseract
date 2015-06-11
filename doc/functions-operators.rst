@@ -2,6 +2,7 @@ Functions and Operators
 =======================
 
 .. toctree::
+   :maxdepth: 2
 
    data-types
    operators

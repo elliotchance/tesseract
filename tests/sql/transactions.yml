@@ -1,0 +1,188 @@
+tags: transaction
+
+data:
+  empty: []
+  one_record:
+  - {"a": "b"}
+
+tests:
+  parser_start_transaction:
+    sql: START TRANSACTION
+
+  parser_begin:
+    sql: BEGIN
+    as: START TRANSACTION
+
+  parser_begin_transaction:
+    sql: BEGIN TRANSACTION
+    as: START TRANSACTION
+
+  parser_begin_work:
+    sql: BEGIN WORK
+    as: START TRANSACTION
+
+  parser_commit:
+    sql: COMMIT
+
+  parser_commit_transaction:
+    sql: COMMIT TRANSACTION
+    as: COMMIT
+
+  parser_commit_work:
+    sql: COMMIT WORK
+    as: COMMIT
+
+  parser_rollback:
+    sql: ROLLBACK
+
+  parser_rollback_transaction:
+    sql: ROLLBACK TRANSACTION
+    as: ROLLBACK
+
+  parser_rollback_work:
+    sql: ROLLBACK WORK
+    as: ROLLBACK
+
+  rollback_insert:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - ROLLBACK
+
+    - SELECT * FROM empty
+    result: []
+
+  nested_transactions_throws_warning:
+    sql:
+    - START TRANSACTION
+    - START TRANSACTION
+    warning: |
+      START TRANSACTION called inside a transaction. This will be ignored.
+
+  commit_outside_transaction_throws_warning:
+    sql: COMMIT
+    warning: COMMIT used after transaction is complete. This will be ignored.
+
+  rollback_outside_transaction_throws_warning:
+    sql: ROLLBACK
+    warning: ROLLBACK used after transaction is complete. This will be ignored.
+
+  rollback_multiple_inserts:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - 'INSERT INTO empty {"foo": "baz"}'
+    - ROLLBACK
+
+    - SELECT * FROM empty
+    result: []
+
+  rollback_will_not_affect_previous_transaction:
+    data: empty
+    sql:
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "bar"}'
+    - COMMIT
+    - START TRANSACTION
+    - 'INSERT INTO empty {"foo": "baz"}'
+    - ROLLBACK
+
+    - SELECT * FROM empty
+    result:
+    - {"foo": "bar"}
+
+  insert_is_isolated:
+    comment: |
+      A record INSERTed should not be visible to another client. However, when
+      the transaction is COMMITed it should be immediately visible.
+    multi:
+      1-a:
+        data: empty
+        sql:
+        - START TRANSACTION
+        - 'INSERT INTO empty {"foo": "bar"}'
+      2-b:
+        sql: SELECT * FROM empty
+        result: []
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM empty
+        result:
+        - {"foo": "bar"}
+
+  delete_where_is_isolated:
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - DELETE FROM one_record WHERE true
+      2-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result: []
+
+  delete_is_isolated:
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - DELETE FROM one_record
+      2-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result: []
+
+  update_is_isolated:
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "c"
+      2-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "b"}
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "c"}
+
+  updates_run_into_each_other:
+    comment: |
+      The same record is held by a transaction colliding should cause the most
+      recent transaction to ROLLBACK.
+    multi:
+      1-a:
+        data: one_record
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "c"
+      2-b:
+        sql:
+        - START TRANSACTION
+        - UPDATE one_record SET a = "d"
+        error: Transaction failed. Will ROLLBACK.
+      3-a:
+        sql: COMMIT
+      4-b:
+        sql: SELECT * FROM one_record
+        result:
+        - {"a": "c"}

@@ -1,0 +1,14 @@
+tags:
+  aggregate: Aggregate functions like AVG()
+  delete: DELETE
+  explain: EXPLAIN and query planner.
+  functions: All functions like ABS(), LENGTH(), etc.
+  index: Indexing.
+  insert: INSERT
+  notification: Notifications.
+  operators: All operators like +, ||, etc.
+  parser: Tests that specifically test the SQL parsing.
+  select: SELECT
+  table: Whole table operations.
+  transaction: Transactions
+  update: UPDATE

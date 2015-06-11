@@ -1,6 +1,9 @@
+tags: notification
+
 tests:
   create_notification:
     sql: CREATE NOTIFICATION foo ON some_table
+    finally: DROP NOTIFICATION foo
 
   notification_will_be_fired_for_insert:
     sql:
@@ -9,27 +12,32 @@ tests:
     notification:
       to: foo
       with: {"a": "b"}
+    finally: DROP NOTIFICATION foo
 
   notification_only_fires_for_watched_table:
     sql:
     - CREATE NOTIFICATION foo ON some_table
     - 'INSERT INTO some_other_table {"a": "b"}'
     notification: []
+    finally: DROP NOTIFICATION foo
 
   create_notification_that_already_exists:
     sql:
     - CREATE NOTIFICATION foo ON some_table
     - CREATE NOTIFICATION foo ON some_table
     error: Notification 'foo' already exists.
+    finally: DROP NOTIFICATION foo
 
   create_notification_with_where:
     sql: CREATE NOTIFICATION foo ON some_table WHERE foo = "bar"
+    finally: DROP NOTIFICATION foo
 
   notification_will_respect_where_clause:
     sql:
     - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
     - 'INSERT INTO some_table {"a": "b"}'
     notification: []
+    finally: DROP NOTIFICATION foo
 
   notification_will_respect_where_clause_false:
     sql:
@@ -38,6 +46,7 @@ tests:
     notification:
       to: foo
       with: {"a": "b"}
+    finally: DROP NOTIFICATION foo
 
   multiple_notifications_can_be_fired_from_a_single_select:
     sql:
@@ -45,9 +54,10 @@ tests:
     - CREATE NOTIFICATION foo2 ON some_table WHERE a = "b"
     - 'INSERT INTO some_table {"a": "b"}'
     notification:
-      -
-        to: foo1
+      - to: foo1
         with: {"a": "b"}
-      -
-        to: foo2
+      - to: foo2
         with: {"a": "b"}
+    finally:
+    - DROP NOTIFICATION foo1
+    - DROP NOTIFICATION foo2
