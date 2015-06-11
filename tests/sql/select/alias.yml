@@ -8,3 +8,8 @@ tests:
     sql: SELECT 123 AS foo
     result:
     - {"foo": 123}
+
+  case_sensitive:
+    sql: SELECT 123 AS foo, 456 AS Foo
+    result:
+    - {"foo": 123, "Foo": 456}
