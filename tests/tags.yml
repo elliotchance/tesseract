@@ -9,6 +9,7 @@ tags:
   operators: All operators like +, ||, etc.
   parser: Tests that specifically test the SQL parsing.
   select: SELECT
+  subquery: Subqueries.
   table: Whole table operations.
   transaction: Transactions
   update: UPDATE

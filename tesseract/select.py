@@ -540,3 +540,16 @@ class NoTableStage(stage.Stage):
         lua = "local dummy = {} " + output_table.lua_add_lua_record('dummy')
 
         return (output_table, lua, self.offset)
+
+
+class SubqueryExpression(ast.Expression):
+    def __init__(self, value):
+        assert isinstance(value, SelectStatement)
+
+        self.value = value
+
+    def __str__(self):
+        return '(%s)' % str(self.value)
+
+    def compile_lua(self, offset):
+        return ('cjson.null', offset, [])

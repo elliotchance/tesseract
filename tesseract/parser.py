@@ -240,6 +240,7 @@ def p_expression(p):
                    | in_expression
                    | between_expression
                    | group_expression
+                   | subquery_expression
                    | value
                    | TIMES
     """
@@ -577,6 +578,14 @@ def p_string(p):
     """
 
     p[0] = p[1]
+
+
+def p_subquery_expression(p):
+    """
+        subquery_expression : PARAM_OPEN select_statement PARAM_CLOSE
+    """
+
+    p[0] = select.SubqueryExpression(p[2])
 
 
 def p_transaction_statement(p):
