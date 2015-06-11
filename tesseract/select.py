@@ -85,7 +85,6 @@ class SelectStatement(statement.Statement):
     def contains_aggregate(self):
         """Tests if any of the expressions in the `SELECT` clause contain
         aggregate expressions.
-
         """
         for col in self.columns:
             if col.is_aggregate():
@@ -276,6 +275,8 @@ class ExpressionStage(stage.Stage):
         args = []
         for col in self.columns:
             name = "col%d" % index
+            if isinstance(col, ast.AliasExpression):
+                name = str(col.alias)
             if isinstance(col, ast.Identifier):
                 name = str(col)
 

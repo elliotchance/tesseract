@@ -3,3 +3,8 @@ tags: select
 tests:
   parser:
     sql: SELECT 123 AS foo
+
+  simple:
+    sql: SELECT 123 AS foo
+    result:
+    - {"foo": 123}

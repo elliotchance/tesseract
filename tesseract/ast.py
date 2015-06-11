@@ -531,7 +531,7 @@ class AliasExpression(Expression):
         self.alias = alias
 
     def compile_lua(self, offset):
-        return ('true', offset, [])
+        return self.expression.compile_lua(offset)
 
     def __str__(self):
         return '%s AS %s' % (self.expression, self.alias)
