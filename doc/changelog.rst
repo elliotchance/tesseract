@@ -147,3 +147,11 @@ The focus of this release was on supporting *transactions*.
 .. _START TRANSACTION: https://tesseractdb.readthedocs.org/en/latest/sql-start-transaction.html
 .. _COMMIT: https://tesseractdb.readthedocs.org/en/latest/sql-commit.html
 .. _ROLLBACK: https://tesseractdb.readthedocs.org/en/latest/sql-rollback.html
+
+
+v1.0.0-alpha5 (Event Horizon)
+-----------------------------
+
+#. Added `AS`_ alias for `SELECT`_ expressions.
+
+.. _AS: https://tesseractdb.readthedocs.org/en/latest/sql-select.html

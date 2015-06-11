@@ -26,6 +26,12 @@ column_definitions
   This can be an asterisk (``*``) to represent that the entire object should be
   retrieved without modification or a list of expressions.
 
+  Each column definition can have an attached alias which is case sensitive:
+
+  .. code-block:: sql
+
+     SELECT 3 + 4 AS total
+
 table_name
   The table name to fetch the objects from. If the table does not exist (i.e.
   has no records) then no records will be returned since tables only come into
