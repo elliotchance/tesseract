@@ -30,3 +30,7 @@ script: nosetests --with-coverage --cover-package=tesseract
 after_success:
   - coveralls
   - ocular
+  
+# Disable email notifications.
+notifications:
+  email: false
