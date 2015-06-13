@@ -1,8 +1,5 @@
-import re
 import redis
 from tesseract import ast
-from tesseract import group
-from tesseract import index
 from tesseract import protocol
 from tesseract import stage
 from tesseract import statement
@@ -96,10 +93,13 @@ class SelectStatement(statement.Statement):
         assert isinstance(result.statement, SelectStatement)
         assert isinstance(tesseract.redis, redis.StrictRedis)
 
+        from tesseract import planner
+
         tesseract.redis.delete('agg')
 
         select = result.statement
-        lua, args, manager = self.compile_select(result, tesseract.redis)
+        query_planner = planner.SelectPlanner(self, tesseract.redis)
+        lua, args, manager = query_planner.compile_lua()
 
         if select.explain:
             tesseract.redis.delete('explain')
@@ -115,138 +115,6 @@ class SelectStatement(statement.Statement):
             result,
             manager
         )
-
-    @staticmethod
-    def is_to_value(e):
-        if e.right.value == 'null':
-            return [ast.Value(None)]
-        if e.right.value == 'true':
-            return [ast.Value(True)]
-        if e.right.value == 'false':
-            return [ast.Value(False)]
-
-        return []
-
-    def __index_matches(self, stages, rule, index_name, expression, redis):
-        # noinspection PyCallingNonCallable
-        looking_for = rule['index_name'](expression.where)
-        if redis.hget('indexes', index_name).decode() == looking_for:
-            # noinspection PyCallingNonCallable
-            args = rule['args'](expression.where)
-            if len(args) > 0:
-                args.insert(0, index_name)
-                stages.add(index.IndexStage, args)
-                return True
-
-    def __find_index(self, expression, redis, result, stages):
-        """Try and find an index that can be used for the WHERE expression. If
-        and index is found it is added to the query plan.
-
-        Returns:
-          If an index was found True is returned, else False.
-        """
-        rules = self.__index_rules(result.statement.table_name)
-        signature = expression.where.signature()
-        rule = None
-        for r in rules.keys():
-            if re.match(r, signature):
-                rule = r
-                break
-
-        if rule:
-            index_manager = index.IndexManager.get_instance(redis)
-            indexes = index_manager.get_indexes_for_table(str(result.statement.table_name))
-            for index_name in indexes:
-                if self.__index_matches(stages, rules[rule], index_name, expression, redis):
-                    return True
-
-        return False
-
-    def __index_rules(self, tn):
-        return {
-            '^@I = @V.$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.left),
-                'args': lambda e: [e.right],
-            },
-            '^@V. = @I$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.right),
-                'args': lambda e: [e.left],
-            },
-            '^@I IS @V.$': {
-                'index_name': lambda e: '%s.%s' % (tn, e.left),
-                'args': self.is_to_value,
-            },
-        }
-
-    def __compile_from_and_where(self, expression, redis, result, stages):
-        """When compiling the WHERE clause we need to do a few things:
-
-        1. Verify the WHERE clause is not impossible. This is when the
-           expression will always be false like 'x = null'.
-
-        2. See if there is an available index with __find_index() - hopefully
-           there is.
-
-        3. Otherwise we fall back to a full table scan.
-        """
-        if str(expression.table_name) == str(SelectStatement.NO_TABLE):
-            stages.add(NoTableStage)
-        elif expression.where:
-            if expression.where.signature() == '@I = @Vn':
-                stages.add(ImpossibleWhereStage)
-            else:
-                index_found = self.__find_index(expression, redis, result, stages)
-                if not index_found:
-                    stages.add(table.FullTableScan, (expression.table_name,))
-                    stages.add(WhereStage, (expression.where,))
-        else:
-            stages.add(table.FullTableScan, (expression.table_name,))
-
-    def __compile_group(self, expression, stages):
-        if expression.group or expression.contains_aggregate():
-            stages.add(group.GroupStage, (expression.group, expression.columns))
-
-    def __compile_order(self, expression, stages):
-        if expression.order:
-            stages.add(OrderStage, (expression.order,))
-
-    def __compile_columns(self, expression, stages):
-        """Compile the `SELECT` columns."""
-        if len(expression.columns) > 1 or str(expression.columns[0]) != '*':
-            stages.add(ExpressionStage, (expression.columns,))
-
-    def __compile_limit(self, expression, stages):
-        if expression.limit:
-            stages.add(LimitStage, (expression.limit,))
-
-    def compile_select(self, result, redis_connection):
-        assert isinstance(result.statement, SelectStatement)
-        assert isinstance(redis_connection, redis.StrictRedis)
-
-        expression = result.statement
-        offset = 2
-        args = []
-
-        stages = stage.StageManager(redis_connection)
-
-        self.__compile_from_and_where(expression, redis_connection, result, stages)
-        self.__compile_group(expression, stages)
-        self.__compile_order(expression, stages)
-        self.__compile_columns(expression, stages)
-        self.__compile_limit(expression, stages)
-
-        lua = """
--- First thing is to convert all the incoming values from JSON to native.
--- Skipping the first two arguments that are not JSON and will always exist.
-local args = {}
-for i = 3, #ARGV do
-    args[i] = cjson.decode(ARGV[i])
-end
-"""
-
-        lua += stages.compile_lua(offset, expression.table_name)
-
-        return (lua, args, stages)
 
 class ExpressionStage(stage.Stage):
     def __init__(self, input_table, offset, redis, columns):
@@ -544,13 +412,12 @@ class NoTableStage(stage.Stage):
 
 
 class SubqueryExpression(ast.Expression):
-    def __init__(self, value):
-        assert isinstance(value, SelectStatement)
-
-        self.value = value
+    def __init__(self, select):
+        assert isinstance(select, SelectStatement)
+        self.select = select
 
     def __str__(self):
-        return '(%s)' % str(self.value)
+        return '(%s)' % str(self.select)
 
     def compile_lua(self, offset):
         return ('cjson.null', offset, [])

@@ -77,10 +77,10 @@ class Protocol:
     def successful_response(data=None, warnings=None):
         # If there is no data to be returned (for instance a `DELETE` statement)
         # then you should provide `None`.
-        assert data is None or isinstance(data, list), '%r' % data
+        assert data is None or isinstance(data, (list, dict))
 
         # Warning are of course optional.
-        assert warnings is None or isinstance(warnings, list), '%r' % warnings
+        assert warnings is None or isinstance(warnings, list)
 
         # Build the response.
         response = {

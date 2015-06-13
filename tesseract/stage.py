@@ -16,19 +16,21 @@ class StageManager(object):
     Attributes:
         stages (list of tesseract.engine.stage.stage.Stage): The stages to be
             run. This will be empty when you create a new `StageManager`.
-
     """
     def __init__(self, redis_connection):
         assert isinstance(redis_connection, redis.StrictRedis)
-
-        self.stages = []
+        self.stages = {}
         self.redis = redis_connection
+        self.job = 'default'
 
     def add(self, stage_class, args=()):
         assert isinstance(stage_class, object)
         assert isinstance(args, (list, tuple))
 
-        self.stages.append({
+        if self.job not in self.stages:
+            self.stages[self.job] = []
+
+        self.stages[self.job].append({
             "class": stage_class,
             "args": args,
         })
@@ -38,7 +40,7 @@ class StageManager(object):
 
         lua = ''
         input_table = table.PermanentTable(self.redis, str(table_name))
-        for stage_details in self.stages:
+        for stage_details in self.stages['default']:
             stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
             input_table, stage_lua, offset = stage.compile_lua()
             lua += stage_lua + "\n"
@@ -48,14 +50,23 @@ class StageManager(object):
 
     def explain(self, table_name):
         offset = 0
-        steps = []
 
         from tesseract import table
 
         input_table = table.PermanentTable(self.redis, str(table_name))
-        for stage_details in self.stages:
-            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
-            steps.append(stage.explain())
+
+        if len(self.stages) == 1:
+            steps = []
+            for stage_details in self.stages['default']:
+                stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
+                steps.append(stage.explain())
+        else:
+            steps = {}
+            for job in self.stages:
+                steps[job] = []
+                for stage_details in self.stages[job]:
+                    stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
+                    steps[job].append(stage.explain())
 
         return steps
 

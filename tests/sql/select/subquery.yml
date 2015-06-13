@@ -10,3 +10,17 @@ tests:
   not_allowed_anonymous_table:
     sql: SELECT * FROM (SELECT 1)
     error: Anonymous table in FROM clause must have alias.
+
+  explain_two_phase_subselect:
+    sql: EXPLAIN SELECT * FROM (SELECT 1 + 2) AS t
+    result: {
+      "default": [
+        {"description": "Full table scan of '<t>'"}
+      ],
+      "t": [
+        {"description": "No table used"},
+        {"description": "Expressions: 1 + 2"}
+      ]
+    }
+
+  # explain_not_allowed_in_subselect
