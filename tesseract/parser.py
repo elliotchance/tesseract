@@ -454,12 +454,15 @@ def p_optional_from_clause(p):
     """
         optional_from_clause : empty
                              | FROM IDENTIFIER
+                             | FROM subquery_expression
                              | FROM subquery_expression AS IDENTIFIER
     """
 
     if len(p) == 5:
         p[0] = ast.AliasExpression(p[2], p[4])
     elif len(p) == 3:
+        if isinstance(p[2], select.SubqueryExpression):
+            raise RuntimeError('Anonymous table in FROM clause must have alias.')
         p[0] = p[2]
     else:
         p[0] = None

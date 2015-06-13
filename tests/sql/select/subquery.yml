@@ -6,3 +6,7 @@ tests:
 
   parser_table:
     sql: SELECT * FROM (SELECT 1) AS t
+
+  not_allowed_anonymous_table:
+    sql: SELECT * FROM (SELECT 1)
+    error: Anonymous table in FROM clause must have alias.
