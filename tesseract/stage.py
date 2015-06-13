@@ -74,7 +74,7 @@ class Stage(object):
         self.redis = r
 
     @abc.abstractmethod
-    def explain(self):
+    def explain(self): # pragma: no cover
         pass
 
     def iterate_page(self, lua):

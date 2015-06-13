@@ -154,28 +154,6 @@ class Table(object):
             ),
         ))
 
-    def lua_add_record(self, record):
-        """Generate the Lua required to add a new record to the table. Redis
-        does not require all the scores to be unique - however to be able to
-        delete or retrieve a singe row we need all the scores to be unique so we
-        keep a separate atomic counter.
-
-        Arguments:
-          record (dict): The record.
-
-        Returns:
-          str Lua code.
-        """
-        assert isinstance(record, dict)
-
-        self.__set_record_meta(record)
-
-        return "redis.call('ZADD', '%s', '%s', '%s') " % (
-            self.redis_key(),
-            record[':id'],
-            json.dumps(record)
-        )
-
     def add_record(self, record):
         assert isinstance(record, dict)
 

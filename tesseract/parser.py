@@ -525,9 +525,7 @@ def p_optional_limit_clause(p):
                               | LIMIT NUMBER OFFSET NUMBER
     """
 
-    if len(p) == 1:
-        p[0] = None
-    elif len(p) == 5:
+    if len(p) == 5:
         p[0] = ast.LimitClause(p[2], p[4])
     elif p[1] == 'LIMIT':
         if p[2] == 'ALL':
