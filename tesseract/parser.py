@@ -454,10 +454,12 @@ def p_optional_from_clause(p):
     """
         optional_from_clause : empty
                              | FROM IDENTIFIER
+                             | FROM subquery_expression AS IDENTIFIER
     """
 
-    #     FROM IDENTIFIER
-    if len(p) == 3:
+    if len(p) == 5:
+        p[0] = ast.AliasExpression(p[2], p[4])
+    elif len(p) == 3:
         p[0] = p[2]
     else:
         p[0] = None

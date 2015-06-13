@@ -13,7 +13,7 @@ class Statement(object):
             manager=None):
         assert manager is None or isinstance(manager, stage.StageManager)
         assert isinstance(redis_connection, redis.StrictRedis)
-        assert isinstance(table_name, ast.Identifier)
+        assert isinstance(table_name, (ast.Identifier, ast.AliasExpression))
         assert isinstance(warnings, list)
         assert isinstance(lua, str)
         assert isinstance(args, list)

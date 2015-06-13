@@ -24,7 +24,7 @@ class SelectStatement(statement.Statement):
 
     def __init__(self, table_name, columns, where=None, order=None, group=None,
                  explain=False, limit=None):
-        assert isinstance(table_name, ast.Identifier)
+        assert isinstance(table_name, (ast.Identifier, ast.AliasExpression))
         assert isinstance(columns, list)
         assert where is None or isinstance(where, ast.Expression)
         assert order is None or isinstance(order, ast.OrderByClause)

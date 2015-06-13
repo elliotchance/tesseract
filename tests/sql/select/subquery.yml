@@ -1,5 +1,8 @@
 tags: subquery select
 
 tests:
-  parser:
+  parser_field:
     sql: SELECT (SELECT 1)
+
+  parser_table:
+    sql: SELECT * FROM (SELECT 1) AS t

@@ -304,7 +304,7 @@ class DropTableStatement(statement.Statement):
 class FullTableScan(stage.Stage):
     def __init__(self, input_table, offset, redis, table_name):
         stage.Stage.__init__(self, input_table, offset, redis)
-        assert isinstance(table_name, ast.Identifier)
+        assert isinstance(table_name, (ast.Identifier, ast.AliasExpression))
         self.table_name = table_name
         self.output_table = TransientTable(redis)
 
