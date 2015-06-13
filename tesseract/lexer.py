@@ -8,6 +8,7 @@ from tesseract.ast import Value, Identifier
 sql_keywords = (
     'ALL',
     'AND',
+    'AS',
     'ASC',
     'BEGIN',
     'BETWEEN',

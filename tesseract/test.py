@@ -1,7 +1,4 @@
 """
-Basic Test (`sql`)
-------------------
-
 Tesseract generates tests from YAML files. This makes it very easy to read,
 maintain and organise.
 
@@ -20,32 +17,9 @@ In the example above we have created one test called ``my_test`` that will run
 the SQL statement and confirm that the server returns one row containing that
 exact data.
 
-Result (`result`)
-^^^^^^^^^^^^^^^^^
 
-Specify the expected output of the last ``sql`` statement. The data returned
-from the server must be exactly the same (including order) as the ``result``
-items.
-
-Result in Any Order (`result-unordered`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If the order in which the records isn't important or is unpredictable you can
-use ``result-unordered`` instead of ``result``.
-
-.. code-block:: yaml
-
-   tests:
-     two_columns:
-       data: table1
-       sql: "SELECT foo, foo * 2 FROM table1"
-       result-unordered:
-       - {"foo": 123, "col2": 246}
-       - {"foo": 124, "col2": 248}
-       - {"foo": 125, "col2": 250}
-
-Parser (`as`)
-^^^^^^^^^^^^^
+``as``
+------
 
 All tests that contain a ``sql`` attribute will be run through the parser and
 the statement will be rendered. This rendered statement is expected to be the
@@ -61,23 +35,9 @@ specify what the result should be through ``as``:
        result:
        - {"col1": null}
 
-Ignoring the Parser (`parse`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Sometimes the SQL rendered from the SQL provided is not predictable, so we have
-to disable the parser test:
-
-.. code-block:: yaml
-
-   tests:
-     json_object_with_two_elements:
-       sql: 'SELECT {"foo": "bar", "baz": 123}'
-       parse: false
-       result:
-       - {"col1": {"foo": "bar", "baz": 123}}
-
-Commenting (`comment`)
-^^^^^^^^^^^^^^^^^^^^^^
+``comment``
+-----------
 
 Test can have an optional comment, this is preferred over using YAML inline
 comments so that comments can be injected is creating reports in the future.
@@ -102,89 +62,9 @@ suite like:
        comment: Test everything!
        sql: 'SELECT 123'
 
-Tags (`tags`)
-^^^^^^^^^^^^^
 
-``tags`` can be set at the file level which means that all tests in the file
-have the same tag:
-
-.. code-block:: yaml
-
-   comment: |
-     All the tests are for 'foo'.
-
-   tags: foo
-
-   tests:
-     ...
-
-If you need multiple tags you can separate them with spaces:
-
-.. code-block:: yaml
-
-   tags: bar foo
-
-It is not required, but it is good practice to keep the tags sorted
-alphabetically.
-
-Tags are defined in ``tags.yml``. While also not required for tags to be defined
-here is is good practice to leave a description.
-
-Repeating Tests (`repeat`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If a test lacks some predictability or you need to test the outcome multiple
-times for another reason you can use the ``repeat``. This will still generate
-one test but it will loop through the ``repeat`` many times.
-
-.. code-block:: yaml
-
-   tests:
-     my_test:
-       sql: 'SELECT 123'
-       repeat: 20
-       result:
-       - {"col1": 123}
-
-Failures
+``data``
 --------
-
-Expecting Errors (`error`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use the ``error`` to test for an expected error:
-
-.. code-block:: yaml
-
-   tests:
-     incompatible_types:
-       sql: SELECT false AND 3.5
-       error: No such operator boolean AND number.
-
-Errors will be raised by the parser or by executing the SQL statement(s).
-
-Expecting Warnings (`warning`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can assert one or more warnings are raised:
-
-.. code-block:: yaml
-
-   tests:
-     json_object_duplicate_item_raises_warning:
-       sql: 'SELECT {"foo": "bar", "foo": "baz"}'
-       as: 'SELECT {"foo": "baz"}'
-       warning: Duplicate key "foo", using last value.
-
-     multiple_warnings_can_be_raised:
-       sql: 'SELECT {"foo": "bar", "foo": "baz", "foo": "bax"}'
-       as: 'SELECT {"foo": "bax"}'
-       warning:
-       - Duplicate key "foo", using last value.
-       - Duplicate key "foo", using last value.
-
-Data Sets (`data`)
-------------------
 
 It is common that you will want to test against an existing data fixture.
 Instead of inserting the data you need manually you can use fixtures:
@@ -204,8 +84,9 @@ Instead of inserting the data you need manually you can use fixtures:
        result:
        - {"foo": 124}
 
-Randomizing Data (`data-randomized`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``data-randomized``
+-------------------
 
 For some tests you may want to randomize the order in which the records are
 loaded in. It is often used in conjunction with ``repeat``.
@@ -219,8 +100,23 @@ loaded in. It is often used in conjunction with ``repeat``.
      - {"foo": 123}
 
 
-Verifying Notifications
------------------------
+``error``
+---------
+
+Use the ``error`` to test for an expected error:
+
+.. code-block:: yaml
+
+   tests:
+     incompatible_types:
+       sql: SELECT false AND 3.5
+       error: No such operator boolean AND number.
+
+Errors will be raised by the parser or by executing the SQL statement(s).
+
+
+``notification``
+----------------
 
 When under test all notifications throughout the entire test case will be
 recorded. They can be asserted after all the SQL is executed. To test for a
@@ -263,6 +159,141 @@ Or validate that no notifications have been fired:
        - CREATE NOTIFICATION foo ON some_table WHERE a = "c"
        - 'INSERT INTO some_table {"a": "b"}'
        notification: []
+
+
+``parse``
+---------
+
+Sometimes the SQL rendered from the SQL provided is not predictable, so we have
+to disable the parser test:
+
+.. code-block:: yaml
+
+   tests:
+     json_object_with_two_elements:
+       sql: 'SELECT {"foo": "bar", "baz": 123}'
+       parse: false
+       result:
+       - {"col1": {"foo": "bar", "baz": 123}}
+
+
+``repeat``
+----------
+
+If a test lacks some predictability or you need to test the outcome multiple
+times for another reason you can use the ``repeat``. This will still generate
+one test but it will loop through the ``repeat`` many times.
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       sql: 'SELECT 123'
+       repeat: 20
+       result:
+       - {"col1": 123}
+
+
+``result``
+----------
+
+Specify the expected output of the last ``sql`` statement. The data returned
+from the server must be exactly the same (including order) as the ``result``
+items.
+
+
+``result-unordered``
+--------------------
+
+If the order in which the records isn't important or is unpredictable you can
+use ``result-unordered`` instead of ``result``.
+
+.. code-block:: yaml
+
+   tests:
+     two_columns:
+       data: table1
+       sql: "SELECT foo, foo * 2 FROM table1"
+       result-unordered:
+       - {"foo": 123, "col2": 246}
+       - {"foo": 124, "col2": 248}
+       - {"foo": 125, "col2": 250}
+
+
+``sql``
+-------
+
+``sql`` is used to run one or more SQL statements:
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       sql: SELECT 1 + 2
+       result:
+       - {"col1": 3}
+
+To run multiple SQL statements provide an array:
+
+.. code-block:: yaml
+
+   tests:
+     my_test:
+       sql:
+       - SELECT 1 + 2
+       - SELECT 3 + 4
+       result:
+       - {"col1": 7}
+
+
+``tags``
+--------
+
+``tags`` can be set at the file level which means that all tests in the file
+have the same tag:
+
+.. code-block:: yaml
+
+   comment: |
+     All the tests are for 'foo'.
+
+   tags: foo
+
+   tests:
+     ...
+
+If you need multiple tags you can separate them with spaces:
+
+.. code-block:: yaml
+
+   tags: bar foo
+
+It is not required, but it is good practice to keep the tags sorted
+alphabetically.
+
+Tags are defined in ``tags.yml``. While also not required for tags to be defined
+here is is good practice to leave a description.
+
+
+``warning``
+-----------
+
+You can assert one or more warnings are raised:
+
+.. code-block:: yaml
+
+   tests:
+     json_object_duplicate_item_raises_warning:
+       sql: 'SELECT {"foo": "bar", "foo": "baz"}'
+       as: 'SELECT {"foo": "baz"}'
+       warning: Duplicate key "foo", using last value.
+
+     multiple_warnings_can_be_raised:
+       sql: 'SELECT {"foo": "bar", "foo": "baz", "foo": "bax"}'
+       as: 'SELECT {"foo": "bax"}'
+       warning:
+       - Duplicate key "foo", using last value.
+       - Duplicate key "foo", using last value.
 """
 
 import glob

@@ -231,7 +231,8 @@ def p_empty(p):
 
 def p_expression(p):
     """
-        expression : arithmetic_expression
+        expression : expression AS IDENTIFIER
+                   | arithmetic_expression
                    | comparison_expression
                    | logic_expression
                    | function_call
@@ -245,7 +246,9 @@ def p_expression(p):
                    | TIMES
     """
 
-    if p[1] == '*':
+    if len(p) == 4:
+        p[0] = ast.AliasExpression(p[1], p[3])
+    elif p[1] == '*':
         p[0] = ast.Asterisk()
     else:
         p[0] = p[1]
@@ -523,9 +526,7 @@ def p_optional_limit_clause(p):
                               | LIMIT NUMBER OFFSET NUMBER
     """
 
-    if len(p) == 1:
-        p[0] = None
-    elif len(p) == 5:
+    if len(p) == 5:
         p[0] = ast.LimitClause(p[2], p[4])
     elif p[1] == 'LIMIT':
         if p[2] == 'ALL':

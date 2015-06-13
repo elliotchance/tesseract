@@ -26,6 +26,12 @@ column_definitions
   This can be an asterisk (``*``) to represent that the entire object should be
   retrieved without modification or a list of expressions.
 
+  Each column definition can have an attached alias which is case sensitive:
+
+  .. code-block:: sql
+
+     SELECT 3 + 4 AS total
+
 table_name
   The table name to fetch the objects from. If the table does not exist (i.e.
   has no records) then no records will be returned since tables only come into
@@ -48,8 +54,8 @@ order_field
   given record it will be sorted as if the value were ``null``.
 
   There are two modifiers for a column; ``ASC`` and ``DESC`` which represent
-  **asc**ending and **desc**ending respectively. If no sort order is specified
-  then ``ASC`` is assumed.
+  **asc**\ ending and **desc**\ ending respectively. If no sort order is
+  specified then ``ASC`` is assumed.
 
   When data is sorted it is separated into four types:
 
@@ -91,10 +97,8 @@ limit
     
   If the offset is larger than the available rows then no rows will be returned.
     
-  .. code-block:: highlights
-
-     It is important to note that all the rows up to the ``LIMIT`` + the
-     ``OFFSET`` must be calculated internally so using a large ``OFFSET`` can be
-     expensive. In some cases all records of the entire set must be calculated
-     before the limit can be applied - such as when there is an ``ORDER BY`` or
-     ``GROUP BY`` clauses.
+  It is important to note that all the rows up to the ``LIMIT`` + the ``OFFSET``
+  must be calculated internally so using a large ``OFFSET`` can be expensive.
+  In some cases all records of the entire set must be calculated before the
+  limit can be applied - such as when there is an ``ORDER BY`` or ``GROUP BY``
+  clauses.

@@ -26,14 +26,12 @@ class Expression(object):
         """This is just a placeholder to be overridden by sub-classes. It exists
         here to satisfy PyCharms need to know that `compile_lua()` is available
         on `Expression`
-
         """
         pass
 
     def is_aggregate(self):
         """Test if the expression contains any elements (like function calls)
         that are on an aggregate set.
-
         """
         return False
 
@@ -61,7 +59,6 @@ class Expression(object):
           A string. If there is an exceptional case where a token cannot be made
           into a reliable signature (or it is not implemented) the return value
           should be "?".
-
         """
         return '?'
 
@@ -69,10 +66,9 @@ class Expression(object):
 class Asterisk(Expression):
     """A unary asterisk (different from a binary asterisk which would be a
     MultiplyExpression) signals that all columns in a record are to be used
-    like:
+    like::
 
-    SELECT * FROM foo
-
+        SELECT * FROM foo
     """
     def __str__(self):
         return '*'
@@ -86,7 +82,6 @@ class Asterisk(Expression):
 
         Returns:
           "true" for the reasoning above.
-
         """
         return ('true', offset, [])
 
@@ -94,15 +89,14 @@ class Asterisk(Expression):
 class Value(Expression):
     """A constant value of any type (numbers, strings, arrays, etc) like `3`,
     `"foo"`, `[1, 2]`, etc.
-
     """
     def __init__(self, value):
         self.value = value
 
     def __eq__(self, other):
         """This is more of a convenience method for testing. It allows us to
-        compare two `Value`s based on their internal value."""
-
+        compare two `Value`s based on their internal value.
+        """
         right = other
 
         # `other` is allowed to be another `Value` instance of a raw value.
@@ -527,3 +521,17 @@ class LimitClause:
         self.__append_limit_to_sql(sql)
         self.__append_offset_to_sql(sql)
         return ' '.join(sql)
+
+
+class AliasExpression(Expression):
+    def __init__(self, expression, alias):
+        assert isinstance(expression, Expression)
+        assert isinstance(alias, Identifier)
+        self.expression = expression
+        self.alias = alias
+
+    def compile_lua(self, offset):
+        return self.expression.compile_lua(offset)
+
+    def __str__(self):
+        return '%s AS %s' % (self.expression, self.alias)

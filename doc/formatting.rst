@@ -41,7 +41,7 @@ SQL Examples
 SQL examples should be used in fenced blocks and not include the following
 semi-colon:
 
-.. code-block:: txt
+.. code-block:: none
 
    .. code-block:: sql
 
@@ -55,7 +55,7 @@ If you would like to show the result of the SQL it must be in a separate block
 for JSON:
 
 
-.. code-block:: txt
+.. code-block:: none
 
    .. code-block:: json
 
@@ -71,7 +71,7 @@ Syntax Descriptions
 
 When describing SQL syntax use a SQL block:
 
-.. code-block:: txt
+.. code-block:: none
 
    .. code-block:: sql
 
@@ -86,7 +86,7 @@ When describing SQL syntax use a SQL block:
 For each of the placeholders use a definition style with a blank line between
 each definition:
 
-.. code-block:: txt
+.. code-block:: none
 
    some_columns
      Lots of nice description here.
@@ -106,7 +106,7 @@ Notes
 
 Notes are meant to stand out from other text and contain important information.
 
-.. code-block:: txt
+.. code-block:: none
 
    .. highlights::
 
@@ -124,7 +124,7 @@ There are two types of table syntax that make the table as small as possible
 around the text or type to span as much space as possible. Always use the
 greater span syntax:
 
-.. code-block:: txt
+.. code-block:: none
 
    .. table::
 
