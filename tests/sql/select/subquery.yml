@@ -63,7 +63,11 @@ tests:
       ]
     }
 
-  # multiple_subselects
+  multiple_subselects:
+    sql: SELECT (SELECT 2 * 3) + 1, (SELECT 5)
+    result:
+    - {"col1": 7, "col2": 5}
+
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
   # subselect_does_not_need_as_before_alias

@@ -441,4 +441,4 @@ class SubqueryReference(ast.Expression):
         return '<%s>' % self.reference
 
     def compile_lua(self, offset):
-        return ('get_subselect()', offset, [])
+        return ('get_subselect(%s)' % self.reference, offset, [])

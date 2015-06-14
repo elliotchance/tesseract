@@ -70,7 +70,7 @@ local function row_is_locked(row, xid, xids)
     return row[':xex'] ~= 0 and xids[row[':xex']]
 end
 
-local function get_subselect()
-    local first = redis.call('ZRANGE', 'table:<0>', 0, -1)[1]
+local function get_subselect(index)
+    local first = redis.call('ZRANGE', 'table:<' .. index .. '>', 0, -1)[1]
     return cjson.decode(first)['col1']
 end
