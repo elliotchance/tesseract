@@ -71,9 +71,12 @@ local function row_is_locked(row, xid, xids)
 end
 
 local function get_subselect(index)
-    local first = redis.call('ZRANGE', 'table:<' .. index .. '>', 0, -1)[1]
-    if first == nil then
+    local records = redis.call('ZRANGE', 'table:<' .. index .. '>', 0, -1)
+    if records[1] == nil then
         return cjson.null
     end
-    return cjson.decode(first)['col1']
+    if records[2] ~= nil then
+        error('Subquery returns more than one record.')
+    end
+    return cjson.decode(records[1])['col1']
 end

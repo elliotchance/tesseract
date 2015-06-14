@@ -97,5 +97,10 @@ tests:
     result:
     - {"col1": null}
 
+  subselect_multiple_rows_is_not_allowed:
+    data: some_records
+    sql: SELECT (SELECT * FROM some_records)
+    error: Subquery returns more than one record.
+
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
