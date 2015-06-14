@@ -55,6 +55,12 @@ class StageManager(object):
             if job == 'default':
                 continue
 
+            lua += "redis.pcall('DEL', 'table:<%s>')\n" % job
+
+        for job in self.stages:
+            if job == 'default':
+                continue
+
             lua += "redis.pcall('RENAME', 'table:' .. job_%s(), 'table:<%s>')\n" % (job, job)
 
         lua += "return job_default()\n"

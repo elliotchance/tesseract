@@ -1,5 +1,8 @@
 tags: subquery select
 
+data:
+  empty: {}
+
 tests:
   parser_field:
     sql: SELECT (SELECT 1)
@@ -71,6 +74,11 @@ tests:
   subselect_does_not_need_as_before_alias:
     sql: SELECT * FROM (SELECT 1) t
     as: SELECT * FROM (SELECT 1) AS t
+
+  subtable_with_zero_records_is_allowed:
+    data: empty
+    sql: SELECT * FROM (SELECT * FROM empty) AS t
+    result: []
 
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
