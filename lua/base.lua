@@ -69,3 +69,8 @@ local function row_is_locked(row, xid, xids)
     -- The record is expired and another transaction holds it.
     return row[':xex'] ~= 0 and xids[row[':xex']]
 end
+
+local function get_subselect()
+    local first = redis.call('ZRANGE', 'table:<0>', 0, -1)[1]
+    return cjson.decode(first)['col1']
+end

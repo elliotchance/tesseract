@@ -41,6 +41,13 @@ tests:
       ]
     }
 
-  # field_subselect
+  field_subselect:
+    sql: SELECT (SELECT 2 * 3) + 1
+    result:
+    - {"col1": 7}
+
+  # explain_multiple_subselects
+  # multiple_subselects
+  # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
   # subselect_does_not_need_as_before_alias

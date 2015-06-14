@@ -427,4 +427,16 @@ class SubqueryExpression(ast.Expression):
 
     def substitute_subqueries(self, mapping):
         assert isinstance(mapping, list)
-        return ast.Identifier('<0>')
+        return SubqueryReference(0)
+
+
+class SubqueryReference(ast.Expression):
+    def __init__(self, reference):
+        assert isinstance(reference, int)
+        self.reference = reference
+
+    def __str__(self):
+        return '<%s>' % self.reference
+
+    def compile_lua(self, offset):
+        return ('get_subselect()', offset, [])
