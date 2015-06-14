@@ -39,13 +39,26 @@ class StageManager(object):
         from tesseract import table
 
         lua = ''
-        input_table = table.PermanentTable(self.redis, str(table_name))
-        for stage_details in self.stages['default']:
-            stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
-            input_table, stage_lua, offset = stage.compile_lua()
-            lua += stage_lua + "\n"
 
-        lua += "return '%s'\n" % input_table.table_name
+        for job in self.stages:
+            lua += "local function job_%s()\n" % job
+            input_table = table.PermanentTable(self.redis, str(table_name))
+            for stage_details in self.stages[job]:
+                stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
+                input_table, stage_lua, offset = stage.compile_lua()
+                lua += stage_lua + "\n"
+
+            lua += "return '%s'\n" % input_table.table_name
+            lua += "end\n"
+
+        for job in self.stages:
+            if job == 'default':
+                continue
+
+            lua += "redis.pcall('RENAME', 'table:' .. job_%s(), 'table:<%s>')\n" % (job, job)
+
+        lua += "return job_default()\n"
+
         return lua
 
     def explain(self, table_name):

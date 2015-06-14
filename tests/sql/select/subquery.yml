@@ -23,4 +23,10 @@ tests:
       ]
     }
 
+  two_phase_subselect:
+    sql: SELECT * FROM (SELECT 1 + 2) AS t
+    result:
+    - {"col1": 3}
+
   # explain_not_allowed_in_subselect
+  # subselect_does_not_need_as_before_alias

@@ -406,7 +406,7 @@ class NoTableStage(stage.Stage):
 
     def compile_lua(self):
         output_table = table.TransientTable(self.redis)
-        lua = "local dummy = {} " + output_table.lua_add_lua_record('dummy')
+        lua = "local dummy = {}\n" + output_table.lua_add_lua_record('dummy')
 
         return (output_table, lua, self.offset)
 

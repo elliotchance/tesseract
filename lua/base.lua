@@ -45,6 +45,12 @@ local function f(row, path)
 end
 
 local function row_is_visible(row, xid, xids)
+    -- No transaction information means all rows are visible (could be a
+    -- transient table)
+    if row[':xid'] == nil then
+        return true
+    end
+
     -- The record was created in active transaction that is not our own.
     if xids[row[':xid']] and row[':xid'] ~= xid then
         return false
