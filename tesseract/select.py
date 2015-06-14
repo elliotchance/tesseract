@@ -427,7 +427,9 @@ class SubqueryExpression(ast.Expression):
 
     def substitute_subqueries(self, mapping):
         assert isinstance(mapping, list)
-        return SubqueryReference(0)
+        for i in range(len(mapping)):
+            if str(mapping[i]) == str(self.select):
+                return SubqueryReference(i)
 
 
 class SubqueryReference(ast.Expression):

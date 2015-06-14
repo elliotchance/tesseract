@@ -46,7 +46,23 @@ tests:
     result:
     - {"col1": 7}
 
-  # explain_multiple_subselects
+  explain_multiple_subselects:
+    sql: EXPLAIN SELECT (SELECT 2 * 3) + 1, (SELECT 5)
+    result: {
+      "default": [
+        {"description": "No table used"},
+        {"description": "Expressions: <0> + 1, <1>"}
+      ],
+      "0": [
+        {"description": "No table used"},
+        {"description": "Expressions: 2 * 3"}
+      ],
+      "1": [
+        {"description": "No table used"},
+        {"description": "Expressions: 5"}
+      ]
+    }
+
   # multiple_subselects
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
