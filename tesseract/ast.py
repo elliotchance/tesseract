@@ -62,6 +62,13 @@ class Expression(object):
         """
         return '?'
 
+    def subqueries(self):
+        return []
+
+    def substitute_subqueries(self, mapping):
+        assert isinstance(mapping, list)
+        return self
+
 
 class Asterisk(Expression):
     """A unary asterisk (different from a binary asterisk which would be a
@@ -256,6 +263,15 @@ class BinaryExpression(Expression):
             self.right.signature()
         )
 
+    def subqueries(self):
+        return self.left.subqueries() + self.right.subqueries()
+
+    def substitute_subqueries(self, mapping):
+        assert isinstance(mapping, list)
+        left = self.left.substitute_subqueries(mapping)
+        right = self.right.substitute_subqueries(mapping)
+        return BinaryExpression(left, self.operator, right, self.lua_operator)
+
 
 class EqualExpression(BinaryExpression):
     def __init__(self, left, right):
@@ -316,9 +332,11 @@ class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '/', right, 'operator_divide')
 
+
 class ConcatExpression(BinaryExpression):
     def __init__(self, left, right):
         BinaryExpression.__init__(self, left, '||', right, 'operator_concat')
+
 
 class FunctionCall(Expression):
     def __init__(self, function_name, argument):

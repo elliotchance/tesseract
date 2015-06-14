@@ -421,3 +421,10 @@ class SubqueryExpression(ast.Expression):
 
     def compile_lua(self, offset):
         return ('cjson.null', offset, [])
+
+    def subqueries(self):
+        return [self.select]
+
+    def substitute_subqueries(self, mapping):
+        assert isinstance(mapping, list)
+        return ast.Identifier('<0>')

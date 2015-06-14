@@ -28,5 +28,19 @@ tests:
     result:
     - {"col1": 3}
 
+  explain_field_subselect:
+    sql: EXPLAIN SELECT (SELECT 2 * 3) + 1
+    result: {
+      "default": [
+        {"description": "No table used"},
+        {"description": "Expressions: <0> + 1"}
+      ],
+      "0": [
+        {"description": "No table used"},
+        {"description": "Expressions: 2 * 3"}
+      ]
+    }
+
+  # field_subselect
   # explain_not_allowed_in_subselect
   # subselect_does_not_need_as_before_alias

@@ -38,6 +38,13 @@ end
         return (lua, args, stages)
 
     def _compile_select(self, stages, select_stmt):
+        subqueries = []
+        for i in range(len(select_stmt.columns)):
+            column = select_stmt.columns[i]
+            assert isinstance(column, ast.Expression)
+            subqueries.extend(column.subqueries())
+            select_stmt.columns[i] = column.substitute_subqueries(subqueries)
+
         if isinstance(select_stmt, select.SelectStatement) and \
                 isinstance(select_stmt.table_name, ast.AliasExpression):
             subquery = select_stmt.table_name.expression
@@ -46,6 +53,13 @@ end
             select_stmt.table_name = ast.Identifier('<%s>' % stages.job)
             self._compile_select(stages, subquery.select)
             stages.job = 'default'
+
+        i = 0
+        for query in subqueries:
+            stages.job = str(i)
+            self._compile_select(stages, query)
+            stages.job = 'default'
+            i += 1
 
         self.__compile_from_and_where(stages, select_stmt)
         self.__compile_group(stages, select_stmt)
