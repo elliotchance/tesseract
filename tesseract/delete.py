@@ -30,7 +30,7 @@ class DeleteStatement(statement.Statement):
 
         stages = stage.StageManager(tesseract.redis)
         stages.add(DeleteStage, (result.statement.where,))
-        lua = stages.compile_lua(2, result.statement.table_name)
+        lua = stages.compile_lua(2, str(result.statement.table_name))
 
         return self.run(tesseract.redis, result.statement.table_name, [], lua,
                         [], result)

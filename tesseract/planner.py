@@ -33,7 +33,7 @@ end
 """
 
         stages = self.plan()
-        lua += stages.compile_lua(offset, self._select.table_name)
+        lua += stages.compile_lua(offset, str(self._select.table_name))
 
         return (lua, args, stages)
 
@@ -50,6 +50,7 @@ end
             subquery = select_stmt.table_name.expression
             assert isinstance(subquery, select.SubqueryExpression)
             stages.job = str(select_stmt.table_name.alias)
+            stages.set_start_table(str(subquery.select.table_name))
             select_stmt.table_name = ast.Identifier('<%s>' % stages.job)
             self._compile_select(stages, subquery.select)
             stages.job = 'default'
@@ -57,10 +58,12 @@ end
         i = 0
         for query in subqueries:
             stages.job = str(i)
+            stages.set_start_table(str(query.table_name))
             self._compile_select(stages, query)
             stages.job = 'default'
             i += 1
 
+        stages.set_start_table(str(select_stmt.table_name))
         self.__compile_from_and_where(stages, select_stmt)
         self.__compile_group(stages, select_stmt)
         self.__compile_order(stages, select_stmt)

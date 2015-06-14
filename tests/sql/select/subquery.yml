@@ -1,7 +1,11 @@
 tags: subquery select
 
 data:
-  empty: {}
+  empty: []
+
+  some_records:
+  - {"a": "b"}
+  - {"c": "d"}
 
 tests:
   parser_field:
@@ -79,6 +83,13 @@ tests:
     data: empty
     sql: SELECT * FROM (SELECT * FROM empty) AS t
     result: []
+
+  subtable_with_several_records_is_allowed:
+    data: some_records
+    sql: SELECT * FROM (SELECT * FROM some_records) AS b
+    result:
+    - {"a": "b"}
+    - {"c": "d"}
 
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect

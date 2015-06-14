@@ -38,7 +38,7 @@ class UpdateStatement(statement.Statement):
 
         stages = stage.StageManager(tesseract.redis)
         stages.add(UpdateStage, (statement.columns, statement.where))
-        lua = stages.compile_lua(2, statement.table_name)
+        lua = stages.compile_lua(2, str(statement.table_name))
 
         return self.run(tesseract.redis, statement.table_name, [], lua, [],
                         result)

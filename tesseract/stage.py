@@ -22,6 +22,18 @@ class StageManager(object):
         self.stages = {}
         self.redis = redis_connection
         self.job = 'default'
+        self.start_table = {}
+
+    def set_start_table(self, table_name):
+        assert isinstance(table_name, str)
+        self.start_table[self.job] = table_name
+
+    def start_table_for_job(self, job, default=None):
+        assert isinstance(job, str)
+        try:
+            return self.start_table[job]
+        except:
+            return default
 
     def add(self, stage_class, args=()):
         assert isinstance(stage_class, object)
@@ -36,13 +48,18 @@ class StageManager(object):
         })
 
     def compile_lua(self, offset, table_name):
+        assert isinstance(offset, int)
+        assert isinstance(table_name, str)
+
         from tesseract import table
 
         lua = ''
 
         for job in self.stages:
             lua += "local function job_%s()\n" % job
-            input_table = table.PermanentTable(self.redis, str(table_name))
+
+            input_table = table.PermanentTable(self.redis, self.start_table_for_job(job, table_name))
+
             for stage_details in self.stages[job]:
                 stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
                 input_table, stage_lua, offset = stage.compile_lua()
