@@ -91,5 +91,11 @@ tests:
     - {"a": "b"}
     - {"c": "d"}
 
+  subselect_zero_rows_is_null:
+    data: empty
+    sql: SELECT (SELECT * FROM empty)
+    result:
+    - {"col1": null}
+
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect

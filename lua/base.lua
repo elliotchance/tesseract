@@ -72,5 +72,8 @@ end
 
 local function get_subselect(index)
     local first = redis.call('ZRANGE', 'table:<' .. index .. '>', 0, -1)[1]
+    if first == nil then
+        return cjson.null
+    end
     return cjson.decode(first)['col1']
 end
