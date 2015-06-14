@@ -68,6 +68,9 @@ tests:
     result:
     - {"col1": 7, "col2": 5}
 
+  subselect_does_not_need_as_before_alias:
+    sql: SELECT * FROM (SELECT 1) t
+    as: SELECT * FROM (SELECT 1) AS t
+
   # subselect_must_return_one_record
   # explain_not_allowed_in_subselect
-  # subselect_does_not_need_as_before_alias
