@@ -464,7 +464,7 @@ def p_optional_from_clause(p):
     elif len(p) == 4:
         p[0] = ast.AliasExpression(p[2], p[3])
     elif len(p) == 3:
-        if isinstance(p[2], select.SubqueryExpression):
+        if isinstance(p[2], ast.SubqueryExpression):
             raise RuntimeError('Anonymous table in FROM clause must have alias.')
         p[0] = p[2]
     else:
@@ -594,7 +594,7 @@ def p_subquery_expression(p):
         subquery_expression : PARAM_OPEN select_statement PARAM_CLOSE
     """
 
-    p[0] = select.SubqueryExpression(p[2])
+    p[0] = ast.SubqueryExpression(p[2])
 
 
 def p_transaction_statement(p):

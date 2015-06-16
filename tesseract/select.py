@@ -1,7 +1,7 @@
 import redis
 from tesseract import ast
-from tesseract import protocol
 from tesseract import stage
+from tesseract import protocol
 from tesseract import statement
 from tesseract import table
 
@@ -115,6 +115,14 @@ class SelectStatement(statement.Statement):
             result,
             manager
         )
+
+    def extract_subquery(self, index):
+        for i in range(len(self.columns)):
+            self.columns[i], subquery = self.columns[i].extract_subquery(index)
+            if subquery:
+                return (ast.SubqueryExpression(self), subquery)
+
+        return (self, None)
 
 class ExpressionStage(stage.Stage):
     def __init__(self, input_table, offset, redis, columns):
@@ -409,36 +417,3 @@ class NoTableStage(stage.Stage):
         lua = "local dummy = {}\n" + output_table.lua_add_lua_record('dummy')
 
         return (output_table, lua, self.offset)
-
-
-class SubqueryExpression(ast.Expression):
-    def __init__(self, select):
-        assert isinstance(select, SelectStatement)
-        self.select = select
-
-    def __str__(self):
-        return '(%s)' % str(self.select)
-
-    def compile_lua(self, offset):
-        return ('cjson.null', offset, [])
-
-    def subqueries(self):
-        return [self.select]
-
-    def substitute_subqueries(self, mapping):
-        assert isinstance(mapping, list)
-        for i in range(len(mapping)):
-            if str(mapping[i]) == str(self.select):
-                return SubqueryReference(i)
-
-
-class SubqueryReference(ast.Expression):
-    def __init__(self, reference):
-        assert isinstance(reference, int)
-        self.reference = reference
-
-    def __str__(self):
-        return '<%s>' % self.reference
-
-    def compile_lua(self, offset):
-        return ('get_subselect(%s)' % self.reference, offset, [])

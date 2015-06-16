@@ -5,7 +5,6 @@ tesseract server.
 import json
 import socket
 from tesseract import protocol
-from tesseract import transaction
 
 
 class Client:

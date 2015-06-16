@@ -38,13 +38,13 @@ tests:
   explain_field_subselect:
     sql: EXPLAIN SELECT (SELECT 2 * 3) + 1
     result: {
-      "default": [
-        {"description": "No table used"},
-        {"description": "Expressions: <0> + 1"}
-      ],
       "0": [
         {"description": "No table used"},
         {"description": "Expressions: 2 * 3"}
+      ],
+      "default": [
+        {"description": "No table used"},
+        {"description": "Expressions: <0> + 1"}
       ]
     }
 
@@ -55,18 +55,21 @@ tests:
 
   explain_multiple_subselects:
     sql: EXPLAIN SELECT (SELECT 2 * 3) + 1, (SELECT 5)
+
+  explain_very_nested_subselect:
+    sql: EXPLAIN SELECT (SELECT 1 + (SELECT 5 * 3)) / 2
     result: {
-      "default": [
-        {"description": "No table used"},
-        {"description": "Expressions: <0> + 1, <1>"}
+      "1": [
+        {'description': 'No table used'},
+        {'description': 'Expressions: 1 + <0>'}
       ],
       "0": [
-        {"description": "No table used"},
-        {"description": "Expressions: 2 * 3"}
+        {'description': 'No table used'},
+        {'description': 'Expressions: 5 * 3'},
       ],
-      "1": [
-        {"description": "No table used"},
-        {"description": "Expressions: 5"}
+      "default": [
+        {'description': 'No table used'},
+        {'description': 'Expressions: <1> / 2'}
       ]
     }
 

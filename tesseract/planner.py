@@ -39,16 +39,16 @@ end
 
     def _compile_select(self, stages, select_stmt):
         subqueries = []
-        for i in range(len(select_stmt.columns)):
-            column = select_stmt.columns[i]
-            assert isinstance(column, ast.Expression)
-            subqueries.extend(column.subqueries())
-            select_stmt.columns[i] = column.substitute_subqueries(subqueries)
+        while True:
+            e, subquery = select_stmt.extract_subquery(len(subqueries))
+            if not subquery:
+                break
+            subqueries.append(subquery)
 
         if isinstance(select_stmt, select.SelectStatement) and \
                 isinstance(select_stmt.table_name, ast.AliasExpression):
             subquery = select_stmt.table_name.expression
-            assert isinstance(subquery, select.SubqueryExpression)
+            assert isinstance(subquery, ast.SubqueryExpression)
             stages.job = str(select_stmt.table_name.alias)
             stages.set_start_table(str(subquery.select.table_name))
             select_stmt.table_name = ast.Identifier('<%s>' % stages.job)

@@ -62,12 +62,9 @@ class Expression(object):
         """
         return '?'
 
-    def subqueries(self):
-        return []
-
-    def substitute_subqueries(self, mapping):
-        assert isinstance(mapping, list)
-        return self
+    def extract_subquery(self, index):
+        assert isinstance(index, int)
+        return (self, None)
 
 
 class Asterisk(Expression):
@@ -189,7 +186,6 @@ class Value(Expression):
         regular expressions that do not care about the value type, for example
         "/@V./" will safely match any value rather than the more brittle and
         longer "/@[n01ifsld]/".
-
         """
         if self.value is None:
             return '@Vn'
@@ -263,14 +259,19 @@ class BinaryExpression(Expression):
             self.right.signature()
         )
 
-    def subqueries(self):
-        return self.left.subqueries() + self.right.subqueries()
+    def extract_subquery(self, index):
+        assert isinstance(index, int)
+        expression, subquery = self.left.extract_subquery(index)
+        if subquery:
+            new_binary = self.__class__(expression, self.right)
+            return (new_binary, subquery)
 
-    def substitute_subqueries(self, mapping):
-        assert isinstance(mapping, list)
-        left = self.left.substitute_subqueries(mapping)
-        right = self.right.substitute_subqueries(mapping)
-        return BinaryExpression(left, self.operator, right, self.lua_operator)
+        expression, subquery = self.right.extract_subquery(index)
+        if subquery:
+            new_binary = self.__class__(self.left, expression)
+            return (new_binary, subquery)
+
+        return (self, None)
 
 
 class EqualExpression(BinaryExpression):
@@ -553,3 +554,33 @@ class AliasExpression(Expression):
 
     def __str__(self):
         return '%s AS %s' % (self.expression, self.alias)
+
+
+class SubqueryExpression(Expression):
+    def __init__(self, select):
+        self.select = select
+
+    def __str__(self):
+        return '(%s)' % str(self.select)
+
+    def compile_lua(self, offset):
+        return ('cjson.null', offset, [])
+
+    def extract_subquery(self, index):
+        assert isinstance(index, int)
+        e, subquery = self.select.extract_subquery(index)
+        if subquery:
+            return (e, subquery)
+        return (SubqueryReference(index), self.select)
+
+
+class SubqueryReference(Expression):
+    def __init__(self, reference):
+        assert isinstance(reference, int)
+        self.reference = reference
+
+    def __str__(self):
+        return '<%s>' % self.reference
+
+    def compile_lua(self, offset):
+        return ('get_subselect(%s)' % self.reference, offset, [])
