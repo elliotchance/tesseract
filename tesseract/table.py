@@ -97,7 +97,7 @@ class Table(object):
             "end",
 
             "if row_is_visible(record_to_delete, xid, xids) then",
-            "  record_to_delete[':xex'] = %d" % self.__xid(),
+            "  record_to_delete[':xex'] = %d" % self._xid(),
             "  redis.call('ZREMRANGEBYSCORE', '%s', %s, %s)" % (
                 self.redis_key(),
                 lua,
@@ -115,7 +115,7 @@ class Table(object):
     def lua_add_lua_record(self, lua_variable):
         return '\n'.join((
             "%s[':id'] = %s" % (lua_variable, self.lua_get_next_record_id()),
-            "%s[':xid'] = %d" % (lua_variable, self.__xid()),
+            "%s[':xid'] = %d" % (lua_variable, self._xid()),
             "%s[':xex'] = %d" % (lua_variable, 0),
             "redis.call('ZADD', '%s', tostring(%s[':id']), cjson.encode(%s)) " % (
                 self.redis_key(),
@@ -124,7 +124,7 @@ class Table(object):
             )
         ))
 
-    def __xid(self):
+    def _xid(self):
         from tesseract import connection
         return connection.Connection.current_connection().transaction_id
 
@@ -185,7 +185,7 @@ class Table(object):
 
     def __set_record_meta(self, record):
         record[':id'] = self.get_next_record_id()
-        record[':xid'] = self.__xid()
+        record[':xid'] = self._xid()
         record[':xex'] = 0
 
     def lua_iterate(self):
@@ -223,7 +223,7 @@ class Table(object):
         Returns:
           str
         """
-        return 'table:%s' % self.table_name
+        return 'tesseract:table:%s' % self.table_name
 
     def drop(self):
         self.__drop_all_indexes()
@@ -234,14 +234,14 @@ class Table(object):
         """Get the name of the key that holds the incrementer for the next
         record ID. This may not exist.
         """
-        return 'table:%s:rowid' % self.table_name
+        return 'tesseract:table:%s:rowid' % self.table_name
 
     def __drop_all_indexes(self):
         for index_name in self.redis.hkeys('indexes'):
             prefix = '%s.' % self.table_name
             if str(self.redis.hget('indexes', index_name).decode()).startswith(prefix):
                 self.redis.hdel('indexes', index_name)
-                self.redis.delete('index:%s' % index_name)
+                self.redis.delete('tesseract:index:%s' % index_name)
 
 
 class PermanentTable(Table):
@@ -278,18 +278,15 @@ class TransientTable(Table):
         automatically.
     """
 
-    def __init__(self, redis):
-        Table.__init__(self, redis, self.__random_table_name())
+    def __init__(self, redis_connection):
+        Table.__init__(self, redis_connection, self.__random_table_name())
 
     def __random_table_name(self):
         """Generate a random table name."""
-        return ''.join(
+        return 'tmp_%s_%s' % (self._xid(), ''.join(
             random.choice('abcdefghijklmnopqrstuvwxyz')
             for _ in range(8)
-        )
-
-    def __del__(self):
-        self.drop()
+        ))
 
     def lua_add_lua_record(self, lua_variable):
         return '\n'.join((
@@ -300,6 +297,13 @@ class TransientTable(Table):
                 lua_variable
             )
         ))
+
+    def lua_drop(self):
+        lua = (
+            "redis.call('DEL', '%s')" % self.redis_key(),
+            "redis.call('DEL', '%s')" % self._redis_record_id_key(),
+        )
+        return '\n'.join(lua)
 
 
 class DropTableStatement(statement.Statement):

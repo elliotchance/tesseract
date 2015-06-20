@@ -1,0 +1,4 @@
+Vacuuming
+=========
+
+.. automodule:: tesseract.vacuum

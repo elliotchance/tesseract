@@ -8,3 +8,4 @@ Engine
    tables
    transactions
    server-protocol
+   vacuuming
