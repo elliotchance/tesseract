@@ -38,10 +38,19 @@ class StageManager(object):
 
         lua = ''
         input_table = table.PermanentTable(self.redis, str(table_name))
+        cleanup_tables = []
         for stage_details in self.stages:
             stage = stage_details['class'](input_table, offset, self.redis, *stage_details['args'])
             input_table, stage_lua, offset = stage.compile_lua()
             lua += stage_lua + "\n"
+            cleanup_tables.append(input_table)
+
+        # We cannot clean up the last table because it contains the result.
+        cleanup_tables.pop()
+
+        for cleanup_table in cleanup_tables:
+            assert isinstance(cleanup_table, table.TransientTable)
+            lua += '%s\n' % cleanup_table.lua_drop()
 
         lua += "return '%s'\n" % input_table.table_name
         return lua

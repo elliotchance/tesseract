@@ -88,7 +88,7 @@ class TransactionManager(object):
         self.__next_transaction_id = 1
         self.__active_transactions = set()
         self.__redis = redis_connection
-        self.__rollback_actions = []
+        self.__rollback_actions = {}
 
     def active_transaction_ids(self):
         return self.__active_transactions
@@ -100,17 +100,29 @@ class TransactionManager(object):
         self.__end_transaction()
 
     def rollback(self):
-        for action in self.__rollback_actions:
-            self.__redis.execute_command(action)
+        xid = self.__transaction_id()
+        if xid in self.__rollback_actions:
+            for action in self.__rollback_actions[xid]:
+                self.__redis.execute_command(action)
+            del self.__rollback_actions[xid]
+
         self.__end_transaction()
 
     def in_transaction(self):
         return self.__transaction_id() in self.__active_transactions
 
     def record(self, action):
-        self.__rollback_actions.append(action)
+        xid = self.__transaction_id()
+        if xid not in self.__rollback_actions:
+            self.__rollback_actions[xid] = []
+
+        self.__rollback_actions[xid].append(action)
 
     def next_transaction_id(self):
+        from tesseract import vacuum
+        if self.__next_transaction_id % 100 == 0:
+            vacuum.vacuum.needs_running = True
+
         self.__next_transaction_id += 1
         return self.__next_transaction_id
 
@@ -151,7 +163,7 @@ class TransactionManager(object):
         return connection.Connection.current_connection().transaction_id
 
     def __end_transaction(self):
-        self.__rollback_actions = []
+        self.__rollback_actions = {}
         try:
             self.__active_transactions.remove(self.__transaction_id())
         except KeyError:

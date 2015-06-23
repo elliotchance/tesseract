@@ -154,4 +154,8 @@ v1.0.0-alpha5 (Event Horizon)
 
 #. Added `AS`_ alias for `SELECT`_ expressions.
 
+#. Tesseract now has a `vacuum`_ thread that runs in the background to keep
+   things neat and tidy.
+
 .. _AS: https://tesseractdb.readthedocs.org/en/latest/sql-select.html
+.. _vacuum: https://tesseractdb.readthedocs.org/en/latest/vacuuming.html
