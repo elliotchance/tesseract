@@ -32,6 +32,13 @@ column_definitions
 
      SELECT 3 + 4 AS total
 
+  According to the SQL standard the ``AS`` keyword is not required, so the above
+  SQL is the same as writing:
+
+  .. code-block:: sql
+
+     SELECT 3 + 4 total
+
 table_name
   The table name to fetch the objects from. If the table does not exist (i.e.
   has no records) then no records will be returned since tables only come into

@@ -13,3 +13,9 @@ tests:
     sql: SELECT 123 AS foo, 456 AS Foo
     result:
     - {"foo": 123, "Foo": 456}
+
+  as_is_not_required:
+    sql: SELECT 123 foo
+    as: SELECT 123 AS foo
+    result:
+    - {"foo": 123}

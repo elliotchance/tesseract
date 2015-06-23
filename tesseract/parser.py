@@ -231,7 +231,8 @@ def p_empty(p):
 
 def p_expression(p):
     """
-        expression : expression AS IDENTIFIER
+        expression : expression IDENTIFIER
+                   | expression AS IDENTIFIER
                    | arithmetic_expression
                    | comparison_expression
                    | logic_expression
@@ -247,6 +248,8 @@ def p_expression(p):
 
     if len(p) == 4:
         p[0] = ast.AliasExpression(p[1], p[3])
+    elif len(p) == 3:
+        p[0] = ast.AliasExpression(p[1], p[2])
     elif p[1] == '*':
         p[0] = ast.Asterisk()
     else:
