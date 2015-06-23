@@ -49,9 +49,9 @@ The first character is the type::
     F false
     S string (followed by the actual string)
 
-The indexes are named with as ``index:mytable:myindex:number`` and
-``index:mytable:myindex:nonnumber``. The table name is kept in the key because
-an index can only apply to a single table.
+The indexes are named with as ``tesseract:index:mytable:myindex:number`` and
+``tesseract:index:mytable:myindex:nonnumber``. The table name is kept in the key
+because an index can only apply to a single table.
 
 Now that we know how indexes are stored we can request back records. The first
 and most important step is to determine if the value we are looking up is a
@@ -369,7 +369,7 @@ class Index(object):
         Returns:
           A string key.
         """
-        return 'index:%s:%s:number' % (self.table_name, self.index_name)
+        return 'tesseract:index:%s:%s:number' % (self.table_name, self.index_name)
 
     def __nonnumber_index_key(self):
         """This is the redis key that contains the sorted set of nonnumbers for
@@ -378,7 +378,7 @@ class Index(object):
         Returns:
           A string key.
         """
-        return 'index:%s:%s:nonnumber' % (self.table_name, self.index_name)
+        return 'tesseract:index:%s:%s:nonnumber' % (self.table_name, self.index_name)
 
     def __get_type_character(self, value):
         """When indexing nonnumbers each indexed value must be prefixed with a

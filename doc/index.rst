@@ -27,6 +27,7 @@ written in Python and uses an
    functions-operators
    engine
    testing
+   client-libraries
    changelog
    faq
    appendix

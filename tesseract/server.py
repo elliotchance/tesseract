@@ -88,5 +88,5 @@ class Server(object):
         self.instance.log("Accepted connection (%d)." % Server.__next_connection_id)
 
     def exit(self):
-        self.instance.log("Server shutting down.")
+        self.instance.exit()
         self.is_ready = False
